@@ -50,6 +50,11 @@ shopby/
 │   ├── admin-settings.md
 │   ├── admin-settings-mobile.md
 │   └── admin-edit-product.md
+├── docs/                       # Dokumentasi
+│   ├── README.md               # README utama
+│   ├── SAR.md                  # Software Architecture Review
+│   ├── PRD.md                  # Product Requirements Document
+│   └── project-reference.md    # Referensi teknis lengkap
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
@@ -69,7 +74,6 @@ shopby/
 │   ├── hooks/                  # TanStack Query hooks
 │   ├── lib/                    # Prisma client, utils, API services
 │   └── types/                  # TypeScript definitions
-└── *.md                        # Dokumentasi
 ```
 
 ## Cara Menjalankan
