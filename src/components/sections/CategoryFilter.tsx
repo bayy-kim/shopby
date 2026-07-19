@@ -7,6 +7,7 @@ interface CategoryFilterProps {
   categories?: Category[]
   activeSlug?: string
   onSelect?: (slug: string) => void
+  variant?: "sidebar" | "chips"
 }
 
 const defaultCategories: Category[] = [
@@ -29,9 +30,34 @@ export default function CategoryFilter({
   categories = defaultCategories,
   activeSlug = "semua",
   onSelect,
+  variant = "sidebar",
 }: CategoryFilterProps) {
+  if (variant === "chips") {
+    return (
+      <div className="flex md:hidden gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
+        {categories.map((cat) => {
+          const isActive = cat.slug === activeSlug
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onSelect?.(cat.slug)}
+              className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-mono uppercase border transition-all shrink-0 ${
+                isActive
+                  ? "bg-tag-yellow text-ink font-bold border-ink"
+                  : "bg-white text-ink/60 border-border-color hover:border-ink/30"
+              }`}
+            >
+              {iconMap[cat.slug]}
+              <span>{cat.name}</span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
-    <aside className="w-full md:w-64 flex-shrink-0">
+    <aside className="hidden md:block w-64 flex-shrink-0">
       <div className="sticky top-24 bg-white border-r border-dashed border-border-color p-4">
         <div className="mb-6">
           <h2 className="text-headline-md text-primary font-sans">Kategori</h2>

@@ -21,26 +21,30 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 
 | Fitur | Deskripsi |
 |---|---|
-| Hero section | Headline singkat + CTA, highlight produk unggulan |
-| Filter kategori | Filter produk berdasarkan kategori (chip scroll di mobile, sidebar di desktop) |
+| Hero section | Headline singkat + CTA, floating card highlight produk unggulan |
+| Filter kategori (mobile chips) | Chip horizontal scroll di mobile, sidebar di desktop |
+| Sorting | Urut berdasarkan terbaru, termurah, termahal |
 | Grid produk | Card berisi gambar, nama, harga, badge diskon (opsional), tombol "Beli di Shopee" |
-| Produk terlaris/rekomendasi | Section khusus highlight produk pilihan |
+| Produk terlaris/rekomendasi | Section khusus highlight produk pilihan (isFeatured) |
 | Klik tracking | Setiap klik "Beli di Shopee" dicatat (produk, waktu) untuk analitik sederhana |
+| Progressif load | Tombol "Muat Lebih Banyak" untuk reveal produk bertahap |
 | Footer | Social links + disclaimer affiliate |
 
 ## 5. Fitur Fase Berikutnya (Nice to Have)
 
 - Search produk
 - Admin panel sederhana untuk CRUD produk (tanpa perlu edit kode)
-- Sorting (harga terendah/tertinggi, terbaru)
 - Statistik klik per produk (dashboard mini)
+- Halaman detail produk (`/produk/[slug]`)
 
 ## 6. User Flow
 
 1. User buka Shopby (dari bio link / share konten).
 2. Landing di hero, lihat highlight produk.
-3. Scroll / filter kategori sesuai minat.
-4. Klik card produk → sistem catat klik → redirect ke halaman produk Shopee.
+3. Geser chip kategori / tap kategori di sidebar → filter produk.
+4. Ubah sorting (terbaru/termurah/termahal) sesuai kebutuhan.
+5. Klik "Muat Lebih Banyak" untuk lihat produk lainnya.
+6. Klik card produk → sistem catat klik → redirect ke halaman produk Shopee.
 
 ## 7. Out of Scope (v1)
 
@@ -53,26 +57,32 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 
 ```
 shopby/
-├── app/                        # Routing & pages (Next.js App Router)
-│   ├── layout.tsx
-│   ├── page.tsx                # Landing page utama
-│   ├── globals.css
-│   ├── produk/[slug]/page.tsx  # Detail produk (opsional, fase 2)
-│   └── api/
-│       └── click/route.ts      # Endpoint log klik ke Shopee
-├── components/
-│   ├── ui/                     # Komponen dasar shadcn/ui
-│   └── sections/                # Hero, ProductGrid, CategoryFilter, Footer, dll
-├── lib/
-│   ├── prisma.ts               # Prisma client instance
-│   └── utils.ts
 ├── prisma/
 │   ├── schema.prisma           # Data model (Product, Category, ClickLog)
-│   └── seed.ts                 # Data awal untuk testing
-├── types/
-│   └── index.ts                # Tipe TypeScript bersama
-├── public/
-│   └── images/                 # Aset gambar statis
+│   ├── seed.ts                 # Data awal untuk testing
+│   └── migrations/             # Riwayat migrasi database
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx          # Root layout, font, metadata
+│   │   ├── page.tsx            # Landing page utama
+│   │   ├── globals.css         # Tailwind v4 + custom CSS
+│   │   ├── providers.tsx       # QueryClientProvider
+│   │   └── api/
+│   │       ├── products/route.ts
+│   │       ├── categories/route.ts
+│   │       └── click/route.ts
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui + skeleton + empty state
+│   │   ├── layout/             # Navbar, Footer
+│   │   └── sections/           # Hero, ProductGrid, ProductCard, CategoryFilter
+│   ├── hooks/                  # useProducts, useCategories (TanStack Query)
+│   ├── lib/
+│   │   ├── prisma.ts           # Prisma client singleton
+│   │   ├── utils.ts            # cn(), formatPrice()
+│   │   └── services/           # fetchProducts, fetchCategories, logClick
+│   └── types/index.ts          # Product, Category, ClickLog
+├── design/
+│   └── shopby-landing.md       # Referensi desain (export Stitch)
 ├── .env.example
 ├── PRD.md
 ├── SAR.md

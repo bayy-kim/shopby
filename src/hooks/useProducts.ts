@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
 import { fetchProducts } from "@/lib/services/products"
-import type { Product } from "@/types"
 
-export function useProducts(categorySlug?: string) {
-  return useQuery<Product[]>({
-    queryKey: ["products", categorySlug ?? "all"],
-    queryFn: () => fetchProducts(categorySlug),
+interface UseProductsOptions {
+  categorySlug?: string
+  sort?: string
+  skip?: number
+  take?: number
+}
+
+export function useProducts(options?: UseProductsOptions) {
+  const { categorySlug, sort, skip, take } = options ?? {}
+
+  return useQuery({
+    queryKey: ["products", categorySlug ?? "all", sort ?? "newest", skip ?? 0, take ?? 12],
+    queryFn: () => fetchProducts(categorySlug, sort, skip, take),
   })
 }

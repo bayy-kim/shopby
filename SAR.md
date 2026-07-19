@@ -8,6 +8,8 @@
 | Styling | Tailwind CSS v4 + shadcn/ui | Cepat, konsisten, komponen siap pakai |
 | Animasi | Framer Motion | Hover card, scroll reveal, transisi halus |
 | Database | Prisma ORM + SQLite (dev) → Postgres/Neon (prod) | Migrasi gampang, tipe aman |
+| State Management | TanStack Query (React Query) | Caching, loading/error state otomatis |
+| Ikon | lucide-react | Ringan, tree-shakeable, inline SVG |
 | Gambar | next/image | Optimasi otomatis, lazy load |
 | Hosting | Vercel | Deploy langsung dari GitHub, cocok buat Next.js |
 
@@ -15,48 +17,57 @@
 
 ```
 shopby/
-├── app/
-│   ├── layout.tsx              # Root layout, metadata, font
-│   ├── page.tsx                # Landing page (Hero + ProductGrid)
-│   ├── globals.css             # Tailwind base + custom variable
-│   ├── produk/[slug]/page.tsx  # Detail produk (fase 2, opsional)
-│   └── api/
-│       └── click/route.ts      # POST: catat klik lalu redirect ke Shopee
-├── components/
-│   ├── ui/                     # button.tsx, card.tsx, badge.tsx (shadcn)
-│   └── sections/
-│       ├── Hero.tsx
-│       ├── CategoryFilter.tsx
-│       ├── ProductGrid.tsx
-│       ├── ProductCard.tsx
-│       └── Footer.tsx
-├── lib/
-│   ├── prisma.ts               # Singleton Prisma client
-│   └── utils.ts                # Helper (format harga, cn(), dll)
 ├── prisma/
 │   ├── schema.prisma
 │   └── seed.ts
-├── types/
-│   └── index.ts                # Product, Category type
-└── public/images/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx              # Root layout, metadata, font
+│   │   ├── page.tsx                # Landing page (Hero + ProductGrid)
+│   │   ├── globals.css             # Tailwind base + custom variable
+│   │   ├── providers.tsx           # TanStack Query provider
+│   │   └── api/
+│   │       ├── products/route.ts   # GET: list produk (filter + sort)
+│   │       ├── categories/route.ts # GET: semua kategori
+│   │       └── click/route.ts      # POST: catat klik
+│   ├── components/
+│   │   ├── ui/                     # button, card, badge (shadcn)
+│   │   │   ├── ProductCardSkeleton.tsx
+│   │   │   └── EmptyState.tsx
+│   │   ├── layout/
+│   │   │   ├── Navbar.tsx
+│   │   │   └── Footer.tsx
+│   │   └── sections/
+│   │       ├── Hero.tsx
+│   │       ├── CategoryFilter.tsx   # sidebar (desktop) + chips (mobile)
+│   │       ├── ProductGrid.tsx      # grid + sort + load more
+│   │       └── ProductCard.tsx      # reusable, variant: highlight/compact
+│   ├── hooks/
+│   │   ├── useProducts.ts
+│   │   └── useCategories.ts
+│   ├── lib/
+│   │   ├── prisma.ts               # Singleton Prisma client
+│   │   └── utils.ts                # cn(), formatPrice()
+│   └── types/
+│       └── index.ts                # Product, Category, ClickLog type
+├── public/images/
 ```
-
-Alasan pemisahan `components/ui` vs `components/sections`: `ui` isinya komponen generik dari shadcn (bisa dipakai ulang di mana saja), `sections` isinya komponen besar yang spesifik untuk 1 bagian halaman Shopby.
 
 ## 3. Data Model (Prisma)
 
 ```prisma
 model Product {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   price       Int
   discountPct Int?
   imageUrl    String
+  imageAlt    String
   shopeeUrl   String
   categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  isFeatured  Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  category    Category  @relation(fields: [categoryId], references: [id])
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
   clicks      ClickLog[]
 }
 
@@ -77,11 +88,33 @@ model ClickLog {
 
 ## 4. API Contract (Internal)
 
-| Endpoint | Method | Fungsi |
-|---|---|---|
-| `/api/products` | GET | Ambil semua produk, support query `?category=` |
-| `/api/categories` | GET | Ambil semua kategori |
-| `/api/click` | POST | Body: `{ productId }` → simpan log, balikin `shopeeUrl` untuk redirect |
+| Endpoint | Method | Query Params | Fungsi |
+|---|---|---|---|
+| `/api/products` | GET | `?category=<slug>&sort=price_asc\|price_desc\|newest` | Ambil produk (filter + sorting) |
+| `/api/categories` | GET | — | Ambil semua kategori |
+| `/api/click` | POST | — | Body: `{ productId }` → simpan log, balikin `{ shopeeUrl }` |
+
+### Response Format
+
+Semua endpoint mengembalikan JSON. Products:
+```json
+{
+  "data": [
+    {
+      "id": "...",
+      "name": "Mechanical Keyboard Pro",
+      "price": 450000,
+      "imageUrl": "...",
+      "imageAlt": "...",
+      "shopeeUrl": "...",
+      "category": { "id": "...", "name": "Elektronik", "slug": "elektronik" },
+      "isFeatured": true,
+      "createdAt": "..."
+    }
+  ],
+  "total": 9
+}
+```
 
 ## 5. Rencana Deploy
 
@@ -94,5 +127,5 @@ model ClickLog {
 
 - **Performance**: gambar produk lewat `next/image` dengan lazy loading, target Lighthouse score > 90.
 - **SEO**: metadata dinamis per halaman, sitemap.xml, open graph image untuk share ke sosmed.
-- **Responsive**: mobile-first, grid 1-2 kolom di HP, 4 kolom di desktop.
+- **Responsive**: mobile-first, chip kategori horizontal scroll, grid 1-2 kolom di HP, 4 kolom di desktop.
 - **Aksesibilitas**: kontras warna cukup, alt text di semua gambar produk.

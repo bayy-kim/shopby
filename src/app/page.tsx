@@ -11,55 +11,102 @@ import { useCategories } from "@/hooks/useCategories"
 import { logClick } from "@/lib/services/click"
 import type { Product } from "@/types"
 
+const PAGE_SIZE = 8
+
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("semua")
+  const [sort, setSort] = useState<string>("newest")
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  const { data: allProducts, isLoading, error } = useProducts(
-    selectedCategory === "semua" ? undefined : selectedCategory
-  )
+  const { data, isLoading, error } = useProducts({
+    categorySlug:
+      selectedCategory === "semua" ? undefined : selectedCategory,
+    sort,
+  })
+
   const { data: categories } = useCategories()
 
-  const featuredProducts =
-    allProducts?.filter((p: Product) => p.isFeatured) ?? []
-  const regularProducts =
-    allProducts?.filter((p: Product) => !p.isFeatured) ?? []
+  const allProducts = data?.data ?? []
+  const total = data?.total ?? 0
+  const visibleProducts = allProducts.slice(0, visibleCount)
+  const featuredProducts = visibleProducts.filter(
+    (p: Product) => p.isFeatured
+  )
+  const regularProducts = visibleProducts.filter(
+    (p: Product) => !p.isFeatured
+  )
+  const hasMore = visibleCount < allProducts.length
 
-  const handleBuyProduct = useCallback(async (productId: string) => {
-    try {
-      const { shopeeUrl } = await logClick(productId)
-      window.open(shopeeUrl, "_blank")
-    } catch {
-      const product = allProducts?.find((p: Product) => p.id === productId)
-      if (product) window.open(product.shopeeUrl, "_blank")
-    }
-  }, [allProducts])
+  const handleBuyProduct = useCallback(
+    async (productId: string) => {
+      try {
+        const { shopeeUrl } = await logClick(productId)
+        window.open(shopeeUrl, "_blank")
+      } catch {
+        const product = allProducts.find(
+          (p: Product) => p.id === productId
+        )
+        if (product) window.open(product.shopeeUrl, "_blank")
+      }
+    },
+    [allProducts]
+  )
+
+  const resetFilters = useCallback(() => {
+    setSelectedCategory("semua")
+    setSort("newest")
+    setVisibleCount(PAGE_SIZE)
+  }, [])
 
   const handleCategoryChange = useCallback((slug: string) => {
     setSelectedCategory(slug)
+    setVisibleCount(PAGE_SIZE)
+  }, [])
+
+  const handleSortChange = useCallback((newSort: string) => {
+    setSort(newSort)
+    setVisibleCount(PAGE_SIZE)
+  }, [])
+
+  const handleLoadMore = useCallback(() => {
+    setVisibleCount((prev) => prev + PAGE_SIZE)
   }, [])
 
   return (
     <>
       <Navbar />
       <Hero featuredProducts={featuredProducts} />
-      <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12 flex flex-col md:flex-row gap-8">
+      <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
         <CategoryFilter
           categories={categories}
           activeSlug={selectedCategory}
           onSelect={handleCategoryChange}
+          variant="chips"
         />
-        <ProductGrid
-          featuredProducts={featuredProducts}
-          allProducts={regularProducts}
-          totalCount={allProducts?.length ?? 0}
-          onBuyProduct={handleBuyProduct}
-          isLoading={isLoading}
-          error={error?.message}
-          activeCategory={categories?.find(
-            (c) => c.slug === selectedCategory
-          )}
-          onResetCategory={() => setSelectedCategory("semua")}
-        />
+        <div className="flex flex-col md:flex-row gap-8 mt-3 md:mt-0">
+          <CategoryFilter
+            categories={categories}
+            activeSlug={selectedCategory}
+            onSelect={handleCategoryChange}
+            variant="sidebar"
+          />
+          <ProductGrid
+            featuredProducts={featuredProducts}
+            allProducts={regularProducts}
+            total={total}
+            onBuyProduct={handleBuyProduct}
+            isLoading={isLoading}
+            error={error?.message}
+            activeCategory={categories?.find(
+              (c) => c.slug === selectedCategory
+            )}
+            onResetCategory={resetFilters}
+            sort={sort}
+            onSortChange={handleSortChange}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+          />
+        </div>
       </main>
       <Footer />
     </>
