@@ -4,7 +4,7 @@
 
 | Layer | Teknologi | Alasan |
 |---|---|---|
-| Framework | Next.js 15 (App Router) + TypeScript | SSR/SSG buat SEO, familiar dengan stack project lain |
+| Framework | Next.js 16 (App Router) + TypeScript | SSR/SSG buat SEO, familiar dengan stack project lain |
 | Styling | Tailwind CSS v4 + shadcn/ui | Cepat, konsisten, komponen siap pakai |
 | Animasi | Framer Motion | Hover card, scroll reveal, transisi halus |
 | Database | Prisma ORM + SQLite (dev) → Postgres/Neon (prod) | Migrasi gampang, tipe aman |
@@ -17,7 +17,7 @@
 
 ```
 shopby/
-├── design/                         # Referensi desain (export)
+├── design/                         # Referensi desain (landing + admin panel)
 │   ├── shopby-landing.md
 │   ├── admin-login.md
 │   ├── admin-dashboard.md
@@ -30,12 +30,17 @@ shopby/
 │   └── admin-edit-product.md
 ├── prisma/
 │   ├── schema.prisma
-│   └── seed.ts
+│   ├── seed.ts
+│   ├── dev.db                      # SQLite database (local dev)
+│   └── migrations/
+│       └── 20260719173140_init/
+│           └── migration.sql
 ├── src/
 │   ├── app/
+│   │   ├── favicon.ico
 │   │   ├── layout.tsx              # Root layout, metadata, font
 │   │   ├── page.tsx                # Landing page (Hero + ProductGrid)
-│   │   ├── globals.css             # Tailwind base + custom variable
+│   │   ├── globals.css             # Tailwind v4 + @layer components
 │   │   ├── providers.tsx           # TanStack Query provider
 │   │   ├── admin/
 │   │   │   ├── login/
@@ -56,7 +61,10 @@ shopby/
 │   │       ├── categories/route.ts # GET: semua kategori
 │   │       └── click/route.ts      # POST: catat klik
 │   ├── components/
-│   │   ├── ui/                     # button, card, badge (shadcn)
+│   │   ├── ui/                     # shadcn/ui + custom components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── badge.tsx
 │   │   │   ├── ProductCardSkeleton.tsx
 │   │   │   └── EmptyState.tsx
 │   │   ├── layout/
@@ -72,9 +80,20 @@ shopby/
 │   │   └── useCategories.ts
 │   ├── lib/
 │   │   ├── prisma.ts               # Singleton Prisma client
-│   │   └── utils.ts                # cn(), formatPrice()
+│   │   ├── utils.ts                # cn(), formatPrice()
+│   │   └── services/
+│   │       ├── products.ts         # fetchProducts API
+│   │       ├── categories.ts       # fetchCategories API
+│   │       └── click.ts            # logClick API
 │   └── types/
 │       └── index.ts                # Product, Category, ClickLog type
+├── .env / .env.example
+├── next.config.ts
+├── tsconfig.json
+├── package.json
+├── eslint.config.mjs
+├── postcss.config.mjs
+└── components.json                 # shadcn/ui config
 ```
 
 ## 3. Data Model (Prisma)

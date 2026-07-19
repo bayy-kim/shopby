@@ -39,19 +39,37 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 
 ```
 shopby/
-├── design/               # Referensi desain (landing + admin panel)
-├── prisma/               # Schema, seed, migrations
+├── design/                     # Referensi desain (landing + admin panel)
+│   ├── shopby-landing.md
+│   ├── admin-login.md
+│   ├── admin-dashboard.md
+│   ├── admin-dashboard-empty.md
+│   ├── admin-analytics.md
+│   ├── admin-products.md
+│   ├── admin-products-mobile.md
+│   ├── admin-settings.md
+│   ├── admin-settings-mobile.md
+│   └── admin-edit-product.md
+├── prisma/
+│   ├── schema.prisma
+│   ├── seed.ts
+│   ├── dev.db
+│   └── migrations/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx      # Landing page
-│   │   ├── admin/        # Admin panel (login + dashboard)
-│   │   └── api/          # REST API routes
-│   ├── components/       # UI, layout, sections
-│   ├── hooks/            # TanStack Query hooks
-│   ├── lib/              # Prisma client, utils, API services
-│   └── types/            # TypeScript types
-├── .env.example
-└── *.md                  # Dokumentasi
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Landing page
+│   │   ├── globals.css         # Tailwind v4 + custom CSS
+│   │   ├── providers.tsx       # TanStack Query
+│   │   ├── admin/              # Admin panel (6 routes)
+│   │   │   ├── login/
+│   │   │   └── (dashboard)/
+│   │   └── api/                # REST API (products, categories, click)
+│   ├── components/             # UI, layout, sections
+│   ├── hooks/                  # TanStack Query hooks
+│   ├── lib/                    # Prisma client, utils, API services
+│   └── types/                  # TypeScript definitions
+└── *.md                        # Dokumentasi
 ```
 
 ## Cara Menjalankan

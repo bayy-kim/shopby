@@ -9,7 +9,7 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 - Menyediakan satu halaman terpusat untuk semua produk affiliate Shopee milik Bayu.
 - Menaikkan CTR (click-through rate) dari pengunjung ke link Shopee.
 - Memberi kesan profesional/branded, bukan sekadar link mentah di bio.
-- Memudahkan update produk baru tanpa perlu sentuh kode (lewat database/admin sederhana di fase berikutnya).
+- Memudahkan update produk baru tanpa perlu sentuh kode (lewat admin panel di `/admin`).
 
 ## 3. Target User
 
@@ -50,7 +50,7 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 - Halaman detail produk (`/produk/[slug]`)
 - Autentikasi admin sesungguhnya (JWT/session)
 
-## 6. User Flow
+## 7. User Flow
 
 1. User buka Shopby (dari bio link / share konten).
 2. Landing di hero, lihat highlight produk.
@@ -59,14 +59,14 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 5. Klik "Muat Lebih Banyak" untuk lihat produk lainnya.
 6. Klik card produk → sistem catat klik → redirect ke halaman produk Shopee.
 
-## 7. Out of Scope (v1)
+## 8. Out of Scope (v1)
 
 - Checkout langsung di Shopby (transaksi tetap di Shopee).
 - Sistem autentikasi user/pembeli.
 - Multi-admin / role management.
 - Payment gateway.
 
-## 8. Struktur Folder Project
+## 9. Struktur Folder Project
 
 ```
 shopby/
@@ -84,37 +84,64 @@ shopby/
 ├── prisma/
 │   ├── schema.prisma           # Data model (Product, Category, ClickLog)
 │   ├── seed.ts                 # Data awal untuk testing
+│   ├── dev.db                  # SQLite database (local dev)
 │   └── migrations/             # Riwayat migrasi database
+│       └── 20260719173140_init/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx          # Root layout, font, metadata
 │   │   ├── page.tsx            # Landing page utama
-│   │   ├── globals.css         # Tailwind v4 + custom CSS
-│   │   ├── providers.tsx       # QueryClientProvider
+│   │   ├── globals.css         # Tailwind v4 + custom CSS (@layer components)
+│   │   ├── providers.tsx       # TanStack Query provider
 │   │   ├── admin/
-│   │   │   ├── login/          # Admin login page
-│   │   │   └── (dashboard)/    # Admin panel (sidebar + pages)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx    # Login page (standalone receipt card)
+│   │   │   └── (dashboard)/
+│   │   │       ├── layout.tsx  # Admin sidebar + topnav layout
+│   │   │       ├── page.tsx    # Dashboard (stats, chart, activity)
+│   │   │       ├── products/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── [id]/page.tsx
+│   │   │       ├── analytics/page.tsx
+│   │   │       └── settings/page.tsx
 │   │   └── api/
-│   │       ├── products/route.ts
-│   │       ├── categories/route.ts
-│   │       └── click/route.ts
+│   │       ├── products/route.ts # GET: list produk (filter + sort)
+│   │       ├── categories/route.ts # GET: semua kategori
+│   │       └── click/route.ts    # POST: catat klik
 │   ├── components/
-│   │   ├── ui/                 # shadcn/ui + skeleton + empty state
+│   │   ├── ui/                 # shadcn/ui (button, card, badge) + custom
+│   │   │   ├── ProductCardSkeleton.tsx
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   └── badge.tsx
 │   │   ├── layout/             # Navbar, Footer
+│   │   │   ├── Navbar.tsx
+│   │   │   └── Footer.tsx
 │   │   └── sections/           # Hero, ProductGrid, ProductCard, CategoryFilter
-│   ├── hooks/                  # useProducts, useCategories (TanStack Query)
+│   │       ├── Hero.tsx
+│   │       ├── ProductGrid.tsx
+│   │       ├── ProductCard.tsx
+│   │       └── CategoryFilter.tsx
+│   ├── hooks/                  # TanStack Query hooks
+│   │   ├── useProducts.ts
+│   │   └── useCategories.ts
 │   ├── lib/
 │   │   ├── prisma.ts           # Prisma client singleton
 │   │   ├── utils.ts            # cn(), formatPrice()
-│   │   └── services/           # fetchProducts, fetchCategories, logClick
-│   └── types/index.ts          # Product, Category, ClickLog
+│   │   └── services/           # API service functions
+│   │       ├── products.ts
+│   │       ├── categories.ts
+│   │       └── click.ts
+│   └── types/
+│       └── index.ts            # Product, Category, ClickLog
 ├── .env.example
 ├── PRD.md
 ├── SAR.md
 └── README.md
 ```
 
-## 9. Metrics of Success
+## 10. Metrics of Success
 
 - CTR: jumlah klik "Beli di Shopee" dibagi jumlah pengunjung.
 - Jumlah produk aktif yang tayang.
