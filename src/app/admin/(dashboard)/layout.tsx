@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   BarChart3,
@@ -31,7 +31,13 @@ export default function AdminDashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" })
+    router.push("/admin/login")
+  }
 
   return (
     <div className="min-h-screen flex bg-[#f9f9f6] text-[#1a1c1b] font-sans antialiased">
@@ -85,10 +91,10 @@ export default function AdminDashboardLayout({
               <HelpCircle className="size-[18px]" />
               Help
             </a>
-            <a className="flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors" href="/admin/login">
+            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors">
               <LogOut className="size-[18px]" />
               Logout
-            </a>
+            </button>
           </div>
         </div>
       </nav>
@@ -174,10 +180,10 @@ export default function AdminDashboardLayout({
                   <HelpCircle className="size-[18px]" />
                   Help
                 </a>
-                <a className="flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] transition-colors" href="/admin/login">
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] transition-colors">
                   <LogOut className="size-[18px]" />
                   Logout
-                </a>
+                </button>
               </div>
             </nav>
           </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Receipt, Mail, Lock, ArrowRight, Store } from "lucide-react"
+import { Receipt, Mail, Lock, ArrowRight, Store, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -8,10 +8,33 @@ export default function AdminLogin() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    router.push("/admin")
+    setError("")
+    setLoading(true)
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        router.push("/admin")
+      } else {
+        setError(data.error || "Email atau password salah")
+      }
+    } catch {
+      setError("Terjadi kesalahan. Silakan coba lagi.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -68,13 +91,24 @@ export default function AdminLogin() {
                 </div>
               </div>
 
+              {error && (
+                <div className="bg-[#ffdad6] border border-[#ba1a1a] rounded px-4 py-3 font-mono text-[13px] leading-[16px] text-[#ba1a1a]">
+                  {error}
+                </div>
+              )}
+
               <div className="pt-6 border-t border-dashed border-[#e5beb6] mt-8">
                 <button
                   type="submit"
-                  className="w-full bg-[#b51c00] text-white font-mono text-[13px] leading-[16px] tracking-[0.05em] py-4 rounded-full transition-transform active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full bg-[#b51c00] text-white font-mono text-[13px] leading-[16px] tracking-[0.05em] py-4 rounded-full transition-transform active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span>AUTHORIZE_LOGIN</span>
-                  <ArrowRight className="size-[18px]" />
+                  {loading ? (
+                    <Loader2 className="size-[18px] animate-spin" />
+                  ) : (
+                    <ArrowRight className="size-[18px]" />
+                  )}
+                  <span>{loading ? "AUTHORIZING..." : "AUTHORIZE_LOGIN"}</span>
                 </button>
               </div>
             </form>

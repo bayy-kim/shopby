@@ -29,9 +29,9 @@ export default function Navbar() {
             Affiliate
           </Link>
         </div>
-        <button className="bg-primary text-ink px-4 py-2 font-bold rounded-full brutalist-shadow text-sm uppercase tracking-wider">
+        <Link href="/admin/login" className="bg-primary text-ink px-4 py-2 font-bold rounded-full brutalist-shadow text-sm uppercase tracking-wider inline-block">
           Masuk
-        </button>
+        </Link>
       </div>
     </nav>
   )

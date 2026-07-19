@@ -16,13 +16,17 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - ⚡ **Progressif load** — Tombol "Muat Lebih Banyak" tanpa reload
 - 🎨 **Animasi** — Scroll reveal + scan-line effect (Framer Motion)
 
-### Admin Panel
-- 🔐 `/admin/login` — Login page receipt card brutalist style
+### Admin Panel (Auth Guard)
+- 🔐 `/admin/login` — Login page receipt card brutalist style (POST ke API login)
+- 🛡️ **Middleware auth** — Semua route `/admin/*` diproteksi, redirect ke login jika session invalid
+- 🔑 **Single admin** — Credential dari `.env` (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH`), tanpa database/users table
+- 🍪 **Session JWT** — HttpOnly cookie `shopby_admin_session`, expiry 24 jam
 - 📈 `/admin` — Dashboard with stats, sales chart, recent activity
 - 📦 `/admin/products` — Product management table with CRUD
 - ✏️ `/admin/products/[id]` — Edit product form
 - 📊 `/admin/analytics` — Metrics, traffic sources, geographic data
 - ⚙️ `/admin/settings` — Store profile, payout, security toggles
+- 🚪 **Logout** — Hapus session cookie, redirect ke login
 
 ## Tech Stack
 
@@ -39,7 +43,8 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 
 ```
 shopby/
-├── design/                     # Referensi desain (landing + admin panel)
+├── middleware.ts                # Edge auth guard untuk /admin/*
+├── design/                      # Referensi desain (landing + admin panel)
 │   ├── shopby-landing.md
 │   ├── admin-login.md
 │   ├── admin-dashboard.md
@@ -50,11 +55,11 @@ shopby/
 │   ├── admin-settings.md
 │   ├── admin-settings-mobile.md
 │   └── admin-edit-product.md
-├── docs/                       # Dokumentasi
-│   ├── README.md               # README utama
-│   ├── SAR.md                  # Software Architecture Review
-│   ├── PRD.md                  # Product Requirements Document
-│   └── project-reference.md    # Referensi teknis lengkap
+├── docs/                        # Dokumentasi
+│   ├── README.md                # README utama
+│   ├── SAR.md                   # Software Architecture Review
+│   ├── PRD.md                   # Product Requirements Document
+│   └── project-reference.md     # Referensi teknis lengkap
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
@@ -62,18 +67,29 @@ shopby/
 │   └── migrations/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx          # Root layout
-│   │   ├── page.tsx            # Landing page
-│   │   ├── globals.css         # Tailwind v4 + custom CSS
-│   │   ├── providers.tsx       # TanStack Query
-│   │   ├── admin/              # Admin panel (6 routes)
+│   │   ├── layout.tsx           # Root layout
+│   │   ├── page.tsx             # Landing page
+│   │   ├── globals.css          # Tailwind v4 + custom CSS
+│   │   ├── providers.tsx        # TanStack Query
+│   │   ├── admin/               # Admin panel
 │   │   │   ├── login/
 │   │   │   └── (dashboard)/
-│   │   └── api/                # REST API (products, categories, click)
-│   ├── components/             # UI, layout, sections
-│   ├── hooks/                  # TanStack Query hooks
-│   ├── lib/                    # Prisma client, utils, API services
-│   └── types/                  # TypeScript definitions
+│   │   └── api/                 # REST API
+│   │       ├── admin/
+│   │       │   ├── login/       # POST /api/admin/login
+│   │       │   └── logout/      # POST /api/admin/logout
+│   │       ├── products/
+│   │       ├── categories/
+│   │       └── click/
+│   ├── components/              # UI, layout, sections
+│   ├── hooks/                   # TanStack Query hooks
+│   ├── lib/
+│   │   ├── auth.ts              # JWT session (jose, edge-compatible)
+│   │   ├── auth-password.ts     # Password hash/verify (crypto built-in)
+│   │   ├── prisma.ts
+│   │   ├── utils.ts
+│   │   └── services/
+│   └── types/
 ```
 
 ## Cara Menjalankan
@@ -102,6 +118,9 @@ Buka `http://localhost:3000` di browser.
 | Variable | Deskripsi | Contoh |
 |---|---|---|
 | `DATABASE_URL` | Koneksi database | `file:./dev.db` (SQLite) / `postgresql://...` |
+| `ADMIN_EMAIL` | Email admin login | `admin@shopby.com` |
+| `ADMIN_PASSWORD_HASH` | Hash password (scrypt) | `salt:derivedKey` (base64) |
+| `SESSION_SECRET` | Secret JWT (min 32 chars) | `d304e6bf...` |
 
 ## Scripts
 
@@ -116,7 +135,9 @@ Buka `http://localhost:3000` di browser.
 ## API Endpoints
 
 | Endpoint | Method | Fungsi |
-||---|---|---|
+|---|---|---|---|
+| `/api/admin/login` | POST | Login admin (return session cookie) |
+| `/api/admin/logout` | POST | Hapus session cookie |
 | `/api/products?category=&sort=` | GET | Ambil produk |
 | `/api/categories` | GET | Ambil kategori |
 | `/api/click` | POST | Catat klik + return URL Shopee |
@@ -136,7 +157,7 @@ Buka `http://localhost:3000` di browser.
 
 1. Push ke GitHub.
 2. Import project di [vercel.com](https://vercel.com).
-3. Set `DATABASE_URL` ke Postgres (Neon).
+3. Set environment variables di Vercel: `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`.
 4. Deploy otomatis tiap push ke `main`.
 
 ---
