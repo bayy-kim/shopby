@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  price       Int
+  discountPct Int?
+  imageUrl    String
+  imageAlt    String
+  shopeeUrl   String
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  clicks      ClickLog[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model ClickLog {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  clickedAt DateTime @default(now())
+}
