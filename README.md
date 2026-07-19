@@ -1,11 +1,12 @@
 # Shopby — Belanja Cerdas, Struk Berkualitas
 
-Landing page pribadi untuk memajang produk-produk Shopee Affiliate, lengkap dengan filter kategori, sorting, dan pencatatan klik.
+Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel brutalist untuk manajemen produk dan analitik.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8) ![Prisma](https://img.shields.io/badge/Prisma-5-2d3748)
 
 ## Fitur
 
+### Landing Page
 - 🎯 **Hero section** — Headline + floating card produk unggulan
 - 🏷️ **Filter kategori** — Chip horizontal scroll (mobile) / sidebar (desktop)
 - 🔄 **Sorting** — Terbaru, termurah, termahal
@@ -14,6 +15,14 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate, lengkap deng
 - 📊 **Klik tracking** — Setiap klik dicatat via API untuk analitik
 - ⚡ **Progressif load** — Tombol "Muat Lebih Banyak" tanpa reload
 - 🎨 **Animasi** — Scroll reveal + scan-line effect (Framer Motion)
+
+### Admin Panel
+- 🔐 `/admin/login` — Login page receipt card brutalist style
+- 📈 `/admin` — Dashboard with stats, sales chart, recent activity
+- 📦 `/admin/products` — Product management table with CRUD
+- ✏️ `/admin/products/[id]` — Edit product form
+- 📊 `/admin/analytics` — Metrics, traffic sources, geographic data
+- ⚙️ `/admin/settings` — Store profile, payout, security toggles
 
 ## Tech Stack
 
@@ -30,14 +39,17 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate, lengkap deng
 
 ```
 shopby/
+├── design/               # Referensi desain (landing + admin panel)
 ├── prisma/               # Schema, seed, migrations
 ├── src/
-│   ├── app/              # Pages, API routes, providers
+│   ├── app/
+│   │   ├── page.tsx      # Landing page
+│   │   ├── admin/        # Admin panel (login + dashboard)
+│   │   └── api/          # REST API routes
 │   ├── components/       # UI, layout, sections
 │   ├── hooks/            # TanStack Query hooks
 │   ├── lib/              # Prisma client, utils, API services
 │   └── types/            # TypeScript types
-├── design/               # Referensi desain (export Stitch)
 ├── .env.example
 └── *.md                  # Dokumentasi
 ```
@@ -82,10 +94,21 @@ Buka `http://localhost:3000` di browser.
 ## API Endpoints
 
 | Endpoint | Method | Fungsi |
-|---|---|---|
+||---|---|---|
 | `/api/products?category=&sort=` | GET | Ambil produk |
 | `/api/categories` | GET | Ambil kategori |
 | `/api/click` | POST | Catat klik + return URL Shopee |
+
+## Admin Routes
+
+| Route | Deskripsi |
+|---|---|
+| `/admin/login` | Login page (standalone, no sidebar) |
+| `/admin` | Dashboard |
+| `/admin/products` | Product table |
+| `/admin/products/[id]` | Edit product |
+| `/admin/analytics` | Analytics panel |
+| `/admin/settings` | Settings page |
 
 ## Deploy ke Vercel
 

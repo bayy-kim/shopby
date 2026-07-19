@@ -75,7 +75,6 @@ export default function Hero({
               }}
             >
               <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-              <div className="receipt-hole" />
               <div className="mt-8 brutalist-dashed pb-4">
                 <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
                   <Image
@@ -113,7 +112,6 @@ export default function Hero({
               }}
             >
               <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-              <div className="receipt-hole" />
               <div className="mt-8 brutalist-dashed pb-4">
                 <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
                   <Image

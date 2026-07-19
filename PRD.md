@@ -30,12 +30,25 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 | Progressif load | Tombol "Muat Lebih Banyak" untuk reveal produk bertahap |
 | Footer | Social links + disclaimer affiliate |
 
-## 5. Fitur Fase Berikutnya (Nice to Have)
+## 5. Fitur Implementasi (Admin Panel)
 
-- Search produk
-- Admin panel sederhana untuk CRUD produk (tanpa perlu edit kode)
-- Statistik klik per produk (dashboard mini)
+| Fitur | Deskripsi |
+|---|---|
+| `/admin/login` | Login page dengan receipt card, brutalist styling, form auth |
+| `/admin` | Dashboard — statistik penjualan, grafik performa, aktivitas terbaru |
+| `/admin/products` | Tabel manajemen produk lengkap dengan filter, search, pagination |
+| `/admin/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, status |
+| `/admin/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
+| `/admin/settings` | Konfigurasi store profile, payout info, keamanan (2FA, password) |
+| Sidebar navigasi | Desktop fixed sidebar, mobile collapsible overlay |
+| Brutalist/receipt theme | Konsisten dengan landing page — ink, vivid-orange, tag-yellow, dashed dividers |
+
+## 6. Fitur Fase Berikutnya (Nice to Have)
+
+- Search produk di landing page
+- Statistik klik per produk (dashboard mini real-time)
 - Halaman detail produk (`/produk/[slug]`)
+- Autentikasi admin sesungguhnya (JWT/session)
 
 ## 6. User Flow
 
@@ -57,6 +70,17 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 
 ```
 shopby/
+├── design/                     # Referensi desain (landing + admin panel)
+│   ├── shopby-landing.md
+│   ├── admin-login.md
+│   ├── admin-dashboard.md
+│   ├── admin-dashboard-empty.md
+│   ├── admin-analytics.md
+│   ├── admin-products.md
+│   ├── admin-products-mobile.md
+│   ├── admin-settings.md
+│   ├── admin-settings-mobile.md
+│   └── admin-edit-product.md
 ├── prisma/
 │   ├── schema.prisma           # Data model (Product, Category, ClickLog)
 │   ├── seed.ts                 # Data awal untuk testing
@@ -67,6 +91,9 @@ shopby/
 │   │   ├── page.tsx            # Landing page utama
 │   │   ├── globals.css         # Tailwind v4 + custom CSS
 │   │   ├── providers.tsx       # QueryClientProvider
+│   │   ├── admin/
+│   │   │   ├── login/          # Admin login page
+│   │   │   └── (dashboard)/    # Admin panel (sidebar + pages)
 │   │   └── api/
 │   │       ├── products/route.ts
 │   │       ├── categories/route.ts
@@ -81,8 +108,6 @@ shopby/
 │   │   ├── utils.ts            # cn(), formatPrice()
 │   │   └── services/           # fetchProducts, fetchCategories, logClick
 │   └── types/index.ts          # Product, Category, ClickLog
-├── design/
-│   └── shopby-landing.md       # Referensi desain (export Stitch)
 ├── .env.example
 ├── PRD.md
 ├── SAR.md

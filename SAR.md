@@ -17,6 +17,17 @@
 
 ```
 shopby/
+├── design/                         # Referensi desain (export)
+│   ├── shopby-landing.md
+│   ├── admin-login.md
+│   ├── admin-dashboard.md
+│   ├── admin-dashboard-empty.md
+│   ├── admin-analytics.md
+│   ├── admin-products.md
+│   ├── admin-products-mobile.md
+│   ├── admin-settings.md
+│   ├── admin-settings-mobile.md
+│   └── admin-edit-product.md
 ├── prisma/
 │   ├── schema.prisma
 │   └── seed.ts
@@ -26,6 +37,20 @@ shopby/
 │   │   ├── page.tsx                # Landing page (Hero + ProductGrid)
 │   │   ├── globals.css             # Tailwind base + custom variable
 │   │   ├── providers.tsx           # TanStack Query provider
+│   │   ├── admin/
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx        # Login page (standalone receipt card)
+│   │   │   └── (dashboard)/
+│   │   │       ├── layout.tsx      # Admin sidebar + topnav layout
+│   │   │       ├── page.tsx        # Dashboard (stats, chart, activity)
+│   │   │       ├── products/
+│   │   │       │   ├── page.tsx    # Product table list
+│   │   │       │   └── [id]/
+│   │   │       │       └── page.tsx# Edit product form
+│   │   │       ├── analytics/
+│   │   │       │   └── page.tsx    # Analytics (metrics, chart, sources)
+│   │   │       └── settings/
+│   │   │           └── page.tsx    # Settings (store, payout, security)
 │   │   └── api/
 │   │       ├── products/route.ts   # GET: list produk (filter + sort)
 │   │       ├── categories/route.ts # GET: semua kategori
@@ -50,7 +75,6 @@ shopby/
 │   │   └── utils.ts                # cn(), formatPrice()
 │   └── types/
 │       └── index.ts                # Product, Category, ClickLog type
-├── public/images/
 ```
 
 ## 3. Data Model (Prisma)
@@ -86,7 +110,20 @@ model ClickLog {
 }
 ```
 
-## 4. API Contract (Internal)
+## 4. Admin Panel Routes
+
+| Route | Deskripsi |
+|---|---|
+| `/admin/login` | Login page (receipt card, brutalist style) |
+| `/admin` | Dashboard — stats, sales chart, recent activity |
+| `/admin/products` | Product management table with CRUD actions |
+| `/admin/products/[id]` | Edit single product form |
+| `/admin/analytics` | Metrics, click/conversion chart, traffic sources, geography |
+| `/admin/settings` | Store profile, payout info, security toggles |
+
+Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top search bar, notification bell, profile avatar. All admin pages use the brutalist/receipt design language consistent with the landing page.
+
+## 5. API Contract (Internal)
 
 | Endpoint | Method | Query Params | Fungsi |
 |---|---|---|---|
@@ -116,14 +153,14 @@ Semua endpoint mengembalikan JSON. Products:
 }
 ```
 
-## 5. Rencana Deploy
+## 6. Rencana Deploy
 
 1. Dev lokal pakai SQLite (`prisma/dev.db`), cepat tanpa setup server.
 2. Sebelum deploy, ganti `DATABASE_URL` ke Postgres (rekomendasi: Neon, free tier cukup untuk skala awal).
 3. Jalankan `npx prisma migrate deploy` di environment production.
 4. Deploy ke Vercel: connect repo GitHub → set environment variables → deploy otomatis tiap push ke `main`.
 
-## 6. Non-Functional Requirements
+## 7. Non-Functional Requirements
 
 - **Performance**: gambar produk lewat `next/image` dengan lazy loading, target Lighthouse score > 90.
 - **SEO**: metadata dinamis per halaman, sitemap.xml, open graph image untuk share ke sosmed.

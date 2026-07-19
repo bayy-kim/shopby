@@ -2,9 +2,9 @@ import Link from "next/link"
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-16 bg-bg/95 backdrop-blur-sm border-b border-border-color">
+    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 md:px-8 py-2 h-16 bg-bg/95 backdrop-blur-sm border-b border-border-color">
       <div className="flex items-center gap-4">
-        <span className="font-sans text-display-lg-mobile uppercase tracking-tighter text-primary">
+        <span className="font-sans text-headline-md md:text-display-lg-mobile uppercase tracking-tighter text-primary">
           Shopby
         </span>
       </div>
