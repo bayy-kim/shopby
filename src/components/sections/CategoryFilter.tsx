@@ -60,7 +60,7 @@ export default function CategoryFilter({
             )
           })}
         </div>
-        {numberRanges && numberRanges.length > 0 && (
+        {numberRanges !== undefined && (
           <div className="flex md:hidden gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
             <button
               onClick={() => onRangeSelect?.(null)}
@@ -122,7 +122,7 @@ export default function CategoryFilter({
           })}
         </ul>
 
-        {numberRanges && numberRanges.length > 0 && (
+        {numberRanges !== undefined && (
           <div className="mt-8">
             <h3 className="font-mono text-xs text-ink/60 uppercase mb-3 tracking-wider">Nomor Produk</h3>
             <ul className="space-y-2">
