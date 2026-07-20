@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Upload, X, Save, ArrowDown, ImageIcon } from "lucide-react"
+import { Save, ArrowDown, ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useRef } from "react"
 import { createProduct } from "@/lib/services/products"
@@ -10,44 +10,16 @@ import { useCategories } from "@/hooks/useCategories"
 export default function NewProduct() {
   const router = useRouter()
   const [status, setStatus] = useState(true)
-  const [image, setImage] = useState<string | null>(null)
-  const [fileName, setFileName] = useState("product-image")
-  const [dragOver, setDragOver] = useState(false)
+  const [imageUrl, setImageUrl] = useState("")
+  const [urlError, setUrlError] = useState("")
   const [showToast, setShowToast] = useState(false)
   const [saving, setSaving] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { data: categories } = useCategories()
 
   const nameRef = useRef<HTMLInputElement>(null)
   const categoryRef = useRef<HTMLSelectElement>(null)
   const linkRef = useRef<HTMLInputElement>(null)
   const priceRef = useRef<HTMLInputElement>(null)
-
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return
-    setFileName(file.name)
-    const reader = new FileReader()
-    reader.onload = (e) => setImage(e.target?.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragOver(false)
-    const file = e.dataTransfer.files[0]
-    if (file) handleFile(file)
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) handleFile(file)
-  }
-
-  const removeImage = () => {
-    setImage(null)
-    setFileName("product-image")
-    if (fileInputRef.current) fileInputRef.current.value = ""
-  }
 
   const handleSave = async () => {
     const name = nameRef.current?.value
@@ -57,6 +29,12 @@ export default function NewProduct() {
 
     if (!name || !categoryId || !shopeeUrl || !priceText) {
       alert("Please fill in all required fields")
+      return
+    }
+
+    const trimmedUrl = imageUrl.trim()
+    if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+      setUrlError("URL must start with http:// or https://")
       return
     }
 
@@ -71,7 +49,7 @@ export default function NewProduct() {
       await createProduct({
         name,
         price,
-        imageUrl: image || "https://picsum.photos/seed/" + Date.now() + "/400/400",
+        imageUrl: trimmedUrl || "https://picsum.photos/seed/" + Date.now() + "/400/400",
         imageAlt: name,
         shopeeUrl,
         categoryId,
@@ -116,64 +94,37 @@ export default function NewProduct() {
                 Product Image
               </label>
 
-              {!image ? (
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-                  onDragLeave={() => setDragOver(false)}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`relative flex flex-col items-center justify-center border-2 border-dashed p-8 cursor-pointer transition-all ${
-                    dragOver ? "border-[#1a1c1b] bg-[#f4f4f1]" : "border-[#e5e1d8] hover:border-[#906f69] hover:bg-[#f4f4f1]"
-                  }`}
-                  style={{ clipPath: "polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px)" }}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleInputChange}
-                    className="hidden"
+              <div>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => { setImageUrl(e.target.value); setUrlError("") }}
+                  placeholder="https://down-id.img.susercontent.com/file/xxxxx"
+                  className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/30 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none"
+                />
+                {urlError && (
+                  <p className="font-mono text-[11px] text-[#ba1a1a] mt-1">{urlError}</p>
+                )}
+              </div>
+
+              <div className="relative aspect-[4/3] bg-[#e2e3e0] overflow-hidden border border-[#e5e1d8]" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt="Product preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden") }}
                   />
-                  <div className="size-14 rounded-full bg-[#f4f4f1] border border-[#e5e1d8] flex items-center justify-center mb-3">
-                    <Upload className="size-6 text-[#5c403a]" aria-hidden="true" />
-                  </div>
-                  <p className="font-sans text-[16px] leading-[24px] font-bold text-[#1a1c1b]">
-                    Upload Product Image
-                  </p>
-                  <p className="font-mono text-[11px] text-[#5c403a] mt-1">
-                    Drag & drop or click to browse (max 5MB)
-                  </p>
-                </div>
-              ) : (
-                <div className="relative border border-[#e5e1d8] p-2 bg-white" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
-                  <div className="relative aspect-[4/3] bg-[#e2e3e0] overflow-hidden">
-                    <Image
-                      src={image}
-                      alt="Product preview"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                  </div>
-                  <div className="flex items-center justify-between mt-2 px-1">
-                    <div className="flex items-center gap-2">
-                      <ImageIcon className="size-4 text-[#5c403a]" aria-hidden="true" />
-                      <span className="font-mono text-[11px] text-[#5c403a] truncate max-w-[200px]">
-                        {fileName}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="flex items-center gap-1 text-[#ba1a1a] hover:bg-[#ffdad6]/20 px-2 py-1 rounded font-mono text-[11px] uppercase transition-colors"
-                    >
-                      <X className="size-3" aria-hidden="true" />
-                      Remove
-                    </button>
+                ) : null}
+                <div className={`absolute inset-0 flex items-center justify-center ${imageUrl ? "hidden" : ""}`}>
+                  <div className="text-center">
+                    <ImageIcon className="size-10 mx-auto text-[#5c403a]/40" aria-hidden="true" />
+                    <p className="font-mono text-[11px] text-[#5c403a]/40 mt-2">Preview</p>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             <div>

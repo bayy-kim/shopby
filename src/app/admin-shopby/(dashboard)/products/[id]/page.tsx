@@ -1,6 +1,7 @@
 "use client"
 
-import { Save, ArrowDown } from "lucide-react"
+import Image from "next/image"
+import { Save, ArrowDown, ImageIcon } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
 import { fetchProductById, updateProduct } from "@/lib/services/products"
@@ -15,6 +16,8 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(true)
   const [product, setProduct] = useState<Product | null>(null)
   const [isFeatured, setIsFeatured] = useState(false)
+  const [imageUrl, setImageUrl] = useState("")
+  const [urlError, setUrlError] = useState("")
   const { data: categories } = useCategories()
 
   const nameRef = useRef<HTMLInputElement>(null)
@@ -28,6 +31,7 @@ export default function EditProduct() {
     fetchProductById(id)
       .then((p) => {
         setProduct(p)
+        setImageUrl(p.imageUrl)
         setIsFeatured(p.isFeatured)
         setLoading(false)
       })
@@ -41,6 +45,12 @@ export default function EditProduct() {
     const shopeeUrl = linkRef.current?.value || product.shopeeUrl
     const priceText = priceRef.current?.value || String(product.price)
 
+    const trimmedUrl = imageUrl.trim()
+    if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+      setUrlError("URL must start with http:// or https://")
+      return
+    }
+
     const price = parseInt(priceText.replace(/\./g, ""), 10)
     if (isNaN(price)) {
       alert("Invalid price")
@@ -52,7 +62,7 @@ export default function EditProduct() {
       await updateProduct(product.id, {
         name,
         price,
-        imageUrl: product.imageUrl,
+        imageUrl: trimmedUrl || product.imageUrl,
         imageAlt: name,
         shopeeUrl,
         categoryId,
@@ -115,6 +125,42 @@ export default function EditProduct() {
             <div>
               <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-1">Item No.</label>
               <p className="font-mono text-[16px] leading-[24px] font-bold">#{product.id}</p>
+            </div>
+
+            <div>
+              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-3">
+                Product Image
+              </label>
+              <div>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => { setImageUrl(e.target.value); setUrlError("") }}
+                  placeholder="https://down-id.img.susercontent.com/file/xxxxx"
+                  className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/30 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none"
+                />
+                {urlError && (
+                  <p className="font-mono text-[11px] text-[#ba1a1a] mt-1">{urlError}</p>
+                )}
+              </div>
+              <div className="relative aspect-[4/3] bg-[#e2e3e0] overflow-hidden border border-[#e5e1d8] mt-3" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt="Product preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden") }}
+                  />
+                ) : null}
+                <div className={`absolute inset-0 flex items-center justify-center ${imageUrl ? "hidden" : ""}`}>
+                  <div className="text-center">
+                    <ImageIcon className="size-10 mx-auto text-[#5c403a]/40" aria-hidden="true" />
+                    <p className="font-mono text-[11px] text-[#5c403a]/40 mt-2">Preview</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>
