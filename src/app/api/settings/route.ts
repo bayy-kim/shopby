@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { verifySessionToken } from "@/lib/auth"
+import { checkAuth } from "@/lib/auth"
 
 const SETTINGS_KEY = "store_settings"
 
@@ -17,13 +17,6 @@ const defaultSettings = {
   twoFA: false,
 }
 
-async function getAuth(request: Request) {
-  const cookieHeader = request.headers.get("cookie") || ""
-  const match = cookieHeader.match(/shopby_admin_session=([^;]+)/)
-  if (!match) return null
-  return verifySessionToken(match[1])
-}
-
 async function readSettings(): Promise<Record<string, unknown>> {
   try {
     const row = await prisma.appSetting.findUnique({ where: { key: SETTINGS_KEY } })
@@ -34,18 +27,16 @@ async function readSettings(): Promise<Record<string, unknown>> {
   }
 }
 
-export async function GET(request: Request) {
-  const session = await getAuth(request)
-  if (!session) {
+export async function GET(request: NextRequest) {
+  if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const settings = await readSettings()
   return NextResponse.json(settings)
 }
 
-export async function PUT(request: Request) {
-  const session = await getAuth(request)
-  if (!session) {
+export async function PUT(request: NextRequest) {
+  if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
