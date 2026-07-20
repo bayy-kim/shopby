@@ -5,10 +5,10 @@ import dynamic from "next/dynamic"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
 import { useProducts } from "@/hooks/useProducts"
+import { useFeaturedProducts } from "@/hooks/useFeaturedProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { logClick } from "@/lib/services/click"
 import { buildNumberRanges } from "@/lib/utils"
-import type { Product } from "@/types"
 
 const CategoryFilter = dynamic(() => import("@/components/sections/CategoryFilter"), {
   loading: () => <div className="h-10 animate-pulse bg-[#f4f4f1]" />,
@@ -37,6 +37,7 @@ export default function Home() {
   })
 
   const { data: categories } = useCategories()
+  const { data: featuredProducts } = useFeaturedProducts()
 
   const total = data?.total ?? 0
   const [globalTotal, setGlobalTotal] = useState(0)
@@ -45,10 +46,6 @@ export default function Home() {
   }
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
-  const featuredProducts = useMemo(
-    () => allProducts.filter((p: Product) => p.isFeatured),
-    [allProducts]
-  )
   const hasMore = visibleCount < total
 
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])

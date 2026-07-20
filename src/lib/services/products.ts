@@ -27,8 +27,10 @@ export async function fetchProducts(
 }
 
 export async function fetchFeaturedProducts(): Promise<Product[]> {
-  const { data } = await fetchProducts()
-  return data.filter((p) => p.isFeatured)
+  const res = await fetch("/api/products?featured=true")
+  if (!res.ok) throw new Error("Failed to fetch featured products")
+  const json = await res.json()
+  return json.data
 }
 
 export async function fetchProductById(id: string): Promise<Product> {
