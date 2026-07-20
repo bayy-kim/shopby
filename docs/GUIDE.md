@@ -129,9 +129,9 @@ Navigasi sticky di atas halaman dengan:
 
 - **Logo "Shopby"** — teks merah, font sans-serif bold
 - **Link Desktop:** Deals (active/border-bottom), Kategori, Affiliate
-- **Tombol "Masuk"** — merah dengan efek bayangan brutalist, mengarah ke `/admin/login`
+- **Tombol "Masuk"** — merah dengan efek bayangan brutalist, mengarah ke `/admin-shopby/login`
 
-> ✅ Semua link navbar (Deals, Kategori, Affiliate, Masuk) kini mengarah ke halaman/ancor yang nyata. "Deals" scroll ke bagian produk, "Kategori" scroll ke filter kategori, "Affiliate" menuju `/affiliate`, "Masuk" menuju `/admin/login`.
+> ✅ Semua link navbar (Deals, Kategori, Affiliate, Masuk) kini mengarah ke halaman/ancor yang nyata. "Deals" scroll ke bagian produk, "Kategori" scroll ke filter kategori, "Affiliate" menuju `/affiliate`, "Masuk" menuju `/admin-shopby/login`.
 
 ### 2.3 Hero Section
 
@@ -288,39 +288,39 @@ Semua halaman ini diakses dari link navbar ("Affiliate") dan footer.
 
 ## 3. Admin Panel
 
-Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/admin/*` tanpa login akan di-redirect ke halaman login.
+Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/admin-shopby/*` tanpa login akan di-redirect ke halaman login.
 
 **Route admin yang tersedia:**
 
 | Route | Keterangan |
 |---|---|
-| `/admin` | Dashboard — statistik real dari API |
-| `/admin/login` | Halaman login |
-| `/admin/analytics` | Analitik dari data nyata |
-| `/admin/products` | Daftar produk (CRUD via API) |
-| `/admin/products/new` | Tambah produk baru (POST `/api/products`) |
-| `/admin/products/[id]` | Edit produk (GET/PUT `/api/products/[id]`) |
-| `/admin/settings` | Pengaturan toko (simpan ke `/api/settings`) |
-| `/admin/help` | Pusat Bantuan |
+| `/admin-shopby` | Dashboard — statistik real dari API |
+| `/admin-shopby/login` | Halaman login |
+| `/admin-shopby/analytics` | Analitik dari data nyata |
+| `/admin-shopby/products` | Daftar produk (CRUD via API) |
+| `/admin-shopby/products/new` | Tambah produk baru (POST `/api/products`) |
+| `/admin-shopby/products/[id]` | Edit produk (GET/PUT `/api/products/[id]`) |
+| `/admin-shopby/settings` | Pengaturan toko (simpan ke `/api/settings`) |
+| `/admin-shopby/help` | Pusat Bantuan |
 
 > ✅ Semua halaman admin kini menggunakan data dari API nyata — tidak ada data hardcoded atau simulasi.
 
 ### 3.1 Alur Autentikasi
 
 ```
-[User] → akses /admin/products
+[User] → akses /admin-shopby/products
          ↓
     [middleware.ts] → cek cookie "shopby_admin_session"
          ↓                           ↓
     tidak ada/expired            valid → lanjut ke halaman
          ↓
-    redirect ke /admin/login
+    redirect ke /admin-shopby/login
          ↓
     [Login Page] → input email & password
          ↓
-    POST /api/admin/login
+    POST /api/admin-shopby/login
          ↓
-    valid? → set cookie HttpOnly → redirect ke /admin
+    valid? → set cookie HttpOnly → redirect ke /admin-shopby
     salah? → tampilkan error, tetap di login
 ```
 
@@ -329,8 +329,8 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 - **Single Admin:** Email dan password hash berasal dari `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`)
 - **Password Hashing:** Node.js `crypto.scryptSync` dengan salt 16-byte, stored sebagai `salt:derivedKey` (base64)
 - **Session JWT:** `jose` library, algoritma HS256, payload `{ role: "admin" }`, expiry 24 jam
-- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/admin, maxAge 86400s
-- **Middleware:** Edge runtime, matcher `["/admin/:path*", "/api/stats/:path*", "/api/analytics/:path*", "/api/settings/:path*"]` — melindungi admin pages + API sensitive routes
+- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/admin-shopby, maxAge 86400s
+- **Middleware:** Edge runtime, matcher `["/admin-shopby/:path*", "/api/stats/:path*", "/api/analytics/:path*", "/api/settings/:path*"]` — melindungi admin pages + API sensitive routes
 
 #### Credential Default (Development)
 
@@ -341,8 +341,8 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 
 ### 3.2 Halaman Login
 
-**Route:** `/admin/login`  
-**File:** `src/app/admin/login/page.tsx`
+**Route:** `/admin-shopby/login`  
+**File:** `src/app/admin-shopby/login/page.tsx`
 
 Form login bergaya struk/nota dengan:
 - Logo struk (`Receipt` icon)
@@ -358,7 +358,7 @@ Form login bergaya struk/nota dengan:
 
 ### 3.3 Dashboard Layout
 
-**File:** `src/app/admin/(dashboard)/layout.tsx`
+**File:** `src/app/admin-shopby/(dashboard)/layout.tsx`
 
 Layout bersama untuk semua halaman admin dengan:
 
@@ -383,7 +383,7 @@ Layout bersama untuk semua halaman admin dengan:
 
 - Sticky, tinggi penuh
 - Link aktif punya background kuning + border kiri merah
-- "Logout" → POST `/api/admin/logout` → redirect ke `/admin/login`
+- "Logout" → POST `/api/admin-shopby/logout` → redirect ke `/admin-shopby/login`
 
 #### Top Navbar
 
@@ -404,8 +404,8 @@ Layout bersama untuk semua halaman admin dengan:
 
 ### 3.4 Halaman Dashboard
 
-**Route:** `/admin`  
-**File:** `src/app/admin/(dashboard)/page.tsx`
+**Route:** `/admin-shopby`  
+**File:** `src/app/admin-shopby/(dashboard)/page.tsx`
 
 Halaman utama admin dengan data real-time dari API:
 
@@ -441,8 +441,8 @@ Tabel 3 baris dengan data contoh:
 
 ### 3.5 Halaman Analytics
 
-**Route:** `/admin/analytics`  
-**File:** `src/app/admin/(dashboard)/analytics/page.tsx`
+**Route:** `/admin-shopby/analytics`  
+**File:** `src/app/admin-shopby/(dashboard)/analytics/page.tsx`
 
 > ✅ Data analytics kini berasal dari API nyata (`GET /api/analytics`) — bukan data contoh.
 
@@ -485,8 +485,8 @@ Tabel 3 baris dengan data contoh:
 
 ### 3.6 Halaman Add New Product Link
 
-**Route:** `/admin/products/new`  
-**File:** `src/app/admin/(dashboard)/products/new/page.tsx`
+**Route:** `/admin-shopby/products/new`  
+**File:** `src/app/admin-shopby/(dashboard)/products/new/page.tsx`
 
 Form untuk menambahkan product link affiliate baru dengan gaya receipt/nota.
 
@@ -550,14 +550,14 @@ Fitur upload gambar dengan dua metode:
 
 ### 3.7 Halaman Products
 
-**Route:** `/admin/products`  
-**File:** `src/app/admin/(dashboard)/products/page.tsx`
+**Route:** `/admin-shopby/products`  
+**File:** `src/app/admin-shopby/(dashboard)/products/page.tsx`
 
 #### Fitur
 
 | Fitur | Keterangan |
 |---|---|
-| **Tambah Produk** | Tombol "Add New Link" → `/admin/products/new` |
+| **Tambah Produk** | Tombol "Add New Link" → `/admin-shopby/products/new` |
 | **Filter Kategori** | Chips: All, Electronics, Fashion, Home, Beauty |
 | **Sort** | Tombol dekoratif (belum berfungsi) |
 | **Search** | Input dekoratif untuk mobile |
@@ -573,7 +573,7 @@ Fitur upload gambar dengan dua metode:
 | Price | Format Rp (contoh: Rp450.000) |
 | Commission | Persentase (contoh: 8%) |
 | Status | Badge Active (hijau) / Out of Stock (merah) |
-| Actions | Copy Link (ikon `Copy`), Edit (ikon `Edit` → `/admin/products/[id]`), Delete (ikon `Trash2`) |
+| Actions | Copy Link (ikon `Copy`), Edit (ikon `Edit` → `/admin-shopby/products/[id]`), Delete (ikon `Trash2`) |
 
 #### Data Contoh (3 Produk)
 
@@ -585,8 +585,8 @@ Fitur upload gambar dengan dua metode:
 
 ### 3.7 Halaman Edit Produk
 
-**Route:** `/admin/products/[id]`  
-**File:** `src/app/admin/(dashboard)/products/[id]/page.tsx`
+**Route:** `/admin-shopby/products/[id]`  
+**File:** `src/app/admin-shopby/(dashboard)/products/[id]/page.tsx`
 
 > ✅ Form memuat data produk dari API (`GET /api/products/[id]`) dan menyimpan perubahan melalui `PUT /api/products/[id]` ke database — bukan data hardcoded atau simulasi.
 
@@ -614,8 +614,8 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 
 ### 3.8 Halaman Settings
 
-**Route:** `/admin/settings`  
-**File:** `src/app/admin/(dashboard)/settings/page.tsx`
+**Route:** `/admin-shopby/settings`  
+**File:** `src/app/admin-shopby/(dashboard)/settings/page.tsx`
 
 #### Tabs
 
@@ -668,7 +668,7 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 
 ### 4.1 Autentikasi Admin
 
-#### POST /api/admin/login
+#### POST /api/admin-shopby/login
 
 Login admin, mengembalikan session cookie.
 
@@ -684,7 +684,7 @@ Login admin, mengembalikan session cookie.
 ```json
 { "success": true }
 ```
-Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/admin; Max-Age=86400`
+Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/admin-shopby; Max-Age=86400`
 
 **Response (400):**
 ```json
@@ -696,7 +696,7 @@ Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/a
 { "error": "Email atau password salah" }
 ```
 
-#### POST /api/admin/logout
+#### POST /api/admin-shopby/logout
 
 Menghapus session cookie.
 
@@ -1400,23 +1400,23 @@ shopby/
     │←─── {shopeeUrl} ──────────────────┤                              │
     ├── window.open(shopeeUrl) ─────────→│                              │
     │                                    │                              │
-    ├── GET /admin/* (tanpa cookie) ────→│                              │
+    ├── GET /admin-shopby/* (tanpa cookie) ────→│                              │
     │    [middleware] cek cookie ✗       │                              │
-    │←─── 302 Redirect /admin/login ────┤                              │
+    │←─── 302 Redirect /admin-shopby/login ────┤                              │
     │                                    │                              │
-    ├── POST /api/admin/login ──────────→│                              │
+    ├── POST /api/admin-shopby/login ──────────→│                              │
     │    {email, password}               ├── validateCredentials()      │
     │                                    │    ├── cek ADMIN_EMAIL       │
     │                                    │    ├── scrypt compare        │
     │                                    │    └── valid?               │
     │←─── Set-Cookie + {success} ───────┤                              │
     │                                    │                              │
-    ├── GET /admin/* (dengan cookie) ───→│                              │
+    ├── GET /admin-shopby/* (dengan cookie) ───→│                              │
     │    [middleware] cek cookie ✓       │                              │
     │←─── 200 [Admin Page] ─────────────┤                              │
     │                                    │                              │
     ├── Klik Logout ────────────────────→│                              │
-    │    POST /api/admin/logout          ├── Clear Cookie               │
+    │    POST /api/admin-shopby/logout          ├── Clear Cookie               │
     │←─── {success} + Cookie: maxAge=0 ─┤                              │
     └────────────────────────────────────┘                              │
 ```
@@ -1425,7 +1425,7 @@ shopby/
 
 1. **Reset data ke awal:** Hapus `prisma/dev.db`, lalu `npx prisma migrate dev && npx prisma db seed`
 2. **Lihat database langsung:** `npx prisma studio` — GUI browser di port 5555
-3. **Test auth di development:** Buka `/admin/login`, login dengan `admin@shopby.com` / `admin123`
+3. **Test auth di development:** Buka `/admin-shopby/login`, login dengan `admin@shopby.com` / `admin123`
 4. **Cek cookie session:** DevTools → Application → Cookies → cari `shopby_admin_session`
 5. **Ganti password:** Generate hash baru dengan script di [6.6](#66-environment-variables), update `ADMIN_PASSWORD_HASH` di `.env`, restart dev server
 6. **Tambah produk featured:** Di Prisma Studio, set kolom `isFeatured` ke `true`/`1`

@@ -90,7 +90,7 @@ export default function AdminProducts() {
           </p>
         </div>
         <Link
-          href="/admin/products/new"
+          href="/admin-shopby/products/new"
           className="bg-[#b51c00] text-white font-mono text-[13px] leading-[16px] tracking-[0.05em] py-3 px-6 rounded-full flex items-center justify-center gap-2 shrink-0 hover:shadow-lg transition-all active:translate-x-0.5 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
         >
           <Plus className="size-[18px]" aria-hidden="true" />
@@ -222,7 +222,7 @@ export default function AdminProducts() {
                     <button onClick={() => handleCopyLink(product.shopeeUrl)} className="p-1.5 text-[#5c403a] hover:text-[#1a1c1b] hover:bg-[#f4f4f1] rounded transition-colors active:scale-90" aria-label="Copy link">
                       <Copy className="size-5" aria-hidden="true" />
                     </button>
-                    <Link href={`/admin/products/${product.id}`} className="p-1.5 text-[#5c403a] hover:text-[#1a1c1b] hover:bg-[#f4f4f1] rounded transition-colors active:scale-90" aria-label="Edit product">
+                    <Link href={`/admin-shopby/products/${product.id}`} className="p-1.5 text-[#5c403a] hover:text-[#1a1c1b] hover:bg-[#f4f4f1] rounded transition-colors active:scale-90" aria-label="Edit product">
                       <Pencil className="size-5" aria-hidden="true" />
                     </Link>
                     <button onClick={() => handleDelete(product.id)} className="p-1.5 text-[#5c403a] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/20 rounded transition-colors active:scale-90" aria-label="Delete product">

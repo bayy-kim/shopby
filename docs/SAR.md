@@ -19,7 +19,7 @@
 shopby/
 ├── design/                         # Referensi desain (landing + admin panel)
 ├── docs/                           # Dokumentasi
-├── middleware.ts                   # Edge auth guard untuk /admin/* + /api/admin/*
+├── middleware.ts                   # Edge auth guard untuk /admin-shopby/* + /api/admin-shopby/*
 ├── prisma/
 │   ├── schema.prisma               # Product, Category, ClickLog, AppSetting
 │   ├── seed.ts
@@ -121,12 +121,12 @@ model AppSetting {
 
 | Route | Deskripsi |
 |---|---|
-| `/admin/login` | Login page (receipt card, brutalist style) |
-| `/admin` | Dashboard — stats, sales chart, recent activity |
-| `/admin/products` | Product management table with CRUD actions |
-| `/admin/products/[id]` | Edit single product form |
-| `/admin/analytics` | Metrics, click/conversion chart, traffic sources, geography |
-| `/admin/settings` | Store profile, payout info, security toggles |
+| `/admin-shopby/login` | Login page (receipt card, brutalist style) |
+| `/admin-shopby` | Dashboard — stats, sales chart, recent activity |
+| `/admin-shopby/products` | Product management table with CRUD actions |
+| `/admin-shopby/products/[id]` | Edit single product form |
+| `/admin-shopby/analytics` | Metrics, click/conversion chart, traffic sources, geography |
+| `/admin-shopby/settings` | Store profile, payout info, security toggles |
 
 Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top search bar, notification bell, profile avatar. All admin pages use the brutalist/receipt design language consistent with the landing page.
 
@@ -134,8 +134,8 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 
 | Endpoint | Method | Auth | Query/Body | Fungsi |
 |---|---|---|---|---|
-| `/api/admin/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie |
-| `/api/admin/logout` | POST | — | — | Hapus session cookie |
+| `/api/admin-shopby/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie |
+| `/api/admin-shopby/logout` | POST | — | — | Hapus session cookie |
 | `/api/products` | GET | — | `?category=&sort=&search=` | Ambil produk (filter + sorting) |
 | `/api/products` | POST | ✅ | Body: `{ name, price, ... }` | Tambah produk baru |
 | `/api/products/[id]` | GET | — | — | Detail produk |

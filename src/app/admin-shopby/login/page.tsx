@@ -18,7 +18,7 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch("/api/admin-shopby/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -27,7 +27,7 @@ export default function AdminLogin() {
       const data = await res.json()
 
       if (res.ok) {
-        router.push("/admin")
+        router.push("/admin-shopby")
       } else {
         setError(data.error || "Email atau password salah")
       }

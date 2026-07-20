@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/"],
+      disallow: ["/admin-shopby/", "/api/"],
     },
     sitemap: "https://shopby.io/sitemap.xml",
   }

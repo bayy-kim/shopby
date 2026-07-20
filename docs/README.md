@@ -17,15 +17,15 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - 🎨 **Animasi** — Scroll reveal + scan-line effect (Framer Motion)
 
 ### Admin Panel (Auth Guard)
-- 🔐 `/admin/login` — Login page receipt card brutalist style (POST ke API login)
-- 🛡️ **Middleware auth** — Semua route `/admin/*` diproteksi, redirect ke login jika session invalid
+- 🔐 `/admin-shopby/login` — Login page receipt card brutalist style (POST ke API login)
+- 🛡️ **Middleware auth** — Semua route `/admin-shopby/*` diproteksi, redirect ke login jika session invalid
 - 🔑 **Single admin** — Credential dari `.env` (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH`), tanpa database/users table
 - 🍪 **Session JWT** — HttpOnly cookie `shopby_admin_session`, expiry 24 jam
-- 📈 `/admin` — Dashboard with stats, sales chart, recent activity
-- 📦 `/admin/products` — Product management table with CRUD
-- ✏️ `/admin/products/[id]` — Edit product form
-- 📊 `/admin/analytics` — Metrics, traffic sources, geographic data
-- ⚙️ `/admin/settings` — Store profile, payout, security toggles
+- 📈 `/admin-shopby` — Dashboard with stats, sales chart, recent activity
+- 📦 `/admin-shopby/products` — Product management table with CRUD
+- ✏️ `/admin-shopby/products/[id]` — Edit product form
+- 📊 `/admin-shopby/analytics` — Metrics, traffic sources, geographic data
+- ⚙️ `/admin-shopby/settings` — Store profile, payout, security toggles
 - 🚪 **Logout** — Hapus session cookie, redirect ke login
 
 ## Tech Stack
@@ -44,7 +44,7 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 
 ```
 shopby/
-├── middleware.ts                # Edge auth guard untuk /admin/* + API admin
+├── middleware.ts                # Edge auth guard untuk /admin-shopby/* + API admin
 ├── design/                      # Referensi desain (landing + admin panel)
 ├── docs/                        # Dokumentasi
 ├── prisma/
@@ -134,8 +134,8 @@ Buka `http://localhost:3000` di browser.
 
 | Endpoint | Method | Auth | Fungsi |
 |---|---|---|---|
-| `/api/admin/login` | POST | — | Login admin (return session cookie) |
-| `/api/admin/logout` | POST | — | Hapus session cookie |
+| `/api/admin-shopby/login` | POST | — | Login admin (return session cookie) |
+| `/api/admin-shopby/logout` | POST | — | Hapus session cookie |
 | `/api/products` | GET | — | Ambil produk (`?category=&sort=`) |
 | `/api/products` | POST | ✅ | Tambah produk baru |
 | `/api/products/[id]` | GET | — | Detail produk |
@@ -152,14 +152,14 @@ Buka `http://localhost:3000` di browser.
 
 | Route | Deskripsi |
 |---|---|
-| `/admin/login` | Login page (standalone, no sidebar) |
-| `/admin` | Dashboard — statistik real + grafik revenue |
-| `/admin/products` | Product table — filter, search, pagination |
-| `/admin/products/new` | Tambah produk baru (image upload + form) |
-| `/admin/products/[id]` | Edit product |
-| `/admin/analytics` | Analytics panel — metrik, chart, top products |
-| `/admin/settings` | Settings — storefront, payout, security |
-| `/admin/help` | Pusat bantuan |
+| `/admin-shopby/login` | Login page (standalone, no sidebar) |
+| `/admin-shopby` | Dashboard — statistik real + grafik revenue |
+| `/admin-shopby/products` | Product table — filter, search, pagination |
+| `/admin-shopby/products/new` | Tambah produk baru (image upload + form) |
+| `/admin-shopby/products/[id]` | Edit product |
+| `/admin-shopby/analytics` | Analytics panel — metrik, chart, top products |
+| `/admin-shopby/settings` | Settings — storefront, payout, security |
+| `/admin-shopby/help` | Pusat bantuan |
 
 ## Deploy ke Vercel
 

@@ -22,10 +22,10 @@ import {
 import { useState, useRef, useEffect } from "react"
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin-shopby", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin-shopby/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin-shopby/products", label: "Products", icon: Package },
+  { href: "/admin-shopby/settings", label: "Settings", icon: Settings },
 ]
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
@@ -60,8 +60,8 @@ export default function AdminDashboardLayout({
   useClickOutside(profileRef, () => setProfileOpen(false))
 
   const handleLogout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" })
-    router.push("/admin/login")
+    await fetch("/api/admin-shopby/logout", { method: "POST" })
+    router.push("/admin-shopby/login")
   }
 
   const notifications = [
@@ -202,15 +202,15 @@ export default function AdminDashboardLayout({
               </button>
               {helpOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#e5e1d8] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] z-50">
-                  <a href="/admin/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                  <a href="/admin-shopby/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
                     <LifeBuoy className="size-4 text-[#5c403a]" aria-hidden="true" />
                     Help Center
                   </a>
-                  <a href="/admin/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                  <a href="/admin-shopby/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
                     <FileText className="size-4 text-[#5c403a]" aria-hidden="true" />
                     Documentation
                   </a>
-                  <a href="/admin/help" className="flex items-center gap-3 p-3 hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                  <a href="/admin-shopby/help" className="flex items-center gap-3 p-3 hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
                     <ChevronRight className="size-4 text-[#5c403a]" aria-hidden="true" />
                     Quick Tutorial
                   </a>
@@ -239,7 +239,7 @@ export default function AdminDashboardLayout({
                     <p className="font-sans text-[13px] font-bold text-[#1a1c1b]">Admin</p>
                     <p className="font-mono text-[10px] text-[#5c403a]">admin@shopby.com</p>
                   </div>
-                  <Link href="/admin/settings" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]" onClick={() => setProfileOpen(false)}>
+                  <Link href="/admin-shopby/settings" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]" onClick={() => setProfileOpen(false)}>
                     <Settings className="size-4 text-[#5c403a]" aria-hidden="true" />
                     Settings
                   </Link>
@@ -308,11 +308,11 @@ export default function AdminDashboardLayout({
                 </button>
               </div>
               <div className="space-y-4">
-                <a href="/admin/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                <a href="/admin-shopby/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
                   <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📖 Help Center</h3>
                   <p className="font-sans text-[13px] text-[#5c403a] mt-1">Browse guides and FAQs for managing your affiliate links.</p>
                 </a>
-                <a href="/admin/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                <a href="/admin-shopby/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
                   <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📊 Analytics Guide</h3>
                   <p className="font-sans text-[13px] text-[#5c403a] mt-1">Understand your metrics and optimize conversions.</p>
                 </a>

@@ -80,7 +80,7 @@ export default function NewProduct() {
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
-        router.push("/admin/products")
+        router.push("/admin-shopby/products")
       }, 1500)
     } catch {
       alert("Failed to create product")

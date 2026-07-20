@@ -67,7 +67,7 @@ export default function AdminHelpPage() {
       </div>
 
       <div className="text-center pt-4">
-        <Link href="/admin" className="font-mono text-[13px] tracking-[0.05em] text-[#5c403a] hover:text-[#1a1c1b] underline decoration-dashed underline-offset-4 transition-colors">
+        <Link href="/admin-shopby" className="font-mono text-[13px] tracking-[0.05em] text-[#5c403a] hover:text-[#1a1c1b] underline decoration-dashed underline-offset-4 transition-colors">
           ← Back to Dashboard
         </Link>
       </div>

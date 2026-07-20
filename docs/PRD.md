@@ -9,7 +9,7 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 - Menyediakan satu halaman terpusat untuk semua produk affiliate Shopee milik Bayu.
 - Menaikkan CTR (click-through rate) dari pengunjung ke link Shopee.
 - Memberi kesan profesional/branded, bukan sekadar link mentah di bio.
-- Memudahkan update produk baru tanpa perlu sentuh kode (lewat admin panel di `/admin`).
+- Memudahkan update produk baru tanpa perlu sentuh kode (lewat admin panel di `/admin-shopby`).
 
 ## 3. Target User
 
@@ -34,12 +34,12 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 
 | Fitur | Deskripsi |
 |---|---|
-| `/admin/login` | Login page dengan receipt card, brutalist styling, form auth |
-| `/admin` | Dashboard — statistik penjualan, grafik performa, aktivitas terbaru |
-| `/admin/products` | Tabel manajemen produk lengkap dengan filter, search, pagination |
-| `/admin/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, status |
-| `/admin/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
-| `/admin/settings` | Konfigurasi store profile, payout info, keamanan (2FA, password) |
+| `/admin-shopby/login` | Login page dengan receipt card, brutalist styling, form auth |
+| `/admin-shopby` | Dashboard — statistik penjualan, grafik performa, aktivitas terbaru |
+| `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination |
+| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, status |
+| `/admin-shopby/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
+| `/admin-shopby/settings` | Konfigurasi store profile, payout info, keamanan (2FA, password) |
 | Sidebar navigasi | Desktop fixed sidebar, mobile collapsible overlay |
 | Brutalist/receipt theme | Konsisten dengan landing page — ink, vivid-orange, tag-yellow, dashed dividers |
 
