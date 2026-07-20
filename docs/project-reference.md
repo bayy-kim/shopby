@@ -1,17 +1,28 @@
 # ShopBy — Next.js E-Commerce Storefront
 
-A modern, high-performance e-commerce storefront built with **Next.js 15 (App Router)**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **Prisma ORM**.
+A modern, high-performance e-commerce storefront built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **Prisma ORM**.
 
 ---
 
 ## Architecture Overview
 
 ```
-middleware.ts             # Edge middleware — auth guard for /admin/*
+middleware.ts             # Edge middleware — auth guard for /admin/*, /api/stats*, /api/analytics*, /api/settings*
 src/
 ├── app/                  # Next.js App Router pages & API routes
-│   ├── layout.tsx        # Root layout (providers, fonts, globals)
+│   ├── layout.tsx        # Root layout (providers, fonts, globals, SEO)
 │   ├── page.tsx          # Homepage
+│   ├── sitemap.ts        # Auto-generated /sitemap.xml
+│   ├── affiliate/        # Static pages
+│   │   └── page.tsx      #   /affiliate  - Affiliate program info
+│   ├── about/
+│   │   └── page.tsx      #   /about      - About Shopby
+│   ├── privacy/
+│   │   └── page.tsx      #   /privacy    - Privacy policy
+│   ├── terms/
+│   │   └── page.tsx      #   /terms      - Terms & conditions
+│   ├── contact/
+│   │   └── page.tsx      #   /contact    - Contact form
 │   ├── products/         # Product listing & detail pages
 │   │   ├── page.tsx      #   /products  - catalog listing
 │   │   ├── [handle]/     #   /products/[handle]  - product detail
@@ -21,6 +32,11 @@ src/
 │   │   ├── page.tsx      #   /categories
 │   │   └── [handle]/     #   /categories/[handle]
 │   │       └── page.tsx
+│   ├── admin/            # Admin pages (protected)
+│   │   ├── error.tsx     #   Error boundary
+│   │   ├── loading.tsx   #   Loading fallback
+│   │   └── help/
+│   │       └── page.tsx  #   /admin/help  - Admin Help Center
 │   └── api/              # API route handlers
 │       ├── admin/
 │       │   ├── login/
@@ -28,11 +44,17 @@ src/
 │       │   └── logout/
 │       │       └── route.ts   #   POST /api/admin/logout
 │       ├── products/
-│       │   ├── route.ts  #   GET /api/products
+│       │   ├── route.ts  #   GET /api/products, POST /api/products (auth)
 │       │   └── [id]/
-│       │       └── route.ts  #   GET /api/products/[id]
+│       │       └── route.ts  #   GET|PUT|DELETE /api/products/[id] (auth)
 │       ├── categories/
 │       │   └── route.ts  #   GET /api/categories
+│       ├── stats/
+│       │   └── route.ts  #   GET /api/stats (auth, from DB)
+│       ├── analytics/
+│       │   └── route.ts  #   GET /api/analytics (auth, from DB)
+│       ├── settings/
+│       │   └── route.ts  #   GET|PUT /api/settings (auth, JSON file)
 │       └── click/
 │           └── route.ts  #   POST /api/click  (analytics tracking)
 ├── components/           # Shared React components
@@ -64,9 +86,11 @@ src/
 │   ├── prisma.ts         #   Prisma client singleton
 │   ├── utils.ts          #   Shared utilities (cn, formatter)
 │   └── services/         #   Data access layer / business logic
-│       ├── products.ts
+│       ├── products.ts   #   fetchProducts, fetchProductById, createProduct, updateProduct, deleteProduct
 │       ├── categories.ts
-│       └── click.ts
+│       ├── click.ts
+│       ├── stats.ts      #   fetchStats, fetchAnalytics
+│       └── settings.ts   #   getSettings, updateSettings
 ├── types/                # TypeScript type definitions
 │   └── index.ts
 └── styles/               # Global styles
@@ -75,6 +99,8 @@ prisma/
 ├── schema.prisma         # Database schema
 └── seed.ts               # Seed script (sample data)
 public/                   # Static assets
+data/
+└── settings.json         # Settings storage (JSON file)
 ```
 
 ---
@@ -83,7 +109,7 @@ public/                   # Static assets
 
 | Layer            | Technology                         |
 | ---------------- | ---------------------------------- |
-| Framework        | Next.js 15.3.2 (App Router)        |
+| Framework        | Next.js 16 (App Router)             |
 | UI Library       | React 19.1.0                       |
 | Language         | TypeScript 5.x                     |
 | Styling          | Tailwind CSS v4 + shadcn/ui        |
@@ -134,14 +160,21 @@ public/                   # Static assets
 
 ## API Routes
 
-| Method | Route                 | Description                         |
-| ------ | --------------------- | ----------------------------------- |
-| POST   | `/api/admin/login`    | Authenticate admin, set session cookie |
-| POST   | `/api/admin/logout`   | Clear session cookie                |
-| GET    | `/api/products`       | List products (supports `?search=&category=&featured=true`) |
-| GET    | `/api/products/[id]`  | Get single product by ID or handle  |
-| GET    | `/api/categories`     | List categories (supports `?featured=true`) |
-| POST   | `/api/click`          | Track product click (analytics)     |
+| Method | Route                 | Auth  | Description                             |
+| ------ | --------------------- | ----- | --------------------------------------- |
+| POST   | `/api/admin/login`    | —     | Authenticate admin, set session cookie  |
+| POST   | `/api/admin/logout`   | —     | Clear session cookie                    |
+| GET    | `/api/products`       | —     | List products (`?search=&category=&featured=true`) |
+| POST   | `/api/products`       | Yes   | Create product                          |
+| GET    | `/api/products/[id]`  | —     | Get single product by ID or handle      |
+| PUT    | `/api/products/[id]`  | Yes   | Update product                          |
+| DELETE | `/api/products/[id]`  | Yes   | Delete product                          |
+| GET    | `/api/categories`     | —     | List categories (`?featured=true`)      |
+| GET    | `/api/stats`          | Yes   | Dashboard stats (from DB)               |
+| GET    | `/api/analytics`      | Yes   | Analytics data (from DB)                |
+| GET    | `/api/settings`       | Yes   | Read settings (from JSON file)          |
+| PUT    | `/api/settings`       | Yes   | Update settings (to JSON file)          |
+| POST   | `/api/click`          | —     | Track product click (analytics)         |
 
 ---
 
@@ -169,7 +202,22 @@ Pages gracefully handle empty states: `empty-state.tsx` component provides descr
 Instead of `tailwindcss-animate` (which is Tailwind v3 only), the codebase uses inline CSS transitions for animations in button and card components. This avoids dependency conflicts with Tailwind v4.
 
 ### 8. Single-Admin Auth (Stateless, Edge-Compatible)
-Per PRD, Shopby hanya butuh **1 admin** (Bayu). Auth tidak menggunakan database/users table — credential berasal dari environment variable (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`). Password diverifikasi via Node `crypto.scryptSync` (built-in, zero dependency). Session dikelola via **JWT** (jose library, edge-compatible untuk middleware) yang disimpan di cookie HttpOnly. Middleware Next.js melindungi semua route `/admin/:path*` — akses tanpa session valid di-redirect ke `/admin/login`.
+Per PRD, Shopby hanya butuh **1 admin** (Bayu). Auth tidak menggunakan database/users table — credential berasal dari environment variable (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`). Password diverifikasi via Node `crypto.scryptSync` (built-in, zero dependency). Session dikelola via **JWT** (jose library, edge-compatible untuk middleware) yang disimpan di cookie HttpOnly. Middleware Next.js melindungi semua route `/admin/:path*` serta `/api/stats*`, `/api/analytics*`, `/api/settings*` — akses tanpa session valid di-redirect ke `/admin/login` atau mengembalikan 401 untuk API.
+
+### 9. Settings JSON File Storage
+Konfigurasi toko (nama, logo, alamat, social links, dsb.) disimpan di `data/settings.json` — bukan di database. Ini memudahkan backup manual, editing langsung via text editor, dan cocok untuk data yang jarang berubah. API endpoint `/api/settings` menjadi bridge antara admin UI dan file.
+
+### 10. SEO — Multi-Layer Strategy
+SEO diterapkan di tiga lapis: (a) **Server-rendered metadata** via Next.js `generateMetadata()` — OpenGraph, Twitter Cards, page-specific title/description; (b) **JSON-LD structured data** (schema.org `Product`) pada product detail — membantu search engine memahami konten; (c) **Auto-generated sitemap** via `sitemap.ts` — mencakup semua produk, kategori, dan halaman statis.
+
+### 11. Accessibility as Default
+Aksesibilitas bukan add-on, melainkan built-in: (a) semantic HTML + ARIA `role` attributes pada landmark element; (b) `aria-label` pada semua interactive element; (c) `focus-visible` ring hanya muncul saat keyboard navigation; (d) `prefers-reduced-motion` media query menonaktifkan animasi untuk vestibular disorders.
+
+### 12. Performance Patterns
+Beberapa teknik performance diterapkan secara konsisten: (a) **preconnect** untuk third-party origins (Google Fonts); (b) **font-display: swap** — teks tetap readable selama font loading; (c) **Next.js Image** dengan `fill` + `sizes` — responsive images tanpa layout shift; (d) **native lazy loading** via `loading="lazy"` pada gambar di bawah fold.
+
+### 13. Error Boundaries
+Admin section memiliki error boundary di `src/app/admin/error.tsx` yang menangkap runtime errors dengan fallback UI dan tombol retry. `src/app/admin/loading.tsx` menyediakan loading state global untuk semua admin pages, memberikan UX yang mulus saat data fetching.
 
 ---
 
@@ -292,18 +340,25 @@ Run `pnpm prisma:seed` to populate the database.
 | Route                    | Component / Type      | Data Source / Notes      |
 | ------------------------ | --------------------- | ------------------------ |
 | `/`                      | Server Component      | Featured products        |
+| `/affiliate`             | Server Component      | Static content           |
+| `/about`                 | Server Component      | Static content           |
+| `/privacy`               | Server Component      | Static content           |
+| `/terms`                 | Server Component      | Static content           |
+| `/contact`               | Server Component      | Static content           |
 | `/products`              | Server Component      | `getProducts()`          |
 | `/products/[handle]`     | Server Component      | `getProduct()`           |
 | `/products/loading`      | Suspense fallback     | —                        |
 | `/categories`            | Server Component      | `getCategories()`        |
 | `/categories/[handle]`   | Server Component      | `getCategoryProducts()`  |
 | `/admin/login`           | Client Component      | Login form → POST `/api/admin/login` |
-| `/admin`                 | Client Component      | Dashboard (protected by middleware)  |
-| `/admin/products`        | Client Component      | Product table (protected)            |
-| `/admin/products/new`    | Client Component      | Add new product with image upload    |
-| `/admin/products/[id]`   | Client Component      | Edit product (protected)             |
-| `/admin/analytics`       | Client Component      | Analytics panel (protected)          |
-| `/admin/settings`        | Client Component      | Settings page (protected)            |
+| `/admin`                 | Client Component      | Dashboard — real stats from `/api/stats` |
+| `/admin/products`        | Client Component      | Product table — fetch/delete via `/api/products` |
+| `/admin/products/new`    | Client Component      | Add product — POST to `/api/products` |
+| `/admin/products/[id]`   | Client Component      | Edit product — load via GET, save via PUT to `/api/products/[id]` |
+| `/admin/analytics`       | Client Component      | Real data from `/api/analytics` |
+| `/admin/settings`        | Client Component      | Read/write via `/api/settings` |
+| `/admin/help`            | Client Component      | Admin Help Center       |
+| `/sitemap.xml`           | Generated route       | Auto-generated from `sitemap.ts` |
 
 ---
 
@@ -320,3 +375,18 @@ Run `pnpm prisma:seed` to populate the database.
 - **Auth — single admin credential:** Email dan password hash berasal dari `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`), bukan dari database — sesuai PRD yang hanya butuh 1 admin
 - **Auth — session via HttpOnly cookie:** JWT disimpan di cookie `shopby_admin_session` dengan flag `HttpOnly`, `Secure` (prod), `SameSite=Lax`, `path=/admin` — expiry 24 jam
 - **Auth — logout:** Panggil `POST /api/admin/logout` → cookie langsung dihapus (maxAge=0), middleware otomatis redirect ke login
+- **Middleware — extended protection:** Selain `/admin/:path*`, middleware juga melindungi `/api/stats*`, `/api/analytics*`, dan `/api/settings*` — akses tanpa session valid mengembalikan `401 Unauthorized`
+- **Settings API (JSON file storage):** `GET|PUT /api/settings` membaca/menulis `data/settings.json` (bukan database) — cocok untuk konfigurasi toko yang jarang berubah, mudah diedit manual
+- **SEO — OpenGraph & Twitter Cards:** Root layout menyisipkan tag `og:title`, `og:description`, `og:image`, `twitter:card`, `twitter:title`, `twitter:description` via `generateMetadata()` — setiap halaman bisa override metadata masing-masing
+- **SEO — JSON-LD structured data:** Product detail page merender `<script type="application/ld+json">` dengan schema.org `Product` — membantu search engine memahami konten
+- **SEO — Sitemap:** `src/app/sitemap.ts` menghasilkan `/sitemap.xml` otomatis mencakup semua produk, kategori, dan halaman statis — menggunakan `generateSitemaps()` untuk scaling
+- **SEO — page-specific metadata:** Setiap halaman mendefinisikan `metadata` export dengan `title` dan `description` spesifik — `generateMetadata()` pada dynamic routes mengambil data dari database
+- **A11y — ARIA labels:** Tombol, link, form, dan interactive elements memiliki `aria-label` yang deskriptif — screen reader dapat menavigasi dengan jelas
+- **A11y — focus-visible rings:** Menggunakan Tailwind `focus-visible:ring-2 focus-visible:ring-primary` — hanya tampil saat navigasi keyboard, tidak saat mouse click
+- **A11y — reduced-motion:** CSS `@media (prefers-reduced-motion: reduce)` menonaktifkan animasi dan transisi — hormati preferensi aksesibilitas pengguna
+- **A11y — role attributes:** Element struktural menggunakan role seperti `banner`, `navigation`, `main`, `contentinfo`, `region` — landmark untuk assistive technology
+- **Performance — preconnect:** `<link rel="preconnect">` untuk Google Fonts dan origin eksternal — mengurangi latency koneksi
+- **Performance — font-display: swap:** Konfigurasi `next/font` dengan `display: 'swap'` — teks tetap terlihat selama font加载, fallback font ditampilkan sementara
+- **Performance — Next.js Image fill+sizes:** Gambar menggunakan `fill` prop dengan `sizes` attribute — responsive image loading, browser pilih ukuran optimal
+- **Performance — lazy loading:** Komponen di bawah fold menggunakan `loading="lazy"` untuk native image lazy loading — non-critical images tidak blocking initial render
+- **Error boundaries:** `src/app/admin/error.tsx` menangkap error di admin pages dengan fallback UI dan tombol retry; `src/app/admin/loading.tsx` menyediakan loading spinner global untuk admin section

@@ -131,7 +131,7 @@ Navigasi sticky di atas halaman dengan:
 - **Link Desktop:** Deals (active/border-bottom), Kategori, Affiliate
 - **Tombol "Masuk"** — merah dengan efek bayangan brutalist, mengarah ke `/admin/login`
 
-> 💡 Link Deals, Kategori, Affiliate saat ini belum memiliki halaman tujuan (href="#" placeholder). Hanya "Masuk" yang berfungsi penuh.
+> ✅ Semua link navbar (Deals, Kategori, Affiliate, Masuk) kini mengarah ke halaman/ancor yang nyata. "Deals" scroll ke bagian produk, "Kategori" scroll ke filter kategori, "Affiliate" menuju `/affiliate`, "Masuk" menuju `/admin/login`.
 
 ### 2.3 Hero Section
 
@@ -267,13 +267,43 @@ Dua varian:
 
 - Nama brand dan deskripsi "Shopee Affiliate Partner"
 - Copyright
-- Link: Tentang Kami, Kebijakan Privasi, Syarat & Ketentuan, Hubungi Kami
+- Link: Tentang Kami (`/about`), Kebijakan Privasi (`/privacy`), Syarat & Ketentuan (`/terms`), Hubungi Kami (`/contact`)
+- ✅ Semua link footer kini mengarah ke halaman statis yang nyata.
+
+### 2.8 Halaman Publik Lainnya
+
+Proyek kini memiliki halaman statis tambahan yang dapat diakses publik:
+
+| Route | Konten |
+|---|---|
+| `/affiliate` | Informasi program Affiliasi Shopee |
+| `/about` | Tentang Shopby |
+| `/privacy` | Kebijakan Privasi |
+| `/terms` | Syarat & Ketentuan |
+| `/contact` | Formulir kontak |
+
+Semua halaman ini diakses dari link navbar ("Affiliate") dan footer.
 
 ---
 
 ## 3. Admin Panel
 
 Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/admin/*` tanpa login akan di-redirect ke halaman login.
+
+**Route admin yang tersedia:**
+
+| Route | Keterangan |
+|---|---|
+| `/admin` | Dashboard — statistik real dari API |
+| `/admin/login` | Halaman login |
+| `/admin/analytics` | Analitik dari data nyata |
+| `/admin/products` | Daftar produk (CRUD via API) |
+| `/admin/products/new` | Tambah produk baru (POST `/api/products`) |
+| `/admin/products/[id]` | Edit produk (GET/PUT `/api/products/[id]`) |
+| `/admin/settings` | Pengaturan toko (simpan ke `/api/settings`) |
+| `/admin/help` | Pusat Bantuan |
+
+> ✅ Semua halaman admin kini menggunakan data dari API nyata — tidak ada data hardcoded atau simulasi.
 
 ### 3.1 Alur Autentikasi
 
@@ -377,7 +407,7 @@ Layout bersama untuk semua halaman admin dengan:
 **Route:** `/admin`  
 **File:** `src/app/admin/(dashboard)/page.tsx`
 
-Halaman utama admin dengan data statis (hardcoded):
+Halaman utama admin dengan data real-time dari API:
 
 #### Header
 - Judul "Dashboard"
@@ -392,6 +422,8 @@ Halaman utama admin dengan data statis (hardcoded):
 | Active Links | 142 | Across 5 platforms |
 | Total Clicks | 89.2K | +5.2% (hijau) |
 | Est. Commission | $3,420 | Pending payout |
+
+> ✅ Statistik kini berasal dari API nyata (`GET /api/stats`) — bukan data hardcoded.
 
 #### Grafik Sales Performance
 - SVG inline line chart (Mon–Sat, 6 titik data)
@@ -411,6 +443,8 @@ Tabel 3 baris dengan data contoh:
 
 **Route:** `/admin/analytics`  
 **File:** `src/app/admin/(dashboard)/analytics/page.tsx`
+
+> ✅ Data analytics kini berasal dari API nyata (`GET /api/analytics`) — bukan data contoh.
 
 #### Header
 - "Analytics Overview"
@@ -455,6 +489,8 @@ Tabel 3 baris dengan data contoh:
 **File:** `src/app/admin/(dashboard)/products/new/page.tsx`
 
 Form untuk menambahkan product link affiliate baru dengan gaya receipt/nota.
+
+> ✅ Form kini mengirim data ke API (`POST /api/products`) dan menyimpannya ke database — bukan sekadar simulasi.
 
 #### Image Upload
 
@@ -509,7 +545,7 @@ Fitur upload gambar dengan dua metode:
 
 | Tombol | Fungsi |
 |---|---|
-| **Create Product Link** (merah) | Simpan → toast "Product link created successfully!" (3 detik) |
+| **Create Product Link** (merah) | `POST /api/products` → simpan ke DB → toast "Product link created successfully!" (3 detik) |
 | **Cancel** | `router.back()` kembali ke halaman sebelumnya |
 
 ### 3.7 Halaman Products
@@ -552,6 +588,8 @@ Fitur upload gambar dengan dua metode:
 **Route:** `/admin/products/[id]`  
 **File:** `src/app/admin/(dashboard)/products/[id]/page.tsx`
 
+> ✅ Form memuat data produk dari API (`GET /api/products/[id]`) dan menyimpan perubahan melalui `PUT /api/products/[id]` ke database — bukan data hardcoded atau simulasi.
+
 #### Form
 
 | Field | Tipe | Default |
@@ -567,7 +605,7 @@ Fitur upload gambar dengan dua metode:
 
 | Tombol | Fungsi |
 |---|---|
-| **Save Changes** (merah) | Simpan → tampilkan toast "Success! Product has been saved." (auto-hilang 3 detik) |
+| **Save Changes** (merah) | `PUT /api/products/[id]` → simpan ke DB → toast "Success! Product has been saved." (auto-hilang 3 detik) |
 | **Discard Edits** | `router.back()` kembali ke halaman sebelumnya |
 
 #### Toast Notification
@@ -619,8 +657,10 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 
 | Tombol | Fungsi |
 |---|---|
-| **Discard** | Reset form (dekoratif) |
-| **Save Changes** | Simpan (dekoratif) |
+| **Discard** | Reset form |
+| **Save Changes** | `PUT /api/settings` → simpan ke `data/settings.json` → toast konfirmasi |
+
+> ✅ Pengaturan kini benar-benar tersimpan ke file `data/settings.json` melalui `PUT /api/settings` — tidak hanya dekoratif.
 
 ---
 
@@ -721,7 +761,203 @@ Mengambil daftar kategori (urut A-Z).
 }
 ```
 
-### 4.4 Click Tracking
+### 4.4 CRUD Produk
+
+#### GET /api/products
+
+Mengambil daftar produk (support filter, sort, pagination).
+
+**Query Parameters:**
+
+| Parameter | Tipe | Default | Keterangan |
+|---|---|---|---|
+| `category` | string | — | Filter slug kategori |
+| `search` | string | — | Pencarian nama produk |
+| `featured` | boolean | — | Filter produk unggulan |
+| `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc` |
+| `page` | number | `1` | Halaman |
+| `limit` | number | `12` | Item per halaman |
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "clx...",
+      "name": "Mechanical Keyboard Pro",
+      "price": 450000,
+      "imageUrl": "https://picsum.photos/...",
+      "category": { "id": "clx...", "name": "Elektronik", "slug": "elektronik" },
+      "_count": { "clicks": 5 }
+    }
+  ],
+  "total": 9,
+  "page": 1,
+  "limit": 12
+}
+```
+
+#### POST /api/products
+
+Menambahkan produk baru ke database.
+
+**Request Body:**
+```json
+{
+  "name": "Ergonomic Desk Chair V2",
+  "price": 1250000,
+  "categoryId": "clx...",
+  "shopeeUrl": "https://shopee.co.id/...",
+  "imageUrl": "https://picsum.photos/...",
+  "isFeatured": false
+}
+```
+
+**Response (201):**
+```json
+{ "success": true, "data": { "id": "clx...", "name": "Ergonomic Desk Chair V2" } }
+```
+
+#### GET /api/products/[id]
+
+Mengambil detail produk berdasarkan ID.
+
+**Response (200):**
+```json
+{
+  "data": {
+    "id": "clx...",
+    "name": "Mechanical Keyboard Pro",
+    "price": 450000,
+    "imageUrl": "https://picsum.photos/...",
+    "shopeeUrl": "https://shopee.co.id/...",
+    "categoryId": "clx...",
+    "isFeatured": true,
+    "createdAt": "2026-07-19T..."
+  }
+}
+```
+
+#### PUT /api/products/[id]
+
+Memperbarui data produk.
+
+**Request Body:**
+```json
+{
+  "name": "Mechanical Keyboard Pro V2",
+  "price": 500000,
+  "categoryId": "clx...",
+  "shopeeUrl": "https://shopee.co.id/...",
+  "imageUrl": "https://picsum.photos/...",
+  "isFeatured": true
+}
+```
+
+**Response (200):**
+```json
+{ "success": true, "data": { "id": "clx...", "name": "Mechanical Keyboard Pro V2" } }
+```
+
+#### DELETE /api/products/[id]
+
+Menghapus produk dari database.
+
+**Response (200):**
+```json
+{ "success": true }
+```
+
+### 4.5 Statistik & Analitik
+
+#### GET /api/stats
+
+Mengembalikan data statistik untuk dashboard admin.
+
+**Response (200):**
+```json
+{
+  "totalSales": 24590,
+  "activeLinks": 142,
+  "totalClicks": 89200,
+  "estCommission": 3420,
+  "salesTrend": 12.5,
+  "clickTrend": 5.2
+}
+```
+
+#### GET /api/analytics
+
+Mengembalikan data analitik detail.
+
+**Query Parameters:**
+
+| Parameter | Tipe | Default | Keterangan |
+|---|---|---|---|
+| `period` | string | `"30d"` | Periode: `7d`, `30d`, `month`, `year` |
+
+**Response (200):**
+```json
+{
+  "revenue": 15400,
+  "avgOrderValue": 245000,
+  "conversionRate": 4.2,
+  "bounceRate": 28.5,
+  "dailyData": [
+    { "date": "2026-06-24", "clicks": 12400, "conversions": 520 }
+  ],
+  "trafficSources": [
+    { "source": "Instagram", "percentage": 45 },
+    { "source": "TikTok", "percentage": 30 }
+  ],
+  "geoData": [
+    { "city": "Jakarta", "users": 12450 }
+  ]
+}
+```
+
+### 4.6 Settings
+
+#### GET /api/settings
+
+Mengambil data pengaturan toko dari `data/settings.json`.
+
+**Response (200):**
+```json
+{
+  "data": {
+    "storeName": "Shopby Affiliate Store",
+    "bio": "Kurator produk...",
+    "primaryColor": "red",
+    "bankName": "BCA",
+    "accountNumber": "1234-5678-9012",
+    "accountHolder": "JOHN DOE"
+  }
+}
+```
+
+#### PUT /api/settings
+
+Memperbarui pengaturan toko dan menyimpannya ke `data/settings.json`.
+
+**Request Body:**
+```json
+{
+  "storeName": "Shopby Store",
+  "bio": "Deskripsi baru",
+  "primaryColor": "black",
+  "bankName": "BNI",
+  "accountNumber": "9876-5432-1098",
+  "accountHolder": "JANE DOE"
+}
+```
+
+**Response (200):**
+```json
+{ "success": true }
+```
+
+### 4.7 Click Tracking
 
 #### POST /api/click
 
