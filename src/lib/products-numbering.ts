@@ -10,8 +10,7 @@ export async function getProductNumberMap(): Promise<Map<string, number>> {
   return map
 }
 
-export async function resolveNumberRangeToIds(from: number, to: number): Promise<string[]> {
-  const map = await getProductNumberMap()
+export function resolveNumberRangeToIds(map: Map<string, number>, from: number, to: number): string[] {
   const ids: string[] = []
   for (const [id, number] of map) {
     if (number >= from && number <= to) {

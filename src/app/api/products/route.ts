@@ -12,17 +12,12 @@ export async function GET(request: NextRequest) {
   const numberFrom = searchParams.get("numberFrom") ? Number(searchParams.get("numberFrom")) : undefined
   const numberTo = searchParams.get("numberTo") ? Number(searchParams.get("numberTo")) : undefined
 
-  let where: Record<string, unknown> =
+  const categoryWhere =
     categorySlug && categorySlug !== "semua"
       ? { category: { slug: categorySlug } }
       : {}
 
-  const [numberMap] = await Promise.all([getProductNumberMap()])
-
-  if (numberFrom !== undefined && numberTo !== undefined) {
-    const idsInRange = await resolveNumberRangeToIds(numberFrom, numberTo)
-    where = { ...where, id: { in: idsInRange } }
-  }
+  const hasNumberFilter = numberFrom !== undefined && numberTo !== undefined
 
   const orderBy =
     sort === "price_asc"
@@ -31,15 +26,40 @@ export async function GET(request: NextRequest) {
         ? { price: "desc" as const }
         : { createdAt: "desc" as const }
 
-  const [products, total] = await Promise.all([
+  const numberMapPromise = getProductNumberMap()
+
+  let where: Record<string, unknown> = categoryWhere
+  if (hasNumberFilter) {
+    const numberMap = await numberMapPromise
+    const idsInRange = resolveNumberRangeToIds(numberMap, numberFrom!, numberTo!)
+    where = { ...where, id: { in: idsInRange } }
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { category: true, _count: { select: { clicks: true } } },
+        orderBy,
+        skip,
+        take,
+      }),
+      prisma.product.count({ where }),
+    ])
+    const data = products.map((p) => ({
+      ...p,
+      number: numberMap.get(p.id) ?? 0,
+    }))
+    return NextResponse.json({ data, total })
+  }
+
+  const [numberMap, products, total] = await Promise.all([
+    numberMapPromise,
     prisma.product.findMany({
-      where,
+      where: categoryWhere,
       include: { category: true, _count: { select: { clicks: true } } },
       orderBy,
       skip,
       take,
     }),
-    prisma.product.count({ where }),
+    prisma.product.count({ where: categoryWhere }),
   ])
 
   const data = products.map((p) => ({
