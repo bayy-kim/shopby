@@ -15,7 +15,7 @@ interface ProductGridProps {
   error?: string
   activeCategory?: Category
   onResetCategory?: () => void
-  onBuyProduct?: (productId: string) => void
+  onBuyProduct?: (productId: string, shopeeUrl: string) => void
   sort?: string
   onSortChange?: (sort: string) => void
   hasMore?: boolean

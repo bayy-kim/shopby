@@ -7,6 +7,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "down-bs-id.img.susercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "down-id.img.susercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
     ],
   },
 };

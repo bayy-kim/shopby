@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/utils"
 interface ProductCardProps {
   product: Product
   variant?: "highlight" | "compact"
-  onBuy?: (productId: string) => void
+  onBuy?: (productId: string, shopeeUrl: string) => void
 }
 
 export default function ProductCard({
@@ -21,7 +21,7 @@ export default function ProductCard({
 
   const handleBuy = () => {
     if (isSoldOut) return
-    onBuy?.(product.id)
+    onBuy?.(product.id, product.shopeeUrl)
   }
 
   return (

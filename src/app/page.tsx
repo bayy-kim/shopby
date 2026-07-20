@@ -47,18 +47,15 @@ export default function Home() {
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])
 
   const handleBuyProduct = useCallback(
-    async (productId: string) => {
+    async (productId: string, shopeeUrl: string) => {
+      window.open(shopeeUrl, "_blank")
       try {
-        const { shopeeUrl } = await logClick(productId)
-        window.open(shopeeUrl, "_blank")
+        await logClick(productId)
       } catch {
-        const product = allProducts.find(
-          (p: Product) => p.id === productId
-        )
-        if (product) window.open(product.shopeeUrl, "_blank")
+        // Click log non-critical
       }
     },
-    [allProducts]
+    []
   )
 
   const resetFilters = useCallback(() => {
