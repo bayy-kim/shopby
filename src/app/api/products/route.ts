@@ -17,8 +17,10 @@ export async function GET(request: NextRequest) {
 
   const categorySlug = searchParams.get("category")
   const sort = searchParams.get("sort") ?? "newest"
-  const skip = Number(searchParams.get("skip")) || undefined
-  const take = Number(searchParams.get("take")) || undefined
+  const skipParam = searchParams.get("skip")
+  const skip = skipParam !== null ? Number(skipParam) : undefined
+  const takeParam = searchParams.get("take")
+  const take = takeParam !== null ? Number(takeParam) : undefined
   const numberFrom = searchParams.get("numberFrom") ? Number(searchParams.get("numberFrom")) : undefined
   const numberTo = searchParams.get("numberTo") ? Number(searchParams.get("numberTo")) : undefined
 

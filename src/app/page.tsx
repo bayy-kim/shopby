@@ -18,15 +18,12 @@ const ProductGrid = dynamic(() => import("@/components/sections/ProductGrid"), {
 })
 const Footer = dynamic(() => import("@/components/layout/Footer"))
 
-const PAGE_SIZE = 8
-
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("semua")
   const [sort, setSort] = useState<string>("newest")
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [numberRange, setNumberRange] = useState<{ from: number; to: number } | null>(null)
 
-  const { data, isLoading, error } = useProducts({
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useProducts({
     categorySlug:
       selectedCategory === "semua" ? undefined : selectedCategory,
     sort,
@@ -44,8 +41,6 @@ export default function Home() {
   }
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
-  const visibleProducts = useMemo(() => allProducts.slice(0, visibleCount), [allProducts, visibleCount])
-  const hasMore = visibleCount < allProducts.length
 
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])
 
@@ -65,26 +60,22 @@ export default function Home() {
     setSelectedCategory("semua")
     setSort("newest")
     setNumberRange(null)
-    setVisibleCount(PAGE_SIZE)
   }, [])
 
   const handleCategoryChange = useCallback((slug: string) => {
     setSelectedCategory(slug)
-    setVisibleCount(PAGE_SIZE)
   }, [])
 
   const handleSortChange = useCallback((newSort: string) => {
     setSort(newSort)
-    setVisibleCount(PAGE_SIZE)
   }, [])
 
   const handleLoadMore = useCallback(() => {
-    setVisibleCount((prev) => prev + PAGE_SIZE)
-  }, [])
+    fetchNextPage()
+  }, [fetchNextPage])
 
   const handleRangeSelect = useCallback((range: { from: number; to: number } | null) => {
     setNumberRange(range)
-    setVisibleCount(PAGE_SIZE)
   }, [])
 
   return (
@@ -118,7 +109,7 @@ export default function Home() {
           />
           <ProductGrid
             featuredProducts={featuredProducts}
-            allProducts={visibleProducts}
+            allProducts={allProducts}
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
@@ -130,8 +121,9 @@ export default function Home() {
             onResetCategory={resetFilters}
             sort={sort}
             onSortChange={handleSortChange}
-            hasMore={hasMore}
+            hasMore={hasNextPage}
             onLoadMore={handleLoadMore}
+            isLoadMoreLoading={isFetchingNextPage}
           />
         </div>
         </div>
