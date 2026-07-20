@@ -14,8 +14,9 @@ export function useProducts(options?: UseProductsOptions) {
   const { categorySlug, sort, skip, take, numberFrom, numberTo } = options ?? {}
 
   return useQuery({
-    queryKey: ["products", categorySlug ?? "all", sort ?? "newest", skip ?? 0, take ?? 50, numberFrom ?? 0, numberTo ?? 0],
+    queryKey: ["products", categorySlug ?? "all", sort ?? "newest", numberFrom ?? 0, numberTo ?? 0],
     queryFn: () => fetchProducts(categorySlug, sort, skip, take, numberFrom, numberTo),
+    staleTime: 30000,
     placeholderData: (prev) => prev,
   })
 }

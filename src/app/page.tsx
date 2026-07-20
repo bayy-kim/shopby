@@ -30,8 +30,6 @@ export default function Home() {
     categorySlug:
       selectedCategory === "semua" ? undefined : selectedCategory,
     sort,
-    skip: 0,
-    take: visibleCount,
     numberFrom: numberRange?.from,
     numberTo: numberRange?.to,
   })
@@ -46,7 +44,8 @@ export default function Home() {
   }
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
-  const hasMore = visibleCount < total
+  const visibleProducts = useMemo(() => allProducts.slice(0, visibleCount), [allProducts, visibleCount])
+  const hasMore = visibleCount < allProducts.length
 
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])
 
@@ -117,7 +116,7 @@ export default function Home() {
           />
           <ProductGrid
             featuredProducts={featuredProducts}
-            allProducts={allProducts}
+            allProducts={visibleProducts}
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
