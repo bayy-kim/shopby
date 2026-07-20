@@ -12,6 +12,7 @@ interface ProductGridProps {
   allProducts?: Product[]
   total?: number
   isLoading?: boolean
+  isFeaturedLoading?: boolean
   error?: string
   activeCategory?: Category
   onResetCategory?: () => void
@@ -52,6 +53,7 @@ export default function ProductGrid({
   allProducts = [],
   total = 0,
   isLoading,
+  isFeaturedLoading,
   error,
   activeCategory,
   onResetCategory,
@@ -92,7 +94,7 @@ export default function ProductGrid({
           whileInView={prefersReducedMotion ? undefined : "visible"}
           viewport={prefersReducedMotion ? undefined : { once: true, amount: 0.2 }}
         >
-          {isLoading
+          {isFeaturedLoading
             ? Array.from({ length: 3 }).map((_, i) => (
                 <ProductCardSkeleton key={`s-feat-${i}`} variant="highlight" />
               ))

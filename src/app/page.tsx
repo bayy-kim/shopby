@@ -37,7 +37,7 @@ export default function Home() {
   })
 
   const { data: categories } = useCategories()
-  const { data: featuredProducts } = useFeaturedProducts()
+  const { data: featuredProducts, isLoading: isFeaturedLoading } = useFeaturedProducts()
 
   const total = data?.total ?? 0
   const [globalTotal, setGlobalTotal] = useState(0)
@@ -121,6 +121,7 @@ export default function Home() {
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
+            isFeaturedLoading={isFeaturedLoading}
             error={error?.message}
             activeCategory={categories?.find(
               (c) => c.slug === selectedCategory
