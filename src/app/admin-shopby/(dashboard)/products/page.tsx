@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   Plus,
   Search,
@@ -32,12 +33,18 @@ const categoryIcons: Record<string, React.ReactNode> = {
 }
 
 export default function AdminProducts() {
+  const searchParams = useSearchParams()
   const [activeCategory, setActiveCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
+  const paramsQ = searchParams.get("q") || ""
+  if (paramsQ && paramsQ !== searchQuery) {
+    setSearchQuery(paramsQ)
+  }
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const pageSize = 10
+  const [sort, setSort] = useState("newest")
 
   useEffect(() => {
     const load = async () => {
@@ -45,7 +52,7 @@ export default function AdminProducts() {
       try {
         const result = await fetchProducts(
           activeCategory === "All" ? undefined : activeCategory.toLowerCase(),
-          "newest"
+          sort
         )
         setProducts(result.data)
       } catch {
@@ -55,7 +62,7 @@ export default function AdminProducts() {
       }
     }
     load()
-  }, [activeCategory])
+  }, [activeCategory, sort])
 
   const filtered = searchQuery
     ? products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -152,9 +159,9 @@ export default function AdminProducts() {
         </div>
 
         <div className="w-full sm:w-auto flex justify-end">
-          <button className="flex items-center gap-2 text-[#5c403a] hover:text-[#1a1c1b] font-mono text-[13px] leading-[16px] tracking-[0.05em] p-2 rounded hover:bg-[#f4f4f1] transition-colors">
+          <button onClick={() => setSort(sort === "newest" ? "price_asc" : "newest")} className="flex items-center gap-2 text-[#5c403a] hover:text-[#1a1c1b] font-mono text-[13px] leading-[16px] tracking-[0.05em] p-2 rounded hover:bg-[#f4f4f1] transition-colors">
             <SortAsc className="size-[18px]" aria-hidden="true" />
-            Sort: Newest
+            Sort: {sort === "newest" ? "Newest" : "Price"}
           </button>
         </div>
       </div>

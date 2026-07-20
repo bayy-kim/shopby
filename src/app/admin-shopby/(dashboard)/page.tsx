@@ -15,11 +15,13 @@ export default function AdminDashboard() {
     totalSales: number
     totalProducts: number
     activeProducts: number
+    soldOut: number
     totalClicks: number
     avgCommission: number
     recentClicks: { productName: string; clickedAt: string }[]
     topProducts: { id: string; name: string; clicks: number; category: string }[]
   } | null>(null)
+  const [period, setPeriod] = useState("all")
 
   const [revenueData, setRevenueData] = useState<{ day: string; clicks: number; conversions: number; revenue: number }[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,7 +43,7 @@ export default function AdminDashboard() {
     {
       label: "Total Products",
       value: statsData ? String(statsData.totalProducts) : "—",
-      trend: statsData ? `${statsData.activeProducts} active | ${statsData.totalProducts - statsData.activeProducts} sold out` : "",
+      trend: statsData ? `${statsData.activeProducts} active | ${statsData.soldOut} sold out` : "",
       icon: Link2,
       color: "text-[#5d5b62]",
     },
@@ -90,9 +92,9 @@ export default function AdminDashboard() {
             Report Date: {new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         </div>
-        <button className="flex items-center gap-2 font-mono text-[13px] leading-[16px] tracking-[0.05em] border border-[#e5e1e9] px-3 py-2 hover:bg-[#f4f4f1] transition-colors active:translate-x-0.5 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+        <button onClick={() => setPeriod(period === "all" ? "week" : "all")} className="flex items-center gap-2 font-mono text-[13px] leading-[16px] tracking-[0.05em] border border-[#e5e1e9] px-3 py-2 hover:bg-[#f4f4f1] transition-colors active:translate-x-0.5 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
           <TrendingUp className="size-[18px]" aria-hidden="true" />
-          All Time
+          {period === "all" ? "All Time" : "This Week"}
         </button>
       </div>
 

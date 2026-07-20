@@ -50,6 +50,18 @@ export default function AdminDashboardLayout({
   const [notifOpen, setNotifOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "/" && document.activeElement !== searchInputRef.current) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   const helpRef = useRef<HTMLDivElement>(null!)
   const notifRef = useRef<HTMLDivElement>(null!)
@@ -64,11 +76,7 @@ export default function AdminDashboardLayout({
     router.push("/admin-shopby/login")
   }
 
-  const notifications = [
-    { id: 1, text: "New click: Mechanical Keyboard Pro", time: "2m ago" },
-    { id: 2, text: "Commission payout processed", time: "1h ago" },
-    { id: 3, text: "Product link expiring soon", time: "1d ago" },
-  ]
+  const notifications: { id: number; text: string; time: string }[] = []
 
   return (
     <div className="min-h-screen flex bg-[#f9f9f6] text-[#1a1c1b] font-sans antialiased">
@@ -152,11 +160,18 @@ export default function AdminDashboardLayout({
             <div className="relative w-full">
               <Search className="size-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#5c403a]" aria-hidden="true" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search orders, products..."
-                aria-label="Search orders, products"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    router.push(`/admin-shopby/products?q=${encodeURIComponent(searchQuery.trim())}`)
+                    setSearchQuery("")
+                  }
+                }}
+                placeholder="Search products...  Press / to focus"
+                aria-label="Search products"
                 className="w-full bg-transparent border-0 border-b border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 pl-10 pr-4 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 transition-colors"
               />
             </div>
@@ -178,16 +193,19 @@ export default function AdminDashboardLayout({
                     <p className="font-mono text-[11px] tracking-[0.05em] font-bold text-[#1a1c1b] uppercase">Notifications</p>
                   </div>
                   <div className="max-h-60 overflow-y-auto">
-                    {notifications.map((n) => (
-                      <div key={n.id} className="p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors cursor-pointer">
-                        <p className="font-sans text-[13px] text-[#1a1c1b]">{n.text}</p>
-                        <p className="font-mono text-[10px] text-[#5c403a] mt-0.5">{n.time}</p>
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div key={n.id} className="p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors cursor-pointer">
+                          <p className="font-sans text-[13px] text-[#1a1c1b]">{n.text}</p>
+                          <p className="font-mono text-[10px] text-[#5c403a] mt-0.5">{n.time}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center">
+                        <p className="font-mono text-[11px] text-[#5c403a]">No notifications</p>
                       </div>
-                    ))}
+                    )}
                   </div>
-                  <button className="w-full p-2 font-mono text-[11px] tracking-[0.05em] text-[#b51c00] hover:bg-[#f4f4f1] transition-colors uppercase focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
-                    Mark All as Read
-                  </button>
                 </div>
               )}
             </div>
@@ -309,15 +327,24 @@ export default function AdminDashboardLayout({
               </div>
               <div className="space-y-4">
                 <a href="/admin-shopby/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
-                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📖 Help Center</h3>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] flex items-center gap-2">
+                    <LifeBuoy className="size-5 text-[#b51c00]" aria-hidden="true" />
+                    Help Center
+                  </h3>
                   <p className="font-sans text-[13px] text-[#5c403a] mt-1">Browse guides and FAQs for managing your affiliate links.</p>
                 </a>
                 <a href="/admin-shopby/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
-                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📊 Analytics Guide</h3>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] flex items-center gap-2">
+                    <BarChart3 className="size-5 text-[#b51c00]" aria-hidden="true" />
+                    Analytics Guide
+                  </h3>
                   <p className="font-sans text-[13px] text-[#5c403a] mt-1">Understand your metrics and optimize conversions.</p>
                 </a>
                 <a href="https://shopee.co.id" target="_blank" rel="noopener noreferrer" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
-                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">🔗 Shopee Affiliate</h3>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] flex items-center gap-2">
+                    <ExternalLink className="size-5 text-[#b51c00]" aria-hidden="true" />
+                    Shopee Affiliate
+                  </h3>
                   <p className="font-sans text-[13px] text-[#5c403a] mt-1">Visit Shopee Affiliate Program for more resources.</p>
                 </a>
               </div>

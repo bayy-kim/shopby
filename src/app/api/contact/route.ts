@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("[Contact] New message:", { name, email, message })
+    console.info("[Contact] New message from:", email)
 
     return NextResponse.json({
       success: true,

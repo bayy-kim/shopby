@@ -92,6 +92,7 @@ export async function fetchStats(): Promise<{
   totalSales: number
   totalProducts: number
   activeProducts: number
+  soldOut: number
   totalClicks: number
   avgCommission: number
   recentClicks: { productName: string; clickedAt: string }[]

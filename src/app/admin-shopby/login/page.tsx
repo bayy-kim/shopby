@@ -116,7 +116,7 @@ export default function AdminLogin() {
           </div>
 
           <div className="p-4 bg-[#f4f4f1] border-t border-[#906f69] flex flex-col items-center gap-3">
-            <button type="button" className="font-sans text-[12px] leading-[16px] font-medium text-[#1a1c1b] hover:text-[#b51c00] transition-colors border-b border-transparent hover:border-[#b51c00] focus-visible:ring-2 focus-visible:ring-[#b51c00]" onClick={() => {}}>
+            <button type="button" className="font-sans text-[12px] leading-[16px] font-medium text-[#1a1c1b] hover:text-[#b51c00] transition-colors border-b border-transparent hover:border-[#b51c00] focus-visible:ring-2 focus-visible:ring-[#b51c00]" onClick={() => alert("Please contact your administrator to reset your passcode.")}>
               Forgot Passcode?
             </button>
             <div className="w-full border-t border-dashed border-[#e5beb6] my-1" />

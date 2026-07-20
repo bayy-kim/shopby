@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
 import CategoryFilter from "@/components/sections/CategoryFilter"
@@ -31,11 +31,11 @@ export default function Home() {
   const { data: categories } = useCategories()
 
   const total = data?.total ?? 0
-  const globalTotalRef = useRef(0)
-  if (!numberRange && total > 0) {
-    globalTotalRef.current = total
+  const [globalTotal, setGlobalTotal] = useState(0)
+  if (!numberRange && total > 0 && globalTotal !== total) {
+    setGlobalTotal(total)
   }
-  const displayTotal = numberRange ? globalTotalRef.current || total : total
+  const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
   const visibleProducts = allProducts.slice(0, visibleCount)
   const featuredProducts = visibleProducts.filter(

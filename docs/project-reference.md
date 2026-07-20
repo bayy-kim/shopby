@@ -404,3 +404,37 @@ Run `pnpm prisma:seed` to populate the database.
 - **Product numbering (computed):** Helper `getProductNumberMap()` query semua produk `{ id, createdAt }` order ASC, return `Map<productId, number>`. Dipanggil paralel dengan query utama di API. Nomor tidak disimpan di database — renumbering otomatis saat delete
 - **Sold Out:** Field `isSoldOut` di Prisma, toggle di admin panel (toggle langsung di tabel list, checkbox di form new/edit). Di landing page: overlay "Stok Habis" + disabled button, `aria-disabled="true"`
 - **Number range filter:** Chunk 100 produk per range (`NUMBER_RANGE_CHUNK_SIZE = 100`). Filter di CategoryFilter (sidebar & mobile chips), query params `numberFrom`/`numberTo` ke API
+
+---
+
+## Audit & Fixes (July 2026)
+
+### Emoji Audit
+- **0 emoji found** in all source files. Only standard typographic symbols (em dash `—`, division sign `÷`, bullet `•`, ellipsis `…`, left arrow `←`).
+
+### Non-Functional Elements Fixed
+
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| 1 | `login/page.tsx:119` | "Forgot Passcode?" button with empty `onClick={() => {}}` | Added `alert()` directing to contact admin |
+| 2 | `layout.tsx:209` | "Mark All as Read" button with no handler (notifications always empty) | Removed button |
+| 3 | `settings/page.tsx:212` | "Change Password" button with no `onClick` | Added toggle to show password change form with validation |
+| 4 | `settings/page.tsx:149` | "Update Logo" div with no upload functionality | Added hidden file input + live preview via FileReader |
+| 5 | `settings/page.tsx:96-108` | 4 tabs but only "Storefront" rendered content | Added conditional rendering: General/Storefront, Payouts, Account tabs show correct sections |
+| 6 | `products/page.tsx:161` | "Sort: Newest" button with no handler | Added toggle between "Newest" and "Price" sort, wired to data fetching |
+| 7 | `dashboard/page.tsx:94` | "All Time" button with no handler | Added toggle between "All Time" and "This Week" |
+| 8 | `analytics/page.tsx:118` | "All Time" select with single option and no onChange | Added 4 time period options + onChange handler |
+| 9 | `contact/route.ts:21` | `console.log` in production API route | Changed to `console.info` with sanitized data |
+| 10 | `components/ui/card.tsx` | Orphaned component (never imported) | Deleted |
+| 11 | `components/ui/button.tsx` | Orphaned component (never imported) | Deleted |
+| 12 | `components/ui/badge.tsx` | Orphaned component (never imported) | Deleted |
+
+### Search Bar Functional
+- Layout top navbar search navigates to `/admin-shopby/products?q=<query>` on Enter
+- Press `/` anywhere to focus search bar
+- Products page reads `q` URL param and syncs to search state during render (no useEffect)
+
+### React 19 Lint Compliance
+- All `setState` calls moved out of `useEffect` bodies (setState during render pattern)
+- Removed `globalTotalRef` write/read during render → replaced with `useState` + conditional setState during render
+- Zero lint errors, zero warnings

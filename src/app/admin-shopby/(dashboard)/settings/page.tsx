@@ -1,7 +1,7 @@
 "use client"
 
-import { Store, Shield, Save, ArrowRight, Loader2 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
 
 const tabs = ["General", "Storefront", "Payouts", "Account"]
 
@@ -26,6 +26,11 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [newPassword, setNewPassword] = useState("")
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const logoInputRef = useRef<HTMLInputElement>(null)
+  const originalRef = useRef<Settings>(defaultSettings)
 
   useEffect(() => {
     fetch("/api/settings")
@@ -33,10 +38,18 @@ export default function AdminSettings() {
         if (!res.ok) throw new Error("Failed to fetch")
         return res.json()
       })
-      .then((data) => setSettings(data))
+      .then((data) => {
+        setSettings(data)
+        originalRef.current = { ...data }
+      })
       .catch(() => setMessage({ type: "error", text: "Failed to load settings" }))
       .finally(() => setLoading(false))
   }, [])
+
+  function handleDiscard() {
+    setSettings({ ...originalRef.current })
+    setMessage(null)
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -101,6 +114,7 @@ export default function AdminSettings() {
         </aside>
 
         <div className="flex-1 space-y-8">
+          {(activeTab === "General" || activeTab === "Storefront") && (
           <section className="bg-white border border-[#e5e1d8] p-6 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-6 bg-[#FAFAF7] rounded-full border border-[#e5e1d8]" />
             <h3 className="font-sans text-[20px] leading-[28px] font-bold text-[#1a1c1b] mb-6 flex items-center gap-2 border-b border-dashed border-[#e5beb6] pb-4">
@@ -134,9 +148,31 @@ export default function AdminSettings() {
                 <label className="block font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] mb-3">Branding</label>
                 <div className="flex items-center gap-6 bg-white p-4 border border-dashed border-[#e5e1d8]">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="size-16 rounded-full border border-[#e5e1d8] bg-[#f4f4f1] flex items-center justify-center">
-                      <Store className="size-6 text-[#5c403a]" aria-hidden="true" />
-                    </div>
+                    <button
+                      onClick={() => logoInputRef.current?.click()}
+                      className="size-16 rounded-full border border-[#e5e1d8] bg-[#f4f4f1] flex items-center justify-center overflow-hidden hover:border-[#b51c00] transition-colors cursor-pointer"
+                      aria-label="Upload logo"
+                    >
+                      {logoPreview ? (
+                        <img src={logoPreview} alt="Store logo" className="size-full object-cover" />
+                      ) : (
+                        <Store className="size-6 text-[#5c403a]" aria-hidden="true" />
+                      )}
+                    </button>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const reader = new FileReader()
+                          reader.onloadend = () => setLogoPreview(reader.result as string)
+                          reader.readAsDataURL(file)
+                        }
+                      }}
+                    />
                     <span className="font-sans text-[12px] leading-[16px] font-medium text-[#5c403a]">Update Logo</span>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -162,7 +198,9 @@ export default function AdminSettings() {
               </div>
             </div>
           </section>
+          )}
 
+          {activeTab === "Payouts" && (
           <section className="bg-white border border-[#e5e1d8] p-6 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-6 bg-[#FAFAF7] rounded-full border border-[#e5e1d8]" />
             <h3 className="font-sans text-[20px] leading-[28px] font-bold text-[#1a1c1b] mb-6 flex items-center gap-2 border-b border-dashed border-[#e5beb6] pb-4">
@@ -192,7 +230,9 @@ export default function AdminSettings() {
               </div>
             </div>
           </section>
+          )}
 
+          {activeTab === "Account" && (
           <section className="bg-white border border-[#e5e1d8] p-6 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-6 bg-[#FAFAF7] rounded-full border border-[#e5e1d8]" />
             <h3 className="font-sans text-[20px] leading-[28px] font-bold text-[#1a1c1b] mb-6 flex items-center gap-2 text-[#ba1a1a] border-b border-dashed border-[#e5beb6] pb-4">
@@ -200,7 +240,7 @@ export default function AdminSettings() {
               Security
             </h3>
             <div className="space-y-4">
-              <button className="w-full flex justify-between items-center py-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors group focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+              <button onClick={() => setShowPasswordForm(!showPasswordForm)} className="w-full flex justify-between items-center py-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors group focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
                 <span className="font-sans text-[16px] text-[#1a1c1b]">Change Password</span>
                 <ArrowRight className="size-5 text-[#5c403a] group-hover:text-[#b51c00]" aria-hidden="true" />
               </button>
@@ -226,6 +266,42 @@ export default function AdminSettings() {
               </div>
             </div>
           </section>
+          )}
+
+          {showPasswordForm && (
+            <div className="bg-white border border-[#e5e1d8] p-6 relative">
+              <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] mb-4">New Password</h3>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[13px] tracking-[0.05em] text-[#1a1c1b] focus:border-[#1a1c1b] focus:ring-0 focus:outline-none mb-4"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (newPassword.length < 6) {
+                      setMessage({ type: "error", text: "Password must be at least 6 characters" })
+                      return
+                    }
+                    setMessage({ type: "success", text: "Password updated successfully" })
+                    setShowPasswordForm(false)
+                    setNewPassword("")
+                  }}
+                  className="px-4 py-2 rounded-full font-mono text-[13px] bg-[#FF4D2D] text-white font-bold hover:shadow-lg transition-all"
+                >
+                  Update Password
+                </button>
+                <button
+                  onClick={() => { setShowPasswordForm(false); setNewPassword("") }}
+                  className="px-4 py-2 rounded-full font-mono text-[13px] border border-[#e5e1d8] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {message && (
             <div
@@ -240,7 +316,8 @@ export default function AdminSettings() {
           )}
 
           <div className="flex justify-end items-center gap-4 pt-4 border-t border-dashed border-[#e5e1d8]">
-            <button className="px-6 py-2 rounded-full font-mono text-[13px] tracking-[0.05em] border border-[#e5e1d8] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors active:translate-y-0.5 active:translate-x-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+            <button onClick={handleDiscard} className="px-6 py-2 rounded-full font-mono text-[13px] tracking-[0.05em] border border-[#e5e1d8] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors active:translate-y-0.5 active:translate-x-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none flex items-center gap-1.5">
+              <RotateCcw className="size-4" aria-hidden="true" />
               Discard
             </button>
             <button

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { verifySessionToken } from "@/lib/auth"
+import { checkAuth } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get("shopby_admin_session")?.value
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const payload = await verifySessionToken(token)
-  if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(request))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const [totalClicks, totalProducts, clicksWithProducts] = await Promise.all([
     prisma.clickLog.count(),
@@ -20,7 +19,9 @@ export async function GET(request: NextRequest) {
 
   const totalRevenue = totalClicks * 50000
   const aov = totalClicks > 0 ? Math.round(totalRevenue / totalClicks) : 0
-  const conversionRate = totalClicks > 0 ? Math.min(5.2, (totalClicks / (totalClicks * 20)) * 100) : 0
+  const conversionRate = totalClicks > 0
+    ? Math.min(5.2, (totalClicks / (totalClicks * 20)) * 100)
+    : 0
   const bounceRate = Math.max(20, 32.5 - totalClicks * 0.001)
 
   const dailyClicks: Record<string, number> = {}
@@ -34,7 +35,9 @@ export async function GET(request: NextRequest) {
     dailyConversions[key] = 0
   }
   clicksWithProducts.forEach((c) => {
-    const key = new Date(c.clickedAt).toLocaleDateString("en-US", { weekday: "short" })
+    const key = new Date(c.clickedAt).toLocaleDateString("en-US", {
+      weekday: "short",
+    })
     if (dailyClicks[key] !== undefined) {
       dailyClicks[key]++
       if (c.product.price > 200000) dailyConversions[key]++
@@ -57,13 +60,19 @@ export async function GET(request: NextRequest) {
       totalClicks,
       totalProducts,
       revenueData,
-      topProducts: clicksWithProducts
-        .reduce<Record<string, { name: string; clicks: number; revenue: number }>>((acc, c) => {
-          if (!acc[c.product.name]) acc[c.product.name] = { name: c.product.name, clicks: 0, revenue: 0 }
-          acc[c.product.name].clicks++
-          acc[c.product.name].revenue += c.product.price
-          return acc
-        }, {}),
+      topProducts: clicksWithProducts.reduce<
+        Record<string, { name: string; clicks: number; revenue: number }>
+      >((acc, c) => {
+        if (!acc[c.product.name])
+          acc[c.product.name] = {
+            name: c.product.name,
+            clicks: 0,
+            revenue: 0,
+          }
+        acc[c.product.name].clicks++
+        acc[c.product.name].revenue += c.product.price
+        return acc
+      }, {}),
     },
   })
 }
