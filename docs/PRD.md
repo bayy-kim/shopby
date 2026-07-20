@@ -29,26 +29,33 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 | Klik tracking | Setiap klik "Beli di Shopee" dicatat (produk, waktu) untuk analitik sederhana |
 | Progressif load | Tombol "Muat Lebih Banyak" untuk reveal produk bertahap |
 | Footer | Social links + disclaimer affiliate |
+| Halaman statis | About, Affiliate, Privacy Policy, Terms of Service, Contact (form + API) |
+| Loading & error states | Global loading.tsx, custom 404 not-found.tsx |
+| SEO | Auto-generated sitemap.xml + robots.txt |
 
 ## 5. Fitur Implementasi (Admin Panel)
 
 | Fitur | Deskripsi |
 |---|---|
 | `/admin-shopby/login` | Login page dengan receipt card, brutalist styling, form auth |
-| `/admin-shopby` | Dashboard — statistik penjualan, grafik performa, aktivitas terbaru |
-| `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination |
-| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, status |
+| `/admin-shopby` | Dashboard — statistik real dari API, grafik performa, aktivitas terbaru |
+| `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination, CRUD via API |
+| `/admin-shopby/products/new` | Form tambah produk baru — image upload, kategori, link afiliasi, harga |
+| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, featured status |
 | `/admin-shopby/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
-| `/admin-shopby/settings` | Konfigurasi store profile, payout info, keamanan (2FA, password) |
+| `/admin-shopby/settings` | Konfigurasi store profile, payout info, keamanan (password) |
+| `/admin-shopby/help` | Pusat bantuan panduan & resources |
 | Sidebar navigasi | Desktop fixed sidebar, mobile collapsible overlay |
 | Brutalist/receipt theme | Konsisten dengan landing page — ink, vivid-orange, tag-yellow, dashed dividers |
+| JWT session auth | HttpOnly cookie shopby_admin_session via jose, middleware guard edge runtime |
+| Error boundary | error.tsx khusus admin dengan fallback UI + tombol retry |
+| Loading state | loading.tsx global untuk semua admin pages |
 
 ## 6. Fitur Fase Berikutnya (Nice to Have)
 
 - Search produk di landing page
 - Statistik klik per produk (dashboard mini real-time)
 - Halaman detail produk (`/produk/[slug]`)
-- Autentikasi admin sesungguhnya (JWT/session)
 
 ## 7. User Flow
 
@@ -81,64 +88,95 @@ shopby/
 │   ├── admin-settings.md
 │   ├── admin-settings-mobile.md
 │   └── admin-edit-product.md
+├── docs/                       # Dokumentasi (PRD, SAR, GUIDE, README, project-reference)
 ├── prisma/
-│   ├── schema.prisma           # Data model (Product, Category, ClickLog)
-│   ├── seed.ts                 # Data awal untuk testing
+│   ├── schema.prisma           # Data model (Product, Category, ClickLog, AppSetting)
+│   ├── seed.ts                 # Seed 4 kategori (0 produk — admin tambah via panel)
 │   ├── dev.db                  # SQLite database (local dev)
-│   └── migrations/             # Riwayat migrasi database
+│   └── migrations/
 │       └── 20260719173140_init/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx          # Root layout, font, metadata
-│   │   ├── page.tsx            # Landing page utama
+│   │   ├── page.tsx            # Landing page (Hero + ProductGrid + CategoryFilter)
 │   │   ├── globals.css         # Tailwind v4 + custom CSS (@layer components)
 │   │   ├── providers.tsx       # TanStack Query provider
-│   │   ├── admin/
+│   │   ├── loading.tsx         # Global loading state
+│   │   ├── not-found.tsx       # Custom 404 page
+│   │   ├── robots.ts           # /robots.txt — disallow /admin-shopby/, /api/
+│   │   ├── sitemap.ts          # /sitemap.xml — auto-generated
+│   │   ├── admin-shopby/       # Admin panel (route diubah dari /admin untuk keamanan)
 │   │   │   ├── login/
-│   │   │   │   └── page.tsx    # Login page (standalone receipt card)
+│   │   │   │   ├── layout.tsx  # Login page metadata
+│   │   │   │   └── page.tsx    # Login form — POST /api/admin-shopby/login
+│   │   │   ├── help/page.tsx   # Pusat bantuan
+│   │   │   ├── loading.tsx     # Admin loading state
+│   │   │   ├── error.tsx       # Admin error boundary
 │   │   │   └── (dashboard)/
-│   │   │       ├── layout.tsx  # Admin sidebar + topnav layout
-│   │   │       ├── page.tsx    # Dashboard (stats, chart, activity)
+│   │   │       ├── layout.tsx  # Sidebar + topnav admin
+│   │   │       ├── page.tsx    # Dashboard (stats real, revenue chart)
 │   │   │       ├── products/
 │   │   │       │   ├── page.tsx
+│   │   │       │   ├── new/page.tsx
 │   │   │       │   └── [id]/page.tsx
 │   │   │       ├── analytics/page.tsx
 │   │   │       └── settings/page.tsx
+│   │   ├── about/page.tsx
+│   │   ├── affiliate/page.tsx
+│   │   ├── privacy/page.tsx
+│   │   ├── terms/page.tsx
+│   │   ├── contact/
+│   │   │   ├── layout.tsx      # Contact page metadata
+│   │   │   └── page.tsx        # Contact form — POST /api/contact
 │   │   └── api/
-│   │       ├── products/route.ts # GET: list produk (filter + sort)
-│   │       ├── categories/route.ts # GET: semua kategori
-│   │       └── click/route.ts    # POST: catat klik
+│   │       ├── admin-shopby/
+│   │       │   ├── login/route.ts   # POST: auth → set cookie HttpOnly JWT
+│   │       │   └── logout/route.ts  # POST: clear cookie
+│   │       ├── products/route.ts    # GET (public) + POST (auth)
+│   │       ├── products/[id]/route.ts # GET + PUT + DELETE (auth)
+│   │       ├── categories/route.ts  # GET: semua kategori
+│   │       ├── click/route.ts       # POST: catat klik → redirect Shopee
+│   │       ├── stats/route.ts       # GET: dashboard stats (auth)
+│   │       ├── analytics/route.ts   # GET: analytics data (auth)
+│   │       ├── settings/route.ts    # GET + PUT: AppSetting via Prisma (auth)
+│   │       └── contact/route.ts     # POST: kirim pesan kontak
 │   ├── components/
-│   │   ├── ui/                 # shadcn/ui (button, card, badge) + custom
+│   │   ├── ui/
 │   │   │   ├── ProductCardSkeleton.tsx
 │   │   │   ├── EmptyState.tsx
 │   │   │   ├── button.tsx
 │   │   │   ├── card.tsx
 │   │   │   └── badge.tsx
-│   │   ├── layout/             # Navbar, Footer
+│   │   ├── layout/
 │   │   │   ├── Navbar.tsx
 │   │   │   └── Footer.tsx
-│   │   └── sections/           # Hero, ProductGrid, ProductCard, CategoryFilter
+│   │   └── sections/
 │   │       ├── Hero.tsx
 │   │       ├── ProductGrid.tsx
 │   │       ├── ProductCard.tsx
 │   │       └── CategoryFilter.tsx
-│   ├── hooks/                  # TanStack Query hooks
+│   ├── hooks/
 │   │   ├── useProducts.ts
 │   │   └── useCategories.ts
 │   ├── lib/
+│   │   ├── auth.ts             # JWT session: createSessionToken, verifySessionToken, checkAuth
+│   │   ├── auth-password.ts    # scrypt hash/verify untuk admin password
 │   │   ├── prisma.ts           # Prisma client singleton
 │   │   ├── utils.ts            # cn(), formatPrice()
-│   │   └── services/           # API service functions
-│   │       ├── products.ts
-│   │       ├── categories.ts
-│   │       └── click.ts
+│   │   └── services/
+│   │       ├── products.ts     # fetchProducts, createProduct, updateProduct, deleteProduct, fetchProductById
+│   │       ├── categories.ts   # fetchCategories
+│   │       └── click.ts        # createClick
 │   └── types/
 │       └── index.ts            # Product, Category, ClickLog
+├── middleware.ts                # Edge auth guard: /admin → redirect /, /admin-shopby/* + API stats/analytics/settings
+├── next.config.ts
+├── postcss.config.mjs
+├── eslint.config.mjs
+├── components.json              # shadcn/ui config
 ├── .env.example
-├── PRD.md
-├── SAR.md
-└── README.md
+├── tsconfig.json
+└── package.json
 ```
 
 ## 10. Metrics of Success

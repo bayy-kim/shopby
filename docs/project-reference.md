@@ -7,93 +7,86 @@ A modern, high-performance e-commerce storefront built with **Next.js 16 (App Ro
 ## Architecture Overview
 
 ```
-middleware.ts             # Edge middleware — auth guard for /admin-shopby/:path*, /api/stats/:path*, /api/analytics/:path*, /api/settings/:path*
+middleware.ts             # Edge middleware — /admin → redirect /, /admin-shopby/:path*, /api/stats/*, /api/analytics/*, /api/settings/*
 src/
 ├── app/                  # Next.js App Router pages & API routes
 │   ├── layout.tsx        # Root layout (providers, fonts, globals, SEO)
-│   ├── page.tsx          # Homepage
-│   ├── sitemap.ts        # Auto-generated /sitemap.xml
-│   ├── affiliate/        # Static pages
-│   │   └── page.tsx      #   /affiliate  - Affiliate program info
-│   ├── about/
-│   │   └── page.tsx      #   /about      - About Shopby
-│   ├── privacy/
-│   │   └── page.tsx      #   /privacy    - Privacy policy
-│   ├── terms/
-│   │   └── page.tsx      #   /terms      - Terms & conditions
+│   ├── page.tsx          # Homepage (Hero + ProductGrid + CategoryFilter)
+│   ├── globals.css       # Tailwind v4 + custom CSS
+│   ├── providers.tsx     # TanStack Query provider
+│   ├── loading.tsx       # Global loading state
+│   ├── not-found.tsx     # Custom 404
+│   ├── robots.ts         # /robots.txt — disallow /admin-shopby/, /api/
+│   ├── sitemap.ts        # /sitemap.xml
+│   ├── admin-shopby/     # Admin panel (renamed from /admin for security)
+│   │   ├── login/
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx  # /admin-shopby/login
+│   │   ├── help/
+│   │   │   └── page.tsx  # /admin-shopby/help
+│   │   ├── loading.tsx   # Admin loading state
+│   │   ├── error.tsx     # Admin error boundary
+│   │   └── (dashboard)/
+│   │       ├── layout.tsx# Sidebar + topnav admin
+│   │       ├── page.tsx  # /admin-shopby — Dashboard (stats real, chart)
+│   │       ├── products/
+│   │       │   ├── page.tsx
+│   │       │   ├── new/page.tsx
+│   │       │   └── [id]/page.tsx
+│   │       ├── analytics/page.tsx
+│   │       └── settings/page.tsx
+│   ├── about/page.tsx
+│   ├── affiliate/page.tsx
+│   ├── privacy/page.tsx
+│   ├── terms/page.tsx
 │   ├── contact/
-│   │   └── page.tsx      #   /contact    - Contact form
-│   ├── products/         # (tidak ada public product pages separately)
-│   ├── categories/       # (tidak ada public category pages separately)
-│   ├── admin/            # Admin pages (protected)
-│   │   ├── error.tsx     #   Error boundary
-│   │   ├── loading.tsx   #   Loading fallback
-│   │   └── help/
-│   │       └── page.tsx  #   /admin-shopby/help  - Admin Help Center
-│   └── api/              # API route handlers
-│       ├── admin/
-│       │   ├── login/
-│       │   │   └── route.ts   #   POST /api/admin-shopby/login
-│       │   └── logout/
-│       │       └── route.ts   #   POST /api/admin-shopby/logout
+│   │   ├── layout.tsx
+│   │   └── page.tsx      # /contact — Contact form
+│   └── api/
+│       ├── admin-shopby/
+│       │   ├── login/route.ts    # POST /api/admin-shopby/login
+│       │   └── logout/route.ts   # POST /api/admin-shopby/logout
 │       ├── products/
-│       │   ├── route.ts  #   GET /api/products, POST /api/products (auth)
-│       │   └── [id]/
-│       │       └── route.ts  #   GET|PUT|DELETE /api/products/[id] (auth)
-│       ├── categories/
-│       │   └── route.ts  #   GET /api/categories
-│       ├── stats/
-│       │   └── route.ts  #   GET /api/stats (auth, from DB)
-│       ├── analytics/
-│       │   └── route.ts  #   GET /api/analytics (auth, from DB)
-│   ├── settings/
-│   │   └── route.ts  #   GET|PUT /api/settings (auth, via Prisma AppSetting)
-│   ├── contact/
-│   │   └── route.ts  #   POST /api/contact
-│       └── click/
-│           └── route.ts  #   POST /api/click  (analytics tracking)
+│       │   ├── route.ts          # GET /api/products, POST /api/products (auth)
+│       │   └── [id]/route.ts     # GET|PUT|DELETE /api/products/[id] (auth)
+│       ├── categories/route.ts   # GET /api/categories
+│       ├── click/route.ts        # POST /api/click
+│       ├── stats/route.ts        # GET /api/stats (auth)
+│       ├── analytics/route.ts    # GET /api/analytics (auth)
+│       ├── settings/route.ts     # GET|PUT /api/settings (auth, via Prisma AppSetting)
+│       └── contact/route.ts      # POST /api/contact
 ├── components/           # Shared React components
-│   ├── ui/               # Primitive UI components (shadcn-style)
+│   ├── ui/               # UI primitives + custom
 │   │   ├── button.tsx
 │   │   ├── card.tsx
 │   │   ├── badge.tsx
-│   │   ├── skeleton.tsx
-│   │   └── input.tsx
-│   ├── layout/           # Layout components
-│   │   ├── navbar.tsx
-│   │   └── footer.tsx
-│   ├── product/          # Product-specific components
-│   │   ├── product-card.tsx
-│   │   ├── product-grid.tsx
-│   │   └── product-detail.tsx
-│   ├── category/         # Category-specific components
-│   │   ├── category-card.tsx
-│   │   └── category-grid.tsx
-│   └── shared/           # Shared utility components
-│       ├── container.tsx
-│       └── empty-state.tsx
-├── hooks/                # Custom React hooks
-│   ├── useProducts.ts    #   Product data fetching hook
-│   └── useCategories.ts  #   Category data fetching hook
-├── lib/                  # Core libraries & services
-│   ├── auth.ts           #   JWT session token (jose) — edge-compatible
-│   ├── auth-password.ts  #   Password hash/verify (Node crypto)
-│   ├── prisma.ts         #   Prisma client singleton
-│   ├── utils.ts          #   Shared utilities (cn, formatter)
-│   └── services/         #   Data access layer / business logic
-│       ├── products.ts   #   fetchProducts, fetchProductById, createProduct, updateProduct, deleteProduct
+│   │   ├── ProductCardSkeleton.tsx
+│   │   └── EmptyState.tsx
+│   ├── layout/
+│   │   ├── Navbar.tsx
+│   │   └── Footer.tsx
+│   └── sections/
+│       ├── Hero.tsx
+│       ├── ProductGrid.tsx
+│       ├── ProductCard.tsx
+│       └── CategoryFilter.tsx
+├── hooks/                # TanStack Query hooks
+│   ├── useProducts.ts
+│   └── useCategories.ts
+├── lib/
+│   ├── auth.ts           # JWT session (jose) — edge-compatible
+│   ├── auth-password.ts  # scrypt hash/verify
+│   ├── prisma.ts         # Prisma client singleton
+│   ├── utils.ts          # cn(), formatPrice()
+│   └── services/
+│       ├── products.ts   # fetchProducts, fetchProductById, createProduct, updateProduct, deleteProduct
 │       ├── categories.ts
-│       ├── click.ts
-│       ├── stats.ts      #   fetchStats, fetchAnalytics
-│       └── settings.ts   #   getSettings, updateSettings
-├── types/                # TypeScript type definitions
-│   └── index.ts
-└── styles/               # Global styles
-    └── globals.css       #   Tailwind directives, CSS custom props
+│       └── click.ts
+└── types/
+    └── index.ts          # Product, Category, ClickLog types
 prisma/
-├── schema.prisma         # Database schema
-└── seed.ts               # Seed script (sample data)
-public/                   # Static assets
+├── schema.prisma         # Product, Category, ClickLog, AppSetting
+└── seed.ts               # 4 categories (0 products)
 ```
 
 ---
@@ -161,19 +154,19 @@ public/                   # Static assets
 
 | Method | Route                 | Auth  | Description                             |
 | ------ | --------------------- | ----- | --------------------------------------- |
-| POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set session cookie  |
+| POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set HttpOnly JWT cookie   |
 | POST   | `/api/admin-shopby/logout`   | —     | Clear session cookie                    |
-| GET    | `/api/products`       | —     | List products (`?search=&category=&featured=true`) |
+| GET    | `/api/products`       | —     | List products (`?search=&category=&sort=`) |
 | POST   | `/api/products`       | Yes   | Create product                          |
 | GET    | `/api/products/[id]`  | —     | Get single product by ID                 |
 | PUT    | `/api/products/[id]`  | Yes   | Update product                          |
 | DELETE | `/api/products/[id]`  | Yes   | Delete product                          |
-| GET    | `/api/categories`     | —     | List categories (`?featured=true`)      |
-| GET    | `/api/stats`          | Yes   | Dashboard stats (from DB)               |
-| GET    | `/api/analytics`      | Yes   | Analytics data (from DB)                |
-| GET    | `/api/settings`       | Yes   | Read settings (from JSON file)          |
-| PUT    | `/api/settings`       | Yes   | Update settings (to JSON file)          |
-| POST   | `/api/click`          | —     | Track product click (analytics)         |
+| GET    | `/api/categories`     | —     | List categories (no query params)       |
+| GET    | `/api/stats`          | Yes   | Dashboard stats — totalSales, totalProducts, totalClicks, recentClicks, topProducts |
+| GET    | `/api/analytics`      | Yes   | Analytics data — revenue, clicks, traffic sources, geography |
+| GET    | `/api/settings`       | Yes   | Read AppSetting via Prisma              |
+| PUT    | `/api/settings`       | Yes   | Update AppSetting via Prisma            |
+| POST   | `/api/click`          | —     | Track product click → returns `{ shopeeUrl }` |
 | POST   | `/api/contact`        | —     | Submit contact form                     |
 
 ---
@@ -224,22 +217,21 @@ Admin section memiliki error boundary di `src/app/admin-shopby/error.tsx` yang m
 ## Component Library (src/components/)
 
 ### UI Primitives (`src/components/ui/`)
-- **button.tsx** — Variants: `default`, `secondary`, `outline`, `ghost`, `danger`; sizes: `sm`, `md`, `lg`; supports `asChild` via `Slot`
+- **button.tsx** — Variants: `default`, `outline`, `secondary`, `ghost`, `destructive`, `link`; sizes: `sm`, `md`, `lg`; supports `asChild` via `Slot`
 - **card.tsx** — `Card`, `CardHeader`, `CardContent`, `CardFooter` composition pattern
 - **badge.tsx** — Variants: `default`, `secondary`, `outline`, `success`, `warning`, `danger`
-- **skeleton.tsx** — Animated loading placeholder with shimmer
-- **input.tsx** — Styled text input with focus ring
+- **ProductCardSkeleton.tsx** — Animated loading placeholder for product cards (pulse animation)
+- **EmptyState.tsx** — Descriptive fallback UI for empty product/grid states
 
 ### Layout (`src/components/layout/`)
-- **navbar.tsx** — Top navigation bar with logo (Next/Link), nav links (Products, Categories), mobile-responsive
-- **footer.tsx** — Simple footer with copyright, links, and branding
+- **Navbar.tsx** — Fixed top nav with logo, nav links (Deals, Kategori, Affiliate), "Masuk" button → `/admin-shopby/login`
+- **Footer.tsx** — Footer with copyright 2026, brand links (About, Affiliate, Privacy, Terms, Contact)
 
-### Feature Components
-- **product-card.tsx** — Card with image, title, price, compare-at price, category badge, "View Details" link
-- **product-grid.tsx** — Responsive CSS Grid layout for product cards (1–4 columns)
-- **product-detail.tsx** — Full product page layout: image gallery, pricing, description, specs
-- **category-card.tsx** — Card with image overlay, title, description, product count badge
-- **category-grid.tsx** — Grid layout for category cards
+### Feature Components (`src/components/sections/`)
+- **Hero.tsx** — Landing page hero: headline + subtitle + CTA "Lihat Semua Deal" + floating product card
+- **ProductCard.tsx** — Card with image, name, price badge, "Beli di Shopee" button → POST `/api/click`
+- **ProductGrid.tsx** — Responsive grid (1–2 mobile, 3 tablet, 4 desktop), progressive load with "Muat Lebih Banyak" button
+- **CategoryFilter.tsx** — Horizontal scroll chips on mobile, sidebar on desktop, active state highlight
 
 ---
 
@@ -273,23 +265,26 @@ Components follow shadcn/ui patterns:
 
 ## Styling Design System
 
-### Color Palette
+### Color Palette (Brutalist)
 | Token              | Value         | Usage                    |
 | ------------------ | ------------- | ------------------------ |
-| `--color-primary`  | `#0891b2` (cyan-600) | Primary buttons, links, accents |
-| `--color-secondary`| `#0d9488` (teal-600) | Secondary elements      |
-| `--color-accent`   | `#06b6d4` (cyan-500) | Hover states, highlights |
-| Background         | `#f8fafc` (slate-50)  | Page background          |
-| Foreground         | `#0f172a` (slate-900) | Primary text             |
+| `--color-primary`  | `#1a1c1b` (ink) | Primary text, borders   |
+| `--color-bg`       | `#f9f9f6`     | Page background          |
+| `--color-ink`      | `#1a1c1b`     | Primary text color       |
+| `--border-color`   | `#e5e1d8`     | Borders, dividers        |
+| Admin red accent   | `#b51c00`     | Buttons, highlights      |
+| Admin yellow       | `#FFC93C`     | Price badges, active nav |
+| Admin orange       | `#FF4D2D`     | Toggle active, CTAs      |
 
 ### Typography
-- **Font Stack:** `Inter` (Google Fonts, variable weight) via next/font
-- **Scale:** Uses Tailwind's default `text-sm`, `text-base`, `text-lg`, `text-2xl`, `text-3xl`, `text-4xl`
+- **Font Stack:** `Montserrat` (headings), `JetBrains Mono` (admin/monospace) via next/font
+- **Admin uses:** `font-sans` for labels, `font-mono` for data values, receipt-style layout
 
 ### Spacing & Layout
 - **Max content width:** `1280px` with auto margins
-- **Component spacing:** Tailwind's `space-y-*`, `gap-*` utilities
-- **Page sections:** Top-level padding via `py-12` or `py-24`
+- **Border style:** `border-dashed` dividers throughout (brutalist receipt aesthetic)
+- **Shadows:** `brutalist-shadow` custom class — solid ink box shadow
+- **Clip paths:** Polygon clip paths on cards and containers for jagged-edge brutalist effect
 
 ### Component Variant Pattern
 ```ts
@@ -327,8 +322,8 @@ const buttonVariants = cva(
 
 ### Seed Data
 The seed script (`prisma/seed.ts`) creates:
-- **5 categories** (Electronics, Clothing, Home & Garden, Sports & Outdoors, Books & Media)
-- **25 products** (5 per category) with realistic names, descriptions, prices, images, and tags
+- **4 categories** (Elektronik, Fashion, Rumah Tangga, Kecantikan)
+- **0 products** — seed only creates categories; admin adds products via the admin panel
 
 Run `pnpm prisma:seed` to populate the database.
 
@@ -338,23 +333,23 @@ Run `pnpm prisma:seed` to populate the database.
 
 | Route                    | Component / Type      | Data Source / Notes      |
 | ------------------------ | --------------------- | ------------------------ |
-| `/`                      | Server Component      | Featured products        |
-| `/affiliate`             | Server Component      | Static content           |
+| `/`                      | Server Component      | Landing — Hero + ProductGrid + CategoryFilter |
 | `/about`                 | Server Component      | Static content           |
+| `/affiliate`             | Server Component      | Static content           |
 | `/privacy`               | Server Component      | Static content           |
 | `/terms`                 | Server Component      | Static content           |
-| `/contact`               | Client Component      | Real form → POST `/api/contact` |
-| `/products`              | —                     | Tidak ada — produk hanya di landing page & admin |
-| `/categories`            | —                     | Tidak ada — kategori hanya terkait produk |
-| `/admin-shopby/login`           | Client Component      | Login form → POST `/api/admin-shopby/login` |
-| `/admin-shopby`                 | Client Component      | Dashboard — real stats from `/api/stats` |
-| `/admin-shopby/products`        | Client Component      | Product table — fetch/delete via `/api/products` |
-| `/admin-shopby/products/new`    | Client Component      | Add product — POST to `/api/products` |
-| `/admin-shopby/products/[id]`   | Client Component      | Edit product — load via GET, save via PUT to `/api/products/[id]` |
-| `/admin-shopby/analytics`       | Client Component      | Real data from `/api/analytics` |
-| `/admin-shopby/settings`        | Client Component      | Read/write via `/api/settings` |
-| `/admin-shopby/help`            | Client Component      | Admin Help Center       |
+| `/contact`               | Client Component      | Form → POST `/api/contact` |
+| `/admin-shopby/login`    | Client Component      | Login form → POST `/api/admin-shopby/login` |
+| `/admin-shopby`          | Client Component      | Dashboard — real stats from `/api/stats` |
+| `/admin-shopby/products` | Client Component      | Product table — CRUD via `/api/products` |
+| `/admin-shopby/products/new` | Client Component  | Add product — POST `/api/products` |
+| `/admin-shopby/products/[id]` | Client Component | Edit product — GET/PUT `/api/products/[id]` |
+| `/admin-shopby/analytics` | Client Component     | Real data from `/api/analytics` |
+| `/admin-shopby/settings` | Client Component      | Read/write via `/api/settings` |
+| `/admin-shopby/help`     | Server Component      | Static content — Help Center |
+| `/robots.txt`            | Generated route       | Disallow `/admin-shopby/`, `/api/` |
 | `/sitemap.xml`           | Generated route       | Auto-generated from `sitemap.ts` |
+| `/_not-found`            | Server Component      | Custom 404 — static page |
 
 ---
 

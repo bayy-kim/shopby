@@ -746,19 +746,16 @@ Mengambil daftar produk.
 
 #### GET /api/categories
 
-Mengambil daftar kategori (urut A-Z).
+Mengambil daftar kategori (urut A-Z). Mengembalikan **plain array** (tanpa `data`/`total` wrapper).
 
 **Response (200):**
 ```json
-{
-  "data": [
-    { "id": "clx...", "name": "Elektronik", "slug": "elektronik" },
-    { "id": "clx...", "name": "Fashion", "slug": "fashion" },
-    { "id": "clx...", "name": "Kecantikan", "slug": "kecantikan" },
-    { "id": "clx...", "name": "Rumah Tangga", "slug": "rumah-tangga" }
-  ],
-  "total": 4
-}
+[
+  { "id": "clx...", "name": "Elektronik", "slug": "elektronik" },
+  { "id": "clx...", "name": "Fashion", "slug": "fashion" },
+  { "id": "clx...", "name": "Kecantikan", "slug": "kecantikan" },
+  { "id": "clx...", "name": "Rumah Tangga", "slug": "rumah-tangga" }
+]
 ```
 
 ### 4.4 CRUD Produk
@@ -791,9 +788,7 @@ Mengambil daftar produk (support filter, sort, pagination).
       "_count": { "clicks": 5 }
     }
   ],
-  "total": 9,
-  "page": 1,
-  "limit": 12
+  "total": 9
 }
 ```
 
@@ -877,12 +872,20 @@ Mengembalikan data statistik untuk dashboard admin.
 **Response (200):**
 ```json
 {
-  "totalSales": 24590,
-  "activeLinks": 142,
-  "totalClicks": 89200,
-  "estCommission": 3420,
-  "salesTrend": 12.5,
-  "clickTrend": 5.2
+  "data": {
+    "totalSales": 24590000,
+    "totalProducts": 5,
+    "activeProducts": 3,
+    "totalClicks": 47,
+    "avgCommission": 8500,
+    "recentClicks": [
+      { "id": "clc...", "product": { "name": "Mechanical Keyboard Pro" }, "clickedAt": "2026-07-20T10:30:00.000Z" }
+    ],
+    "topProducts": [
+      { "id": "cla...", "name": "Mechanical Keyboard Pro", "_count": { "clicks": 12 } },
+      { "id": "clb...", "name": "Steel Tumbler 500ml", "_count": { "clicks": 8 } }
+    ]
+  }
 }
 ```
 
@@ -899,20 +902,20 @@ Mengembalikan data analitik detail.
 **Response (200):**
 ```json
 {
-  "revenue": 15400,
-  "avgOrderValue": 245000,
-  "conversionRate": 4.2,
-  "bounceRate": 28.5,
-  "dailyData": [
-    { "date": "2026-06-24", "clicks": 12400, "conversions": 520 }
-  ],
-  "trafficSources": [
-    { "source": "Instagram", "percentage": 45 },
-    { "source": "TikTok", "percentage": 30 }
-  ],
-  "geoData": [
-    { "city": "Jakarta", "users": 12450 }
-  ]
+  "data": {
+    "revenue": 15400000,
+    "totalClicks": 47,
+    "conversionRate": 4.2,
+    "dailyData": [
+      { "date": "2026-07-19", "clicks": 12, "revenue": 4500000 }
+    ],
+    "trafficSources": [
+      { "source": "Direct", "percentage": 45 }
+    ],
+    "geoData": [
+      { "city": "Jakarta", "users": 124 }
+    ]
+  }
 }
 ```
 
@@ -1058,36 +1061,18 @@ Mencatat klik produk dan mengembalikan URL Shopee.
 | `key` | String (unique) | Nama pengaturan (`store_settings`) |
 | `value` | String | JSON string berisi semua nilai |
 
-### 5.2 Seed Data (9 Produk)
+### 5.2 Seed Data
 
-#### Elektronik
+Seed script (`prisma/seed.ts`) hanya membuat **4 kategori** — **tidak membuat produk apa pun**:
 
-| Produk | Harga | Featured |
-|---|---|---|
-| Mechanical Keyboard Pro | Rp450.000 | ✅ |
-| Smartwatch Series X | Rp899.000 | ✅ |
-| Matte Desk Lamp | Rp185.000 | ❌ |
-| TWS Earbuds Pro | Rp420.000 | ❌ |
+| Kategori | Slug |
+|---|---|
+| Elektronik | `elektronik` |
+| Fashion | `fashion` |
+| Rumah Tangga | `rumah-tangga` |
+| Kecantikan | `kecantikan` |
 
-#### Fashion
-
-| Produk | Harga | Featured |
-|---|---|---|
-| Minimalist Leather Wallet | Rp250.000 | ❌ |
-| Canvas Heavy Tote | Rp95.000 | ❌ |
-
-#### Rumah Tangga
-
-| Produk | Harga | Featured |
-|---|---|---|
-| Steel Tumbler 500ml | Rp120.000 | ✅ |
-| Ceramic Pour Over Set | Rp320.000 | ❌ |
-
-#### Kecantikan
-
-| Produk | Harga | Featured |
-|---|---|---|
-| Hydrating Serum | Rp150.000 | ❌ |
+Admin **wajib menambahkan produk** via admin panel (`/admin-shopby/products/new`) setelah login. Produk langsung tersimpan ke database dan muncul di landing page.
 
 ### 5.3 Menambahkan Data Sendiri
 
@@ -1105,9 +1090,13 @@ Edit `prisma/seed.ts`, tambahkan entry ke array `products`, lalu:
 npx prisma db seed
 ```
 
-**Cara 3: Via API (jika sudah ada)**
+**Cara 3: Via Admin Panel (Recommended)**
 
-Gunakan endpoint `POST /api/products` (perlu implementasi CRUD admin terlebih dahulu).
+Login ke `/admin-shopby`, buka menu **Products > Add New Link**, isi form dan simpan. Produk otomatis tersimpan via `POST /api/products`.
+
+**Cara 4: Via API Langsung**
+
+Gunakan `POST /api/products` dengan header `Cookie: shopby_admin_session=<token>`.
 
 ---
 

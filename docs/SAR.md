@@ -18,11 +18,11 @@
 ```
 shopby/
 ├── design/                         # Referensi desain (landing + admin panel)
-├── docs/                           # Dokumentasi
-├── middleware.ts                   # Edge auth guard untuk /admin-shopby/* + /api/admin-shopby/*
+├── docs/                           # Dokumentasi (PRD, SAR, GUIDE, README, project-reference)
+├── middleware.ts                   # Edge auth guard: /admin → redirect /, /admin-shopby/*, /api/stats/*, /api/analytics/*, /api/settings/*
 ├── prisma/
 │   ├── schema.prisma               # Product, Category, ClickLog, AppSetting
-│   ├── seed.ts
+│   ├── seed.ts                     # 4 kategori (0 produk)
 │   ├── dev.db
 │   └── migrations/
 ├── src/
@@ -31,9 +31,14 @@ shopby/
 │   │   ├── page.tsx                # Landing page (Hero + ProductGrid)
 │   │   ├── globals.css             # Tailwind v4 + @layer components
 │   │   ├── providers.tsx           # TanStack Query provider
-│   │   ├── sitemap.ts              # Auto-generated sitemap
-│   │   ├── admin/
-│   │   │   ├── login/page.tsx
+│   │   ├── loading.tsx             # Global loading state
+│   │   ├── not-found.tsx           # Custom 404
+│   │   ├── robots.ts               # /robots.txt
+│   │   ├── sitemap.ts              # /sitemap.xml
+│   │   ├── admin-shopby/
+│   │   │   ├── login/
+│   │   │   │   ├── layout.tsx      # Login metadata
+│   │   │   │   └── page.tsx        # Login form
 │   │   │   ├── help/page.tsx
 │   │   │   ├── loading.tsx
 │   │   │   ├── error.tsx
@@ -42,7 +47,7 @@ shopby/
 │   │   │       ├── page.tsx        # Dashboard (stats real, revenue chart)
 │   │   │       ├── products/
 │   │   │       │   ├── page.tsx    # CRUD product table
-│   │   │       │   ├── new/page.tsx# Add product
+│   │   │       │   ├── new/page.tsx
 │   │   │       │   └── [id]/page.tsx
 │   │   │       ├── analytics/page.tsx
 │   │   │       └── settings/page.tsx
@@ -51,13 +56,14 @@ shopby/
 │   │   ├── privacy/page.tsx
 │   │   ├── terms/page.tsx
 │   │   ├── contact/
-│   │   │   ├── page.tsx            # Client component form
-│   │   │   └── layout.tsx          # Metadata wrapper
+│   │   │   ├── layout.tsx          # Metadata wrapper
+│   │   │   └── page.tsx            # Client component form
 │   │   └── api/
-│   │       ├── admin/login/route.ts
-│   │       ├── admin/logout/route.ts
+│   │       ├── admin-shopby/
+│   │       │   ├── login/route.ts
+│   │       │   └── logout/route.ts
 │   │       ├── products/route.ts   # GET (public) + POST (auth)
-│   │       ├── products/[id]/route.ts # GET + PUT + DELETE
+│   │       ├── products/[id]/route.ts # GET + PUT + DELETE (auth)
 │   │       ├── categories/route.ts
 │   │       ├── click/route.ts
 │   │       ├── stats/route.ts
@@ -65,10 +71,10 @@ shopby/
 │   │       ├── settings/route.ts   # via Prisma AppSetting
 │   │       └── contact/route.ts
 │   ├── components/
-│   │   ├── ui/                     # shadcn/ui + custom
+│   │   ├── ui/ (button, card, badge, ProductCardSkeleton, EmptyState)
 │   │   ├── layout/ (Navbar, Footer)
 │   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
-│   ├── hooks/ (useProducts, useCategories, useSettings, useContact)
+│   ├── hooks/ (useProducts, useCategories)
 │   ├── lib/
 │   │   ├── auth.ts                 # JWT session + checkAuth (shared)
 │   │   ├── auth-password.ts        # scrypt hash/verify
@@ -124,9 +130,11 @@ model AppSetting {
 | `/admin-shopby/login` | Login page (receipt card, brutalist style) |
 | `/admin-shopby` | Dashboard — stats, sales chart, recent activity |
 | `/admin-shopby/products` | Product management table with CRUD actions |
+| `/admin-shopby/products/new` | Add new product form |
 | `/admin-shopby/products/[id]` | Edit single product form |
 | `/admin-shopby/analytics` | Metrics, click/conversion chart, traffic sources, geography |
 | `/admin-shopby/settings` | Store profile, payout info, security toggles |
+| `/admin-shopby/help` | Admin help center — guides & resources |
 
 Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top search bar, notification bell, profile avatar. All admin pages use the brutalist/receipt design language consistent with the landing page.
 
@@ -134,41 +142,77 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 
 | Endpoint | Method | Auth | Query/Body | Fungsi |
 |---|---|---|---|---|
-| `/api/admin-shopby/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie |
+| `/api/admin-shopby/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie HttpOnly JWT |
 | `/api/admin-shopby/logout` | POST | — | — | Hapus session cookie |
-| `/api/products` | GET | — | `?category=&sort=&search=` | Ambil produk (filter + sorting) |
+| `/api/products` | GET | — | `?category=&sort=&search=` | Ambil produk (filter + sorting) → `{ data: [...], total }` |
 | `/api/products` | POST | ✅ | Body: `{ name, price, ... }` | Tambah produk baru |
 | `/api/products/[id]` | GET | — | — | Detail produk |
 | `/api/products/[id]` | PUT | ✅ | Body: `{ name, price, ... }` | Update produk |
 | `/api/products/[id]` | DELETE | ✅ | — | Hapus produk |
-| `/api/categories` | GET | — | — | Ambil semua kategori |
-| `/api/click` | POST | — | Body: `{ productId }` → simpan log, return `{ shopeeUrl }` |
-| `/api/stats` | GET | ✅ | — | Statistik dashboard |
-| `/api/analytics` | GET | ✅ | — | Data analitik (revenue, clicks) |
-| `/api/settings` | GET | ✅ | — | Baca pengaturan (via Prisma) |
-| `/api/settings` | PUT | ✅ | Body: `{ storeName, bio, ... }` | Simpan pengaturan |
+| `/api/categories` | GET | — | — | Ambil semua kategori → `[{ id, name, slug }]` (plain array) |
+| `/api/click` | POST | — | Body: `{ productId }` | Simpan log klik → `{ shopeeUrl }` |
+| `/api/stats` | GET | ✅ | — | `{ data: { totalSales, totalProducts, activeProducts, totalClicks, avgCommission, recentClicks, topProducts } }` |
+| `/api/analytics` | GET | ✅ | — | Data analitik — revenue, clicks, traffic sources, geography |
+| `/api/settings` | GET | ✅ | — | Baca AppSetting via Prisma |
+| `/api/settings` | PUT | ✅ | Body: `{ storeName, bio, ... }` | Simpan AppSetting via Prisma |
 | `/api/contact` | POST | — | Body: `{ name, email, message }` | Kirim pesan kontak |
 
 ### Response Format
 
-Semua endpoint mengembalikan JSON. Products:
+Semua endpoint mengembalikan JSON.
+
+**Products** `GET /api/products`:
 ```json
 {
   "data": [
     {
-      "id": "...",
+      "id": "cla1...",
       "name": "Mechanical Keyboard Pro",
       "price": 450000,
       "imageUrl": "...",
       "imageAlt": "...",
       "shopeeUrl": "...",
-      "category": { "id": "...", "name": "Elektronik", "slug": "elektronik" },
+      "categoryId": "clb1...",
+      "category": { "id": "clb1...", "name": "Elektronik", "slug": "elektronik" },
       "isFeatured": true,
-      "createdAt": "..."
+      "createdAt": "2026-07-19T17:31:40.000Z",
+      "_count": { "clicks": 12 }
     }
   ],
-  "total": 9
+  "total": 5
 }
+```
+
+**Categories** `GET /api/categories` — returns **plain array** (no `data`/`total` wrapper):
+```json
+[
+  { "id": "clb1...", "name": "Elektronik", "slug": "elektronik" },
+  { "id": "clb2...", "name": "Fashion", "slug": "fashion" }
+]
+```
+
+**Stats** `GET /api/stats`:
+```json
+{
+  "data": {
+    "totalSales": 0,
+    "totalProducts": 5,
+    "activeProducts": 3,
+    "totalClicks": 47,
+    "avgCommission": 8500,
+    "recentClicks": [
+      { "id": "clc1...", "product": { "name": "Product A" }, "clickedAt": "2026-07-20T..." }
+    ],
+    "topProducts": [
+      { "id": "cla1...", "name": "Product A", "_count": { "clicks": 12 } }
+    ]
+  }
+}
+```
+
+**Click** `POST /api/click`:
+```json
+{ "shopeeUrl": "https://shopee.co.id/..." }
 ```
 
 ## 6. Rencana Deploy

@@ -44,50 +44,48 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 
 ```
 shopby/
-├── middleware.ts                # Edge auth guard untuk /admin-shopby/* + API admin
+├── middleware.ts                # Edge auth guard — /admin → redirect /, /admin-shopby/*, API stats/analytics/settings
+├── next.config.ts
+├── postcss.config.mjs
+├── eslint.config.mjs
+├── components.json              # shadcn/ui config
 ├── design/                      # Referensi desain (landing + admin panel)
 ├── docs/                        # Dokumentasi
 ├── prisma/
 │   ├── schema.prisma            # Product, Category, ClickLog, AppSetting
-│   ├── seed.ts
+│   ├── seed.ts                  # 4 kategori (0 produk)
 │   ├── dev.db
 │   └── migrations/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx           # Root layout
-│   │   ├── page.tsx             # Landing page
-│   │   ├── globals.css          # Tailwind v4 + custom CSS
-│   │   ├── providers.tsx        # TanStack Query
-│   │   ├── sitemap.ts           # Auto-generated sitemap
-│   │   ├── admin/               # Admin panel
-│   │   │   ├── login/
-│   │   │   ├── (dashboard)/
-│   │   │   ├── error.tsx        # Error boundary
-│   │   │   ├── loading.tsx      # Loading fallback
-│   │   │   └── help/
-│   │   ├── about/               # /about
-│   │   ├── affiliate/           # /affiliate
-│   │   ├── privacy/             # /privacy
-│   │   ├── terms/               # /terms
-│   │   ├── contact/             # /contact (client form + layout)
-│   │   └── api/                 # REST API
-│   │       ├── admin/ (login, logout)
-│   │       ├── products/ (GET, POST) + [id]/ (GET, PUT, DELETE)
-│   │       ├── categories/
-│   │       ├── click/
-│   │       ├── stats/
-│   │       ├── analytics/
-│   │       ├── settings/        # via Prisma (AppSetting model)
-│   │       └── contact/
-│   ├── components/              # UI, layout, sections
-│   ├── hooks/                   # TanStack Query hooks
+│   │   ├── layout.tsx           # Root layout (fonts, metadata, providers)
+│   │   ├── page.tsx             # Landing page (Hero + ProductGrid)
+│   │   ├── globals.css          # Tailwind v4 + custom CSS (@layer components)
+│   │   ├── providers.tsx        # TanStack Query Provider
+│   │   ├── loading.tsx          # Global loading state
+│   │   ├── not-found.tsx        # Custom 404
+│   │   ├── robots.ts            # /robots.txt
+│   │   ├── sitemap.ts           # /sitemap.xml
+│   │   ├── admin-shopby/        # Admin panel (route diubah untuk keamanan)
+│   │   │   ├── login/ (layout.tsx, page.tsx)
+│   │   │   ├── help/page.tsx
+│   │   │   ├── loading.tsx, error.tsx
+│   │   │   └── (dashboard)/ (layout, page, products/, analytics/, settings/)
+│   │   ├── about/, affiliate/, privacy/, terms/
+│   │   ├── contact/ (layout.tsx + page.tsx)
+│   │   └── api/
+│   │       ├── admin-shopby/ (login, logout)
+│   │       ├── products/ + [id]/
+│   │       ├── categories/, click/, stats/, analytics/, settings/, contact/
+│   ├── components/
+│   │   ├── ui/ (button, card, badge, ProductCardSkeleton, EmptyState)
+│   │   ├── layout/ (Navbar, Footer)
+│   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
+│   ├── hooks/ (useProducts, useCategories)
 │   ├── lib/
-│   │   ├── auth.ts              # JWT session + checkAuth (edge-compatible)
-│   │   ├── auth-password.ts     # Password hash/verify (crypto built-in)
-│   │   ├── prisma.ts
-│   │   ├── utils.ts             # cn(), formatPrice()
-│   │   └── services/            # products, categories, click
-│   └── types/
+│   │   ├── auth.ts, auth-password.ts, prisma.ts, utils.ts
+│   │   └── services/ (products, categories, click)
+│   └── types/ (Product, Category, ClickLog)
 ```
 
 ## Cara Menjalankan
