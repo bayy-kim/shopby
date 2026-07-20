@@ -335,7 +335,7 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 - **Single Admin:** Email dan password hash berasal dari `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`)
 - **Password Hashing:** Node.js `crypto.scryptSync` dengan salt 16-byte, stored sebagai `salt:derivedKey` (base64)
 - **Session JWT:** `jose` library, algoritma HS256, payload `{ role: "admin" }`, expiry 24 jam
-- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/admin-shopby, maxAge 86400s
+- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/, maxAge 86400s
 - **Middleware:** Edge runtime, matcher `["/admin-shopby/:path*", "/api/stats/:path*", "/api/analytics/:path*", "/api/settings/:path*"]` — melindungi admin pages + API sensitive routes
 
 #### Credential Default (Development)
@@ -683,7 +683,7 @@ Login admin, mengembalikan session cookie.
 ```json
 { "success": true }
 ```
-Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/admin-shopby; Max-Age=86400`
+Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400`
 
 **Response (400):**
 ```json
@@ -1143,13 +1143,10 @@ Diatur di `src/app/layout.tsx` via `next/font/google`.
 
 ### 6.3 Komponen UI
 
-Komponen shadcn/ui yang tersedia di `src/components/ui/`:
+Komponen di `src/components/ui/`:
 
 | Komponen | File | Variants |
 |---|---|---|
-| Button | `button.tsx` | default, outline, secondary, ghost, destructive, link |
-| Card | `card.tsx` | default, sm |
-| Badge | `badge.tsx` | default, secondary, destructive, outline, ghost, link |
 | Skeleton | `ProductCardSkeleton.tsx` | highlight, compact |
 | EmptyState | `EmptyState.tsx` | — |
 
@@ -1331,23 +1328,32 @@ shopby/
     │   ├── page.tsx                # Storefront homepage
     │   ├── providers.tsx           # TanStack Query provider
     │   ├── globals.css             # Tailwind v4 + tema + utilities
-    │   ├── admin/
+    │   ├── admin-shopby/
     │   │   ├── login/page.tsx      # Halaman login admin
+    │   │   ├── help/page.tsx       # Pusat bantuan
+    │   │   ├── loading.tsx         # Loading state
+    │   │   ├── error.tsx           # Error boundary
     │   │   └── (dashboard)/
     │   │       ├── layout.tsx      # Sidebar + navbar admin
     │   │       ├── page.tsx        # Dashboard utama
     │   │       ├── analytics/page.tsx
     │   │       ├── products/
     │   │       │   ├── page.tsx          # Daftar produk
+    │   │       │   ├── new/page.tsx      # Tambah produk
     │   │       │   └── [id]/page.tsx     # Edit produk
     │   │       └── settings/page.tsx
     │   └── api/
-    │       ├── admin/
+    │       ├── admin-shopby/
     │       │   ├── login/route.ts  # POST login
     │       │   └── logout/route.ts # POST logout
-    │       ├── products/route.ts   # GET products
-    │       └── categories/route.ts # GET categories
-    │       └── click/route.ts      # POST click tracking
+    │       ├── products/route.ts   # GET + POST products
+    │       ├── products/[id]/route.ts # GET + PUT + DELETE
+    │       ├── categories/route.ts # GET categories
+    │       ├── click/route.ts      # POST click tracking
+    │       ├── stats/route.ts      # GET dashboard stats
+    │       ├── analytics/route.ts  # GET analytics data
+    │       ├── settings/route.ts   # GET + PUT settings
+    │       └── contact/route.ts    # POST contact form
     ├── components/
     │   ├── layout/
     │   │   ├── Navbar.tsx          # Navigasi utama
@@ -1357,12 +1363,9 @@ shopby/
     │   │   ├── CategoryFilter.tsx  # Filter kategori (chips/sidebar)
     │   │   ├── ProductGrid.tsx     # Grid produk + sort + load more
     │   │   └── ProductCard.tsx     # Kartu produk (highlight/compact)
-    │   └── ui/
-    │       ├── ProductCardSkeleton.tsx
-    │       ├── EmptyState.tsx
-    │       ├── card.tsx
-    │       ├── button.tsx
-    │       └── badge.tsx
+    │       └── ui/
+            ├── ProductCardSkeleton.tsx
+            └── EmptyState.tsx
     ├── hooks/
     │   ├── useProducts.ts          # TanStack Query untuk produk
     │   └── useCategories.ts        # TanStack Query untuk kategori

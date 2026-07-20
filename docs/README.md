@@ -79,7 +79,7 @@ shopby/
 │   │       ├── products/ + [id]/
 │   │       ├── categories/, click/, stats/, analytics/, settings/, contact/
 │   ├── components/
-│   │   ├── ui/ (button, card, badge, ProductCardSkeleton, EmptyState)
+│   │   ├── ui/ (ProductCardSkeleton, EmptyState)
 │   │   ├── layout/ (Navbar, Footer)
 │   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
 │   ├── hooks/ (useProducts, useCategories)
@@ -169,4 +169,4 @@ Buka `http://localhost:3000` di browser.
 
 ---
 
-Dibuat dengan ❤️ untuk Bayu — Shopee Affiliate Partner.
+Dibuat untuk Bayu — Shopee Affiliate Partner.

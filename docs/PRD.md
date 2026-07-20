@@ -145,10 +145,7 @@ shopby/
 │   ├── components/
 │   │   ├── ui/
 │   │   │   ├── ProductCardSkeleton.tsx
-│   │   │   ├── EmptyState.tsx
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   └── badge.tsx
+│   │   │   └── EmptyState.tsx
 │   │   ├── layout/
 │   │   │   ├── Navbar.tsx
 │   │   │   └── Footer.tsx

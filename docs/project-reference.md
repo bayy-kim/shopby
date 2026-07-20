@@ -57,9 +57,6 @@ src/
 │       └── contact/route.ts      # POST /api/contact
 ├── components/           # Shared React components
 │   ├── ui/               # UI primitives + custom
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── badge.tsx
 │   │   ├── ProductCardSkeleton.tsx
 │   │   └── EmptyState.tsx
 │   ├── layout/
@@ -215,8 +212,8 @@ TypeScript types for Product, Category, ClickLog are defined in `src/types/index
 ### 6. Null/Empty State Handling
 Pages gracefully handle empty states: `EmptyState` component provides descriptive fallback UI when no products exist, and admin pages show toast notifications for errors.
 
-### 7. Simple CSS Approach
-Instead of `tailwindcss-animate` (which is Tailwind v3 only), the codebase uses inline CSS transitions for animations in button and card components. This avoids dependency conflicts with Tailwind v4.
+### 7. Animation — Framer Motion + CSS Transitions
+Framer Motion digunakan untuk staggered fade-up animations di product grid (`ProductGrid.tsx`). Untuk komponen UI (button, card hover), digunakan inline CSS transitions karena `tailwindcss-animate` tidak kompatibel dengan Tailwind v4.
 
 ### 8. Single-Admin Auth (Stateless, Edge-Compatible)
 Per PRD, Shopby hanya butuh **1 admin** (Bayu). Auth tidak menggunakan database/users table — credential berasal dari environment variable (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`). Password diverifikasi via Node `crypto.scryptSync` (built-in, zero dependency). Session dikelola via **JWT** (jose library, edge-compatible untuk middleware) yang disimpan di cookie HttpOnly. Middleware Next.js melindungi semua route `/admin-shopby/:path*` serta `/api/stats/:path*`, `/api/analytics/:path*`, `/api/settings/:path*`, `/api/products/:path*` (POST/PUT/DELETE) — akses tanpa session valid di-redirect ke `/admin-shopby/login` atau mengembalikan 401 untuk API. Semua route API yang butuh proteksi memanggil `checkAuth()` dari `@/lib/auth.ts` — fungsi terpusat yang melempar `401` jika session invalid.
@@ -253,9 +250,6 @@ Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Sh
 ## Component Library (src/components/)
 
 ### UI Primitives (`src/components/ui/`)
-- **button.tsx** — Variants: `default`, `outline`, `secondary`, `ghost`, `destructive`, `link`; sizes: `sm`, `md`, `lg`; supports `asChild` via `Slot`
-- **card.tsx** — `Card`, `CardHeader`, `CardContent`, `CardFooter` composition pattern
-- **badge.tsx** — Variants: `default`, `secondary`, `outline`, `success`, `warning`, `danger`
 - **ProductCardSkeleton.tsx** — Animated loading placeholder for product cards (pulse animation)
 - **EmptyState.tsx** — Descriptive fallback UI for empty product/grid states
 
@@ -382,7 +376,7 @@ Run `pnpm prisma:seed` to populate the database.
 - **Auth — edge-compatible JWT:** Middleware menggunakan `jose` library (bukan `jsonwebtoken`) karena Next.js middleware berjalan di Edge Runtime yang tidak support Node crypto untuk JWTs
 - **Auth — password hashing tanpa bcryptjs:** Gunakan Node.js `crypto.scryptSync` + `timingSafeEqual` — 100% built-in, tanpa dependency tambahan
 - **Auth — single admin credential:** Email dan password hash berasal dari `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`), bukan dari database — sesuai PRD yang hanya butuh 1 admin
-- **Auth — session via HttpOnly cookie:** JWT disimpan di cookie `shopby_admin_session` dengan flag `HttpOnly`, `Secure` (prod), `SameSite=Lax`, `path=/admin-shopby` — expiry 24 jam
+- **Auth — session via HttpOnly cookie:** JWT disimpan di cookie `shopby_admin_session` dengan flag `HttpOnly`, `Secure` (prod), `SameSite=Lax`, `path=/` — expiry 24 jam
 - **Auth — logout:** Panggil `POST /api/admin-shopby/logout` → cookie langsung dihapus (maxAge=0), middleware otomatis redirect ke login
 - **Middleware — extended protection:** Selain `/admin-shopby/:path*`, middleware melindungi `/api/stats/:path*`, `/api/analytics/:path*`, `/api/settings/:path*` — akses tanpa session valid redirect ke `/admin-shopby/login`
 - **Middleware — matcher patterns:** Gunakan sintaks `/:path*` (bukan `:path*`) — Next.js 16 membutuhkan leading slash pada path patterns agar cocok dengan root-relative URLs

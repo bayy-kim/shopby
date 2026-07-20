@@ -71,7 +71,7 @@ shopby/
 │   │       ├── settings/route.ts   # via Prisma AppSetting
 │   │       └── contact/route.ts
 │   ├── components/
-│   │   ├── ui/ (button, card, badge, ProductCardSkeleton, EmptyState)
+│   │   ├── ui/ (ProductCardSkeleton, EmptyState)
 │   │   ├── layout/ (Navbar, Footer)
 │   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
 │   ├── hooks/ (useProducts, useCategories)
