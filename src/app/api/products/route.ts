@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const featured = searchParams.get("featured") === "true"
   if (featured) {
-    const products = await prisma.product.findMany({
-      where: { isFeatured: true },
-      include: { category: true },
-    })
-    const data = products.map((p) => ({ ...p, number: 0 }))
+    const [products, numberMap] = await Promise.all([
+      prisma.product.findMany({ where: { isFeatured: true }, include: { category: true } }),
+      getProductNumberMap(),
+    ])
+    const data = products.map((p) => ({ ...p, number: numberMap.get(p.id) ?? 0 }))
     return NextResponse.json({ data, total: products.length })
   }
 
