@@ -241,4 +241,27 @@
   .clip-tag {
     clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%, 0 15%);
   }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #f4f4f1 25%,
+      #e8e8e5 37%,
+      #f4f4f1 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+      background: #f4f4f1;
+    }
+  }
 }

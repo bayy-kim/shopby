@@ -11,6 +11,7 @@ interface CategoryFilterProps {
   numberRanges?: { label: string; from: number; to: number }[]
   activeRange?: { from: number; to: number } | null
   onRangeSelect?: (range: { from: number; to: number } | null) => void
+  isLoading?: boolean
 }
 
 const defaultCategories: Category[] = [
@@ -37,7 +38,54 @@ export default function CategoryFilter({
   numberRanges,
   activeRange,
   onRangeSelect,
+  isLoading,
 }: CategoryFilterProps) {
+  if (isLoading && variant === "chips") {
+    return (
+      <div className="space-y-3">
+        <div className="flex md:hidden gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={`sk-cat-${i}`}
+              className="h-8 skeleton-shimmer rounded-full shrink-0"
+              style={{ width: `${70 + i * 20}px` }}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoading && variant === "sidebar") {
+    return (
+      <aside className="hidden md:block w-64 flex-shrink-0">
+        <div className="sticky top-24 bg-white border-r border-dashed border-border-color p-4">
+          <div className="mb-6">
+            <div className="h-6 skeleton-shimmer w-24 mb-2" />
+            <div className="h-3 skeleton-shimmer w-16" />
+          </div>
+          <ul className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <li key={`sk-side-${i}`}>
+                <div className="h-10 skeleton-shimmer w-full" />
+              </li>
+            ))}
+          </ul>
+          <div className="mt-8">
+            <div className="h-3 skeleton-shimmer w-20 mb-3" />
+            <ul className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <li key={`sk-range-${i}`}>
+                  <div className="h-10 skeleton-shimmer w-full" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
   if (variant === "chips") {
     return (
       <div className="space-y-3">

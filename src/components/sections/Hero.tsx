@@ -7,6 +7,7 @@ import type { Product } from "@/types"
 interface HeroProps {
   featuredProducts?: Product[]
   onBuyProduct?: (productId: string, shopeeUrl: string) => void
+  isFeaturedLoading?: boolean
 }
 
 const defaultFeatured: Product[] = [
@@ -49,6 +50,7 @@ const defaultFeatured: Product[] = [
 export default function Hero({
   featuredProducts,
   onBuyProduct,
+  isFeaturedLoading,
 }: HeroProps) {
   const displayProducts = featuredProducts?.length ? featuredProducts : defaultFeatured
   const [card1, card2] = displayProducts.slice(0, 2)
@@ -78,88 +80,117 @@ export default function Hero({
         </div>
 
         <div className="relative h-[400px] hidden md:block">
-          {card1 && (
-            <div
-              onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card1.id, card1.shopeeUrl) }}
-              role="button"
-              tabIndex={0}
-              className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer"
-              style={{
-                background: "white",
-                clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
-              }}
-            >
-              <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-              <div className="mt-8 brutalist-dashed pb-4">
-                <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
-                  <Image
-                    src={card1.imageUrl}
-                    alt={card1.imageAlt}
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="256px"
-                  />
+          {isFeaturedLoading ? (
+            <>
+              <div className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
+                <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
+                <div className="mt-8 brutalist-dashed pb-4">
+                  <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
+                  <div className="h-3 skeleton-shimmer w-16 mb-2" />
+                  <div className="h-4 skeleton-shimmer w-36" />
                 </div>
-                <span className="font-mono text-xs text-ink/60 uppercase">
-                  {card1.category.name}
-                </span>
-                <h3 className="font-bold text-ink mt-1">{card1.name}</h3>
+                <div className="pt-4 flex justify-between items-end">
+                  <div className="h-5 skeleton-shimmer w-20" />
+                  <div className="size-5 skeleton-shimmer" />
+                </div>
               </div>
-              <div className="pt-4 flex justify-between items-end">
-                <span
-                  className="font-mono text-price-xl text-ink"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
+              <div className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
+                <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
+                <div className="mt-8 brutalist-dashed pb-4">
+                  <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
+                  <div className="h-3 skeleton-shimmer w-16 mb-2" />
+                  <div className="h-4 skeleton-shimmer w-36" />
+                </div>
+                <div className="pt-4 flex justify-between items-end">
+                  <div className="h-5 skeleton-shimmer w-20" />
+                  <div className="size-5 skeleton-shimmer" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {card1 && (
+                <div
+                  onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card1.id, card1.shopeeUrl) }}
+                  role="button"
+                  tabIndex={0}
+                  className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer"
+                  style={{
+                    background: "white",
+                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
+                  }}
                 >
-                  Rp{(card1.price / 1000).toFixed(0)}k
-                </span>
-                <ArrowRight className="text-primary size-5" aria-hidden="true" />
-              </div>
-              <div className="scan-line" />
-            </div>
-          )}
+                  <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
+                  <div className="mt-8 brutalist-dashed pb-4">
+                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
+                      <Image
+                        src={card1.imageUrl}
+                        alt={card1.imageAlt}
+                        fill
+                        className="object-cover"
+                        sizes="256px"
+                      />
+                    </div>
+                    <span className="font-mono text-xs text-ink/60 uppercase">
+                      {card1.category.name}
+                    </span>
+                    <h3 className="font-bold text-ink mt-1">{card1.name}</h3>
+                  </div>
+                  <div className="pt-4 flex justify-between items-end">
+                    <span
+                      className="font-mono text-price-xl text-ink"
+                      style={{ fontVariantNumeric: "tabular-nums" }}
+                    >
+                      Rp{(card1.price / 1000).toFixed(0)}k
+                    </span>
+                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
+                  </div>
+                  <div className="scan-line" />
+                </div>
+              )}
 
-          {card2 && (
-            <div
-              onClick={() => handleCardClick(card2.id, card2.shopeeUrl)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card2.id, card2.shopeeUrl) }}
-              role="button"
-              tabIndex={0}
-              className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0 cursor-pointer"
-              style={{
-                background: "white",
-                clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
-              }}
-            >
-              <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-              <div className="mt-8 brutalist-dashed pb-4">
-                <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
-                  <Image
-                    src={card2.imageUrl}
-                    alt={card2.imageAlt}
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="256px"
-                  />
-                </div>
-                <span className="font-mono text-xs text-ink/60 uppercase">
-                  {card2.category.name}
-                </span>
-                <h3 className="font-bold text-ink mt-1">{card2.name}</h3>
-              </div>
-              <div className="pt-4 flex justify-between items-end">
-                <span
-                  className="font-mono text-price-xl text-ink"
-                  style={{ fontVariantNumeric: "tabular-nums" }}
+              {card2 && (
+                <div
+                  onClick={() => handleCardClick(card2.id, card2.shopeeUrl)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card2.id, card2.shopeeUrl) }}
+                  role="button"
+                  tabIndex={0}
+                  className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0 cursor-pointer"
+                  style={{
+                    background: "white",
+                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
+                  }}
                 >
-                  Rp{(card2.price / 1000).toFixed(0)}k
-                </span>
-                <ArrowRight className="text-primary size-5" aria-hidden="true" />
-              </div>
-              <div className="scan-line" />
-            </div>
+                  <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
+                  <div className="mt-8 brutalist-dashed pb-4">
+                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
+                      <Image
+                        src={card2.imageUrl}
+                        alt={card2.imageAlt}
+                        fill
+                        className="object-cover"
+                        sizes="256px"
+                      />
+                    </div>
+                    <span className="font-mono text-xs text-ink/60 uppercase">
+                      {card2.category.name}
+                    </span>
+                    <h3 className="font-bold text-ink mt-1">{card2.name}</h3>
+                  </div>
+                  <div className="pt-4 flex justify-between items-end">
+                    <span
+                      className="font-mono text-price-xl text-ink"
+                      style={{ fontVariantNumeric: "tabular-nums" }}
+                    >
+                      Rp{(card2.price / 1000).toFixed(0)}k
+                    </span>
+                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
+                  </div>
+                  <div className="scan-line" />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

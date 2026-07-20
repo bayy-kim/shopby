@@ -181,7 +181,7 @@ export default function ProductGrid({
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
               <ProductCardSkeleton key={`s-all-${i}`} />
             ))
-          : allProducts.length === 0 && featuredProducts.length === 0
+          : allProducts.length === 0
             ? (
             <EmptyState
               categoryName={activeCategory?.name}

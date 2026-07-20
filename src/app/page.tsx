@@ -11,10 +11,10 @@ import { logClick } from "@/lib/services/click"
 import { buildNumberRanges } from "@/lib/utils"
 
 const CategoryFilter = dynamic(() => import("@/components/sections/CategoryFilter"), {
-  loading: () => <div className="h-10 animate-pulse bg-[#f4f4f1]" />,
+  loading: () => <div className="h-10 skeleton-shimmer" />,
 })
 const ProductGrid = dynamic(() => import("@/components/sections/ProductGrid"), {
-  loading: () => <div className="h-96 animate-pulse bg-[#f4f4f1]" />,
+  loading: () => <div className="h-96 skeleton-shimmer" />,
 })
 const Footer = dynamic(() => import("@/components/layout/Footer"))
 
@@ -34,7 +34,7 @@ export default function Home() {
     numberTo: numberRange?.to,
   })
 
-  const { data: categories } = useCategories()
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories()
   const { data: featuredProducts, isLoading: isFeaturedLoading } = useFeaturedProducts()
 
   const total = data?.total ?? 0
@@ -90,7 +90,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Hero featuredProducts={featuredProducts} onBuyProduct={handleBuyProduct} />
+      <Hero featuredProducts={featuredProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isFeaturedLoading} />
       <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
         <div id="categories">
           <CategoryFilter
@@ -101,6 +101,7 @@ export default function Home() {
             numberRanges={numberRanges}
             activeRange={numberRange}
             onRangeSelect={handleRangeSelect}
+            isLoading={isCategoriesLoading}
           />
         </div>
         <div id="products">
@@ -113,6 +114,7 @@ export default function Home() {
             numberRanges={numberRanges}
             activeRange={numberRange}
             onRangeSelect={handleRangeSelect}
+            isLoading={isCategoriesLoading}
           />
           <ProductGrid
             featuredProducts={featuredProducts}
