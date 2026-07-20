@@ -11,7 +11,7 @@
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -v '^scripts/check-secrets.sh$')
 
 if [ -z "$STAGED" ]; then
   exit 0
