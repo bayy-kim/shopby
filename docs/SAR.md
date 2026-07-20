@@ -98,6 +98,7 @@ model Product {
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id])
   isFeatured  Boolean   @default(false)
+  isSoldOut   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   clicks      ClickLog[]
 }
@@ -130,7 +131,7 @@ model AppSetting {
 | `/admin-shopby/login` | Login page (receipt card, brutalist style) |
 | `/admin-shopby` | Dashboard — stats, sales chart, recent activity |
 | `/admin-shopby/products` | Product management table with CRUD actions |
-| `/admin-shopby/products/new` | Add new product form |
+| `/admin-shopby/products/new` | Tambah produk baru (URL image input + sold out toggle) |
 | `/admin-shopby/products/[id]` | Edit single product form |
 | `/admin-shopby/analytics` | Metrics, click/conversion chart, traffic sources, geography |
 | `/admin-shopby/settings` | Store profile, payout info, security toggles |
@@ -144,7 +145,7 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 |---|---|---|---|---|
 | `/api/admin-shopby/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie HttpOnly JWT |
 | `/api/admin-shopby/logout` | POST | — | — | Hapus session cookie |
-| `/api/products` | GET | — | `?category=&sort=&search=` | Ambil produk (filter + sorting) → `{ data: [...], total }` |
+| `/api/products` | GET | — | `?category=&sort=&numberFrom=&numberTo=` | Ambil produk (filter + sorting + number range) → `{ data: [...], total }` |
 | `/api/products` | POST | ✅ | Body: `{ name, price, ... }` | Tambah produk baru |
 | `/api/products/[id]` | GET | — | — | Detail produk |
 | `/api/products/[id]` | PUT | ✅ | Body: `{ name, price, ... }` | Update produk |

@@ -16,6 +16,7 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(true)
   const [product, setProduct] = useState<Product | null>(null)
   const [isFeatured, setIsFeatured] = useState(false)
+  const [isSoldOut, setIsSoldOut] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const [urlError, setUrlError] = useState("")
   const { data: categories } = useCategories()
@@ -33,6 +34,7 @@ export default function EditProduct() {
         setProduct(p)
         setImageUrl(p.imageUrl)
         setIsFeatured(p.isFeatured)
+        setIsSoldOut(p.isSoldOut)
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -67,6 +69,7 @@ export default function EditProduct() {
         shopeeUrl,
         categoryId,
         isFeatured,
+        isSoldOut,
       })
       setShowToast(true)
       setTimeout(() => setShowToast(false), 3000)
@@ -203,6 +206,15 @@ export default function EditProduct() {
                 <input type="checkbox" checked={isFeatured} onChange={() => setIsFeatured(!isFeatured)} className="sr-only peer" />
                 <div className="w-14 h-7 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF4D2D]" />
                 <span className="ml-3 font-mono text-[13px] leading-[16px] tracking-[0.05em] uppercase text-[#1a1c1b]">{isFeatured ? "Yes" : "No"}</span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between py-4 border-b border-dashed border-[#e5e1d8] -mt-6">
+              <span className="font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase">Tandai Stok Habis</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={isSoldOut} onChange={() => setIsSoldOut(!isSoldOut)} className="sr-only peer" />
+                <div className="w-14 h-7 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#ba1a1a]" />
+                <span className="ml-3 font-mono text-[13px] leading-[16px] tracking-[0.05em] uppercase text-[#1a1c1b]">{isSoldOut ? "Yes" : "No"}</span>
               </label>
             </div>
 

@@ -129,9 +129,9 @@ Navigasi sticky di atas halaman dengan:
 
 - **Logo "Shopby"** — teks merah, font sans-serif bold
 - **Link Desktop:** Deals (active/border-bottom), Kategori, Affiliate
-- **Tombol "Masuk"** — merah dengan efek bayangan brutalist, mengarah ke `/admin-shopby/login`
+- **Tombol "Masuk"** — (sudah dihapus dari navbar untuk keamanan — akses admin hanya via `/admin-shopby/login`)
 
-> ✅ Semua link navbar (Deals, Kategori, Affiliate, Masuk) kini mengarah ke halaman/ancor yang nyata. "Deals" scroll ke bagian produk, "Kategori" scroll ke filter kategori, "Affiliate" menuju `/affiliate`, "Masuk" menuju `/admin-shopby/login`.
+> ✅ Semua link navbar (Deals, Kategori, Affiliate) kini mengarah ke halaman/ancor yang nyata. "Deals" scroll ke bagian produk, "Kategori" scroll ke filter kategori, "Affiliate" menuju `/affiliate`.
 
 ### 2.3 Hero Section
 
@@ -170,13 +170,19 @@ Dua varian tergantung ukuran layar:
 #### Desktop: Sidebar
 
 ```
-┌─ Kategori ─────────────┐
+┌─ Kategori ─────────────────────────────┐
 │ 🔲 Semua               │ ← aktif = kuning
 │ 💻 Elektronik          │
 │ 👕 Fashion             │
 │ 🏠 Rumah Tangga       │
 │ ✨ Kecantikan          │
-└────────────────────────┘
+├────────────────────────────────────────┤
+│ Nomor Produk                           │
+│ 🔲 Semua                               │
+│ #1-100                                 │
+│ #101-200                               │
+│ ...                                    │
+└────────────────────────────────────────┘
 ```
 
 - Sticky di sisi kiri layar
@@ -492,54 +498,43 @@ Form untuk menambahkan product link affiliate baru dengan gaya receipt/nota.
 
 > ✅ Form kini mengirim data ke API (`POST /api/products`) dan menyimpannya ke database — bukan sekadar simulasi.
 
-#### Image Upload
+#### Image Input (URL)
 
-Fitur upload gambar dengan dua metode:
+Fitur input gambar via URL langsung:
 
-1. **Drag & Drop** — Seret file gambar ke area upload
-2. **Click to Browse** — Klik area upload untuk membuka file dialog
+1. **Input URL** — Tempel URL gambar produk dari Shopee (atau sumber lain)
+2. **Live Preview** — Gambar tampil otomatis saat URL diisi, pakai `<Image>` dari `next/image`
+3. **Fallback** — Jika URL dikosongkan, pakai `picsum.photos` sebagai placeholder
 
 **Spesifikasi:**
-- Format: semua format gambar (PNG, JPG, WEBP, dll)
-- Ukuran maks: 5MB
-- Validasi: hanya file gambar yang diterima (cek `file.type`)
-- Preview: tampilkan gambar dengan gradient overlay + nama file
-- Remove: tombol "Remove" untuk menghapus dan mengganti gambar
+- Format: URL gambar (harus diawali `http://` atau `https://`)
+- Validasi: cek protokol URL sebelum submit
+- Error handling: jika gambar gagal load, tampilkan placeholder icon (tidak crash)
+- Tidak ada upload file / base64 — gambar dikirim sebagai URL string ke database
 
-**Tampilan Upload:**
+**Tampilan Input:**
 ```
-┌─ Upload Product Image ─────────────────┐
-│                                        │
-│           [Upload Icon]                │
-│     Upload Product Image               │
-│  Drag & drop or click to browse        │
-│           (max 5MB)                    │
-│                                        │
-└────────────────────────────────────────┘
-```
+URL Gambar Produk
+[ https://down-id.img.susercontent.com/file/xxxxx _________________ ]
 
-**Tampilan Preview:**
-```
-┌─ Gambar ───────────────────────────────┐
-│ [████████████████████████████████]      │
-│ [███████ Gambar Produk █████████]      │
-│ [████████████████████████████████]      │
-│ [██ gradient overlay █████████████]     │
-├────────────────────────────────────────┤
-│ 🖼️ product-image.jpg      [Remove] 🔴 │
-└────────────────────────────────────────┘
+┌── Preview ──────────────────────────────┐
+│                                          │
+│           [ImageIcon] Preview            │
+│                                          │
+└──────────────────────────────────────────┘
 ```
 
 #### Form Fields
 
 | Field | Tipe | Placeholder |
 |---|---|---|
-| Product Image | Upload (drag & drop / click) | — |
+| URL Gambar Produk | URL input | `https://down-id.img.susercontent.com/file/xxxxx` |
 | Product Name | Text | `e.g. Ergonomic Desk Chair V2` |
 | Category | Select | Electronics, Fashion, Home, Beauty |
 | Affiliate Link | URL | `https://shopee.co.id/...` |
 | Price (IDR) | Text with "Rp" prefix | `1.250.000` |
-| Status | Toggle switch | Active / Inactive |
+| Featured | Toggle switch | Yes / No |
+| Tandai Stok Habis | Toggle switch | Yes / No |
 
 #### Tombol Aksi
 
@@ -568,12 +563,15 @@ Fitur upload gambar dengan dua metode:
 
 | Kolom | Isi |
 |---|---|
+| # | Nomor produk urut (computed dari createdAt ASC) |
 | Product | Gambar thumbnail + nama + ID produk |
 | Category | Badge kategori |
 | Price | Format Rp (contoh: Rp450.000) |
-| Commission | Persentase (contoh: 8%) |
-| Status | Badge Active (hijau) / Out of Stock (merah) |
+| Clicks | Jumlah klik (dari ClickLog) |
+| Status | Badge Featured/Standard + toggle Sold Out (Active/Sold Out) |
 | Actions | Copy Link (ikon `Copy`), Edit (ikon `Edit` → `/admin-shopby/products/[id]`), Delete (ikon `Trash2`) |
+
+> **Sold Out Toggle:** Setiap baris produk memiliki toggle "Sold Out" yang bisa di-klik langsung. Perubahan langsung terkirim ke `PUT /api/products/[id]` dan tabel di-refresh otomatis.
 
 #### Data Contoh (3 Produk)
 
@@ -594,12 +592,13 @@ Fitur upload gambar dengan dua metode:
 
 | Field | Tipe | Default |
 |---|---|---|
-| Item No. | Read-only text | `#PRD-90210-XYZ` |
+| Product Image | URL input + live preview | URL dari product (bisa diganti) |
 | Product Name | Text input | "Ergonomic Desk Chair V2" |
 | Category | Select | Furniture, Electronics, Apparel, Rumah Tangga |
 | Affiliate Link | URL input | `https://shopby.com/ref/8923a` |
 | Price | Text with "Rp" prefix | "1.250.000" |
-| Status | Toggle switch | Active (hijau) / Inactive (merah) |
+| Featured | Toggle switch | Yes / No |
+| Tandai Stok Habis | Toggle switch | Yes / No |
 
 #### Tombol Aksi
 
@@ -715,9 +714,11 @@ Mengambil daftar produk.
 **Query Parameters:**
 
 | Parameter | Tipe | Default | Deskripsi |
-|---|---|---|---|
+|---|---|---|---|---|
 | `category` | string | — | Slug kategori untuk filter |
 | `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc` |
+| `numberFrom` | number | — | Filter nomor produk awal (inklusif) |
+| `numberTo` | number | — | Filter nomor produk akhir (inklusif) |
 
 **Response (200):**
 ```json
@@ -733,6 +734,8 @@ Mengambil daftar produk.
       "shopeeUrl": "https://shopee.co.id/...",
       "categoryId": "clx...",
       "isFeatured": true,
+      "isSoldOut": false,
+      "number": 1,
       "createdAt": "2026-07-19T...",
       "category": { "id": "clx...", "name": "Elektronik", "slug": "elektronik" },
       "_count": { "clicks": 5 }
@@ -804,7 +807,8 @@ Menambahkan produk baru ke database.
   "categoryId": "clx...",
   "shopeeUrl": "https://shopee.co.id/...",
   "imageUrl": "https://picsum.photos/...",
-  "isFeatured": false
+  "isFeatured": false,
+  "isSoldOut": false
 }
 ```
 
@@ -845,7 +849,8 @@ Memperbarui data produk.
   "categoryId": "clx...",
   "shopeeUrl": "https://shopee.co.id/...",
   "imageUrl": "https://picsum.photos/...",
-  "isFeatured": true
+  "isFeatured": true,
+  "isSoldOut": false
 }
 ```
 
@@ -1035,7 +1040,10 @@ Mencatat klik produk dan mengembalikan URL Shopee.
 | `shopeeUrl` | String | URL affiliate Shopee |
 | `categoryId` | String | Foreign Key → Category |
 | `isFeatured` | Boolean | Flag produk unggulan |
+| `isSoldOut` | Boolean | Flag stok habis |
 | `createdAt` | DateTime | Waktu dibuat |
+
+> **Catatan:** Produk memiliki field computed `number` yang tidak disimpan di database. Nomor dihitung dari urutan `createdAt ASC` (produk pertama = #1, berikutnya = #2, dst). Renumbering otomatis saat produk dihapus.
 
 #### Category
 

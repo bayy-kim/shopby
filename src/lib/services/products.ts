@@ -9,13 +9,17 @@ export async function fetchProducts(
   categorySlug?: string,
   sort?: string,
   skip?: number,
-  take?: number
+  take?: number,
+  numberFrom?: number,
+  numberTo?: number
 ): Promise<ProductsResponse> {
   const params = new URLSearchParams()
   if (categorySlug) params.set("category", categorySlug)
   if (sort) params.set("sort", sort)
   if (skip) params.set("skip", String(skip))
   if (take) params.set("take", String(take))
+  if (numberFrom) params.set("numberFrom", String(numberFrom))
+  if (numberTo) params.set("numberTo", String(numberTo))
 
   const res = await fetch(`/api/products?${params.toString()}`)
   if (!res.ok) throw new Error("Failed to fetch products")
@@ -43,6 +47,7 @@ export async function createProduct(data: {
   shopeeUrl: string
   categoryId: string
   isFeatured?: boolean
+  isSoldOut?: boolean
 }): Promise<Product> {
   const res = await fetch("/api/products", {
     method: "POST",
@@ -65,6 +70,7 @@ export async function updateProduct(
     shopeeUrl: string
     categoryId: string
     isFeatured?: boolean
+    isSoldOut?: boolean
   }
 ): Promise<Product> {
   const res = await fetch(`/api/products/${id}`, {

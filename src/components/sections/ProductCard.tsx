@@ -17,8 +17,10 @@ export default function ProductCard({
   onBuy,
 }: ProductCardProps) {
   const isHighlight = variant === "highlight"
+  const isSoldOut = product.isSoldOut
 
   const handleBuy = () => {
+    if (isSoldOut) return
     onBuy?.(product.id)
   }
 
@@ -38,20 +40,36 @@ export default function ProductCard({
             src={product.imageUrl}
             alt={product.imageAlt}
             fill
-            className="object-cover"
+            className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
             sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
           />
+          {isSoldOut && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <span className="font-mono text-sm text-white font-bold uppercase tracking-wider bg-ink/60 px-3 py-1 border border-white/30">
+                Stok Habis
+              </span>
+            </div>
+          )}
         </div>
-        {isHighlight && (
-          <span className="font-mono text-xs text-ink/60 uppercase">
-            {product.category.name}
-          </span>
-        )}
-        <h3
-          className={`font-bold text-ink leading-tight mt-1 ${isHighlight ? "" : "text-sm"}`}
-        >
-          {product.name}
-        </h3>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            {isHighlight && (
+              <span className="font-mono text-xs text-ink/60 uppercase">
+                {product.category.name}
+              </span>
+            )}
+            <h3
+              className={`font-bold text-ink leading-tight mt-1 ${isHighlight ? "" : "text-sm"}`}
+            >
+              {product.name}
+            </h3>
+          </div>
+          {product.number > 0 && (
+            <span className="font-mono text-[10px] text-ink/40 uppercase shrink-0 mt-1">
+              #{product.number}
+            </span>
+          )}
+        </div>
       </div>
       <div className="mt-3 pt-3 border-t border-dashed border-border-color">
         <p
@@ -62,14 +80,18 @@ export default function ProductCard({
         </p>
         <button
           onClick={handleBuy}
+          disabled={isSoldOut}
+          aria-disabled={isSoldOut}
           className={`w-full py-1 font-bold text-xs uppercase brutalist-border transition-colors flex justify-center items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-primary ${
-            isHighlight
-              ? "bg-primary text-white hover:bg-ink"
-              : "bg-[#e8e8e5] text-ink hover:bg-primary hover:text-white"
+            isSoldOut
+              ? "bg-[#e2e3e0] text-[#906f69] cursor-not-allowed"
+              : isHighlight
+                ? "bg-primary text-white hover:bg-ink"
+                : "bg-[#e8e8e5] text-ink hover:bg-primary hover:text-white"
           }`}
         >
-          {isHighlight ? "Beli di Shopee" : "Beli"}
-          <ExternalLink className="size-3" aria-hidden="true" />
+          {isSoldOut ? "Stok Habis" : isHighlight ? "Beli di Shopee" : "Beli"}
+          {!isSoldOut && <ExternalLink className="size-3" aria-hidden="true" />}
         </button>
       </div>
       <div className="scan-line" />

@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer"
 import { useProducts } from "@/hooks/useProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { logClick } from "@/lib/services/click"
+import { buildNumberRanges } from "@/lib/utils"
 import type { Product } from "@/types"
 
 const PAGE_SIZE = 8
@@ -17,11 +18,14 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("semua")
   const [sort, setSort] = useState<string>("newest")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [numberRange, setNumberRange] = useState<{ from: number; to: number } | null>(null)
 
   const { data, isLoading, error } = useProducts({
     categorySlug:
       selectedCategory === "semua" ? undefined : selectedCategory,
     sort,
+    numberFrom: numberRange?.from,
+    numberTo: numberRange?.to,
   })
 
   const { data: categories } = useCategories()
@@ -36,6 +40,8 @@ export default function Home() {
     (p: Product) => !p.isFeatured
   )
   const hasMore = visibleCount < allProducts.length
+
+  const numberRanges = useMemo(() => buildNumberRanges(total), [total])
 
   const handleBuyProduct = useCallback(
     async (productId: string) => {
@@ -55,6 +61,7 @@ export default function Home() {
   const resetFilters = useCallback(() => {
     setSelectedCategory("semua")
     setSort("newest")
+    setNumberRange(null)
     setVisibleCount(PAGE_SIZE)
   }, [])
 
@@ -72,6 +79,11 @@ export default function Home() {
     setVisibleCount((prev) => prev + PAGE_SIZE)
   }, [])
 
+  const handleRangeSelect = useCallback((range: { from: number; to: number } | null) => {
+    setNumberRange(range)
+    setVisibleCount(PAGE_SIZE)
+  }, [])
+
   return (
     <>
       <Navbar />
@@ -83,6 +95,9 @@ export default function Home() {
             activeSlug={selectedCategory}
             onSelect={handleCategoryChange}
             variant="chips"
+            numberRanges={numberRanges}
+            activeRange={numberRange}
+            onRangeSelect={handleRangeSelect}
           />
         </div>
         <div id="products">
@@ -92,6 +107,9 @@ export default function Home() {
             activeSlug={selectedCategory}
             onSelect={handleCategoryChange}
             variant="sidebar"
+            numberRanges={numberRanges}
+            activeRange={numberRange}
+            onRangeSelect={handleRangeSelect}
           />
           <ProductGrid
             featuredProducts={featuredProducts}

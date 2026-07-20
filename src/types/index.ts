@@ -9,6 +9,8 @@ export interface Product {
   categoryId: string
   category: { id: string; name: string; slug: string }
   isFeatured: boolean
+  isSoldOut: boolean
+  number: number
   createdAt: string
   clicks?: { id: string }[]
 }

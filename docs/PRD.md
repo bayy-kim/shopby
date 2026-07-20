@@ -22,9 +22,11 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 | Fitur | Deskripsi |
 |---|---|
 | Hero section | Headline singkat + CTA, floating card highlight produk unggulan |
+| Fitur Stok Habis | Admin bisa tandai produk sebagai "Stok Habis", overlay + disabled button di landing page |
 | Filter kategori (mobile chips) | Chip horizontal scroll di mobile, sidebar di desktop |
+| Filter nomor produk | Filter range #1-100, #101-200, dst berdasarkan urutan produk upload |
 | Sorting | Urut berdasarkan terbaru, termurah, termahal |
-| Grid produk | Card berisi gambar, nama, harga, badge diskon (opsional), tombol "Beli di Shopee" |
+| Grid produk | Card berisi gambar, nomor produk (#1, #2...), nama, harga, badge diskon (opsional), tombol "Beli di Shopee", overlay "Stok Habis" jika sold out |
 | Produk terlaris/rekomendasi | Section khusus highlight produk pilihan (isFeatured) |
 | Klik tracking | Setiap klik "Beli di Shopee" dicatat (produk, waktu) untuk analitik sederhana |
 | Progressif load | Tombol "Muat Lebih Banyak" untuk reveal produk bertahap |
@@ -39,9 +41,9 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 |---|---|
 | `/admin-shopby/login` | Login page dengan receipt card, brutalist styling, form auth |
 | `/admin-shopby` | Dashboard — statistik real dari API, grafik performa, aktivitas terbaru |
-| `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination, CRUD via API |
-| `/admin-shopby/products/new` | Form tambah produk baru — image upload, kategori, link afiliasi, harga |
-| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, featured status |
+| `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination, toggle Sold Out per baris, CRUD via API |
+| `/admin-shopby/products/new` | Form tambah produk baru — URL image input, kategori, link afiliasi, harga, toggle Stok Habis |
+| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, featured status, sold out status |
 | `/admin-shopby/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
 | `/admin-shopby/settings` | Konfigurasi store profile, payout info, keamanan (password) |
 | `/admin-shopby/help` | Pusat bantuan panduan & resources |

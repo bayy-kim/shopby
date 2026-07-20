@@ -17,7 +17,7 @@ import {
   Home,
   Sparkles,
 } from "lucide-react"
-import { fetchProducts, deleteProduct } from "@/lib/services/products"
+import { fetchProducts, deleteProduct, updateProduct } from "@/lib/services/products"
 import { formatPrice } from "@/lib/utils"
 import type { Product } from "@/types"
 
@@ -76,6 +76,26 @@ export default function AdminProducts() {
 
   const handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url)
+  }
+
+  const handleToggleSoldOut = async (product: Product) => {
+    try {
+      const updated = await updateProduct(product.id, {
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        imageAlt: product.imageAlt,
+        shopeeUrl: product.shopeeUrl,
+        categoryId: product.categoryId,
+        isFeatured: product.isFeatured,
+        isSoldOut: !product.isSoldOut,
+      })
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, isSoldOut: updated.isSoldOut } : p))
+      )
+    } catch {
+      alert("Failed to update product")
+    }
   }
 
   return (
@@ -143,7 +163,7 @@ export default function AdminProducts() {
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-[#f4f4f1]/50">
-              {["Product", "Category", "Price", "Clicks", "Status", "Actions"].map((h) => (
+              {["#", "Product", "Category", "Price", "Clicks", "Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className={`py-4 px-6 font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] font-bold uppercase ${
@@ -158,7 +178,7 @@ export default function AdminProducts() {
           <tbody className="divide-y divide-dashed divide-[#e5e1d8]">
             {loading ? (
               <tr>
-                <td colSpan={6} className="text-center py-12" aria-busy="true">
+                <td colSpan={7} className="text-center py-12" aria-busy="true">
                   <div className="animate-pulse space-y-3 max-w-md mx-auto">
                     <div className="h-4 bg-[#e2e3e0] rounded" />
                     <div className="h-4 bg-[#e2e3e0] rounded w-3/4 mx-auto" />
@@ -169,7 +189,7 @@ export default function AdminProducts() {
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
+                <td colSpan={7} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
                   <div role="status">
                     <p className="font-mono text-[13px] text-[#5c403a]">No products found</p>
                     <p className="font-mono text-[11px] text-[#906f69] mt-2">Try adjusting your search or filter to find what you&apos;re looking for.</p>
@@ -178,6 +198,9 @@ export default function AdminProducts() {
               </tr>
             ) : paginated.map((product) => (
               <tr key={product.id} className="group hover:bg-[#FAFAF7] transition-colors border-b border-dashed border-[#e5e1d8]">
+                <td className="py-4 px-6 align-middle">
+                  <span className="font-mono text-[13px] text-[#5c403a]">#{product.number}</span>
+                </td>
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-4">
                     <div
@@ -208,14 +231,26 @@ export default function AdminProducts() {
                   <span className="font-mono text-[16px] font-bold text-[#b51c00]">{(product as ProductWithClicks)._count?.clicks ?? 0}</span>
                 </td>
                 <td className="py-4 px-6 align-middle text-center">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 border font-mono text-[11px] uppercase ${
-                    product.isFeatured
-                      ? "border-[#e5e1d8] bg-white text-[#1a1c1b]"
-                      : "border-[#e5e1d8] bg-[#e2e3e0] text-[#5c403a]"
-                  }`}>
-                    <span className={`size-1.5 rounded-full ${product.isFeatured ? "bg-green-500" : "bg-[#906f69]"}`} />
-                    {product.isFeatured ? "Featured" : "Standard"}
-                  </span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 border font-mono text-[11px] uppercase ${
+                      product.isFeatured
+                        ? "border-[#e5e1d8] bg-white text-[#1a1c1b]"
+                        : "border-[#e5e1d8] bg-[#e2e3e0] text-[#5c403a]"
+                    }`}>
+                      <span className={`size-1.5 rounded-full ${product.isFeatured ? "bg-green-500" : "bg-[#906f69]"}`} />
+                      {product.isFeatured ? "Featured" : "Standard"}
+                    </span>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={product.isSoldOut}
+                        onChange={() => handleToggleSoldOut(product)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-8 h-4 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[0.5px] after:left-[0.5px] after:bg-white after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#ba1a1a] relative" />
+                      <span className="font-mono text-[10px] uppercase text-[#5c403a]">{product.isSoldOut ? "Sold Out" : "Active"}</span>
+                    </label>
+                  </div>
                 </td>
                 <td className="py-4 px-6 align-middle text-right">
                   <div className="flex items-center justify-end gap-2">

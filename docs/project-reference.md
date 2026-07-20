@@ -47,7 +47,7 @@ src/
 │       │   ├── login/route.ts    # POST /api/admin-shopby/login
 │       │   └── logout/route.ts   # POST /api/admin-shopby/logout
 │       ├── products/
-│       │   ├── route.ts          # GET /api/products, POST /api/products (auth)
+│       │   ├── route.ts          # GET /api/products (public, with numberFrom/To), POST /api/products (auth)
 │       │   └── [id]/route.ts     # GET|PUT|DELETE /api/products/[id] (auth)
 │       ├── categories/route.ts   # GET /api/categories
 │       ├── click/route.ts        # POST /api/click
@@ -77,7 +77,8 @@ src/
 │   ├── auth.ts           # JWT session (jose) — edge-compatible
 │   ├── auth-password.ts  # scrypt hash/verify
 │   ├── prisma.ts         # Prisma client singleton
-│   ├── utils.ts          # cn(), formatPrice()
+│   ├── utils.ts          # cn(), formatPrice(), NUMBER_RANGE_CHUNK_SIZE, buildNumberRanges()
+│   ├── products-numbering.ts # getProductNumberMap(), resolveNumberRangeToIds()
 │   └── services/
 │       ├── products.ts   # fetchProducts, fetchProductById, createProduct, updateProduct, deleteProduct
 │       ├── categories.ts
@@ -86,7 +87,8 @@ src/
     └── index.ts          # Product, Category, ClickLog types
 prisma/
 ├── schema.prisma         # Product, Category, ClickLog, AppSetting
-└── seed.ts               # 4 categories (0 products)
+├── seed.ts               # 4 categories (0 products)
+└── migrations/
 ```
 
 ---
@@ -100,7 +102,7 @@ prisma/
 | Language         | TypeScript 5.x                     |
 | Styling          | Tailwind CSS v4 + shadcn/ui        |
 | Database ORM     | Prisma 6.6.0                       |
-| Database         | SQLite (local dev, `prisma/dev.db`) |
+| Database         | PostgreSQL (Neon in prod)           |
 | Package Manager  | pnpm                               |
 
 ---
@@ -119,7 +121,10 @@ prisma/
 | `shopeeUrl`  | `String`     | Shopee affiliate link        |
 | `categoryId` | `String`     | FK → Category                |
 | `isFeatured` | `Boolean`    | Flag for homepage featured   |
+| `isSoldOut`  | `Boolean`    | Flag for out-of-stock status |
 | `createdAt`  | `DateTime`   | Auto-set                     |
+
+**Computed field (not stored):** `number` — position in `createdAt ASC` order, calculated via `getProductNumberMap()`
 
 **Relations:** `Product belongsTo Category` (required), `Product hasMany ClickLog`
 
@@ -156,10 +161,10 @@ prisma/
 | ------ | --------------------- | ----- | --------------------------------------- |
 | POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set HttpOnly JWT cookie   |
 | POST   | `/api/admin-shopby/logout`   | —     | Clear session cookie                    |
-| GET    | `/api/products`       | —     | List products (`?search=&category=&sort=`) |
+| GET    | `/api/products`       | —     | List products (`?category=&sort=&numberFrom=&numberTo=`) |
 | POST   | `/api/products`       | Yes   | Create product                          |
-| GET    | `/api/products/[id]`  | —     | Get single product by ID                 |
-| PUT    | `/api/products/[id]`  | Yes   | Update product                          |
+| GET    | `/api/products/[id]`  | —     | Get single product (includes computed `number`) |
+| PUT    | `/api/products/[id]`  | Yes   | Update product (accepts `isSoldOut`)    |
 | DELETE | `/api/products/[id]`  | Yes   | Delete product                          |
 | GET    | `/api/categories`     | —     | List categories (no query params)       |
 | GET    | `/api/stats`          | Yes   | Dashboard stats — totalSales, totalProducts, totalClicks, recentClicks, topProducts |
@@ -168,6 +173,25 @@ prisma/
 | PUT    | `/api/settings`       | Yes   | Update AppSetting via Prisma            |
 | POST   | `/api/click`          | —     | Track product click → returns `{ shopeeUrl }` |
 | POST   | `/api/contact`        | —     | Submit contact form                     |
+
+### API Response — Product with `number`
+```json
+{
+  "data": [
+    {
+      "id": "clx...",
+      "name": "Mechanical Keyboard Pro",
+      "price": 450000,
+      "number": 1,
+      "isSoldOut": false,
+      "isFeatured": true,
+      "category": { "id": "clx...", "name": "Elektronik", "slug": "elektronik" },
+      "_count": { "clicks": 5 }
+    }
+  ],
+  "total": 9
+}
+```
 
 ---
 
@@ -212,6 +236,18 @@ Beberapa teknik performance diterapkan secara konsisten: (a) **preconnect** untu
 ### 13. Error Boundaries
 Admin section memiliki error boundary di `src/app/admin-shopby/error.tsx` yang menangkap runtime errors dengan fallback UI dan tombol retry. `src/app/admin-shopby/loading.tsx` menyediakan loading state global untuk semua admin pages, memberikan UX yang mulus saat data fetching.
 
+### 14. Product Numbering (Computed, Not Stored)
+Nomor produk dihitung dari posisi dalam urutan `createdAt ASC` — produk pertama = #1, berikutnya = #2, dst. Tidak disimpan sebagai kolom database. Renumbering otomatis saat produk dihapus. Helper di `src/lib/products-numbering.ts`.
+
+### 15. Sold Out Status
+Produk bisa ditandai `isSoldOut` via admin panel. Di landing page: overlay "Stok Habis" di atas gambar, tombol "Beli" jadi disabled dengan teks "Stok Habis".
+
+### 16. Number Range Filter
+Landing page memiliki filter nomor produk dengan chunk 100 produk per range (#1-100, #101-200, dst). Filter via query params `numberFrom` & `numberTo` pada `GET /api/products`.
+
+### 17. Image URL Input (No File Upload)
+Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Shopee langsung bisa ditempel sebagai URL, preview live dengan `<Image>` dari `next/image`.
+
 ---
 
 ## Component Library (src/components/)
@@ -224,21 +260,22 @@ Admin section memiliki error boundary di `src/app/admin-shopby/error.tsx` yang m
 - **EmptyState.tsx** — Descriptive fallback UI for empty product/grid states
 
 ### Layout (`src/components/layout/`)
-- **Navbar.tsx** — Fixed top nav with logo, nav links (Deals, Kategori, Affiliate), "Masuk" button → `/admin-shopby/login`
+- **Navbar.tsx** — Fixed top nav with logo, nav links (Deals, Kategori, Affiliate)
 - **Footer.tsx** — Footer with copyright 2026, brand links (About, Affiliate, Privacy, Terms, Contact)
 
 ### Feature Components (`src/components/sections/`)
 - **Hero.tsx** — Landing page hero: headline + subtitle + CTA "Lihat Semua Deal" + floating product card
-- **ProductCard.tsx** — Card with image, name, price badge, "Beli di Shopee" button → POST `/api/click`
+- **ProductCard.tsx** — Card with image, name, price, badge `#number`, sold-out overlay/disabled button, "Beli di Shopee" button → POST `/api/click`
 - **ProductGrid.tsx** — Responsive grid (1–2 mobile, 3 tablet, 4 desktop), progressive load with "Muat Lebih Banyak" button
-- **CategoryFilter.tsx** — Horizontal scroll chips on mobile, sidebar on desktop, active state highlight
+- **CategoryFilter.tsx** — Horizontal scroll chips on mobile, sidebar on desktop; includes category filter + number range filter sections
 
 ---
 
 ## Custom Hooks
 
-### `useProducts(params?: { category?: string; sort?: string; search?: string })`
-- Calls `GET /api/products` with optional category, sort, search query params
+### `useProducts(params?: { category?: string; sort?: string; numberFrom?: number; numberTo?: number })`
+- Calls `GET /api/products` with optional category, sort, number range query params
+- Query key includes numberFrom/To for cache differentiation
 - Returns `{ data, total, isLoading, error }` via TanStack Query `useQuery`
 
 ### `useCategories()`
@@ -252,7 +289,7 @@ Admin section memiliki error boundary di `src/app/admin-shopby/error.tsx` yang m
 ### Tailwind CSS v4
 - Uses `@import "tailwindcss"` syntax (v4 style) in `globals.css`
 - **No `tailwind.config.js`** — Tailwind v4 uses CSS-based configuration
-- Custom CSS custom properties in `:root` for brand colors (cyan/teal palette)
+- Custom CSS custom properties in `:root` for brand colors
 - `dark` class support via `@variant dark`
 
 ### shadcn/ui Convention
@@ -285,25 +322,6 @@ Components follow shadcn/ui patterns:
 - **Border style:** `border-dashed` dividers throughout (brutalist receipt aesthetic)
 - **Shadows:** `brutalist-shadow` custom class — solid ink box shadow
 - **Clip paths:** Polygon clip paths on cards and containers for jagged-edge brutalist effect
-
-### Component Variant Pattern
-```ts
-const buttonVariants = cva(
-  "base-classes",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-white",
-        outline: "border border-input",
-      },
-      size: {
-        sm: "h-8 px-3",
-        md: "h-10 px-4",
-      },
-    },
-  }
-)
-```
 
 ---
 
@@ -342,7 +360,7 @@ Run `pnpm prisma:seed` to populate the database.
 | `/admin-shopby/login`    | Client Component      | Login form → POST `/api/admin-shopby/login` |
 | `/admin-shopby`          | Client Component      | Dashboard — real stats from `/api/stats` |
 | `/admin-shopby/products` | Client Component      | Product table — CRUD via `/api/products` |
-| `/admin-shopby/products/new` | Client Component  | Add product — POST `/api/products` |
+| `/admin-shopby/products/new` | Client Component  | Add product — POST `/api/products` (URL image input) |
 | `/admin-shopby/products/[id]` | Client Component | Edit product — GET/PUT `/api/products/[id]` |
 | `/admin-shopby/analytics` | Client Component     | Real data from `/api/analytics` |
 | `/admin-shopby/settings` | Client Component      | Read/write via `/api/settings` |
@@ -357,7 +375,7 @@ Run `pnpm prisma:seed` to populate the database.
 
 - **Price formatting:** `formatPrice()` utility returns `RpX.XXX` (IDR) string — handles large numbers with dot separators, konsisten di semua produk, analytics, dan dashboard. Didefinisikan di `@/lib/utils.ts`.
 - **URL-safe slugs:** Categories use `slug` field generated from name via `.toLowerCase().replace(/\s+/g, '-')` in seed script
-- **Image strategy:** Uses `https://picsum.photos` for seed placeholder images; real deployments should swap for a CDN or media service
+- **Image strategy:** Input URL gambar langsung (base64 upload dihapus). Preview live via `<Image>` dari `next/image`. Fallback `picsum.photos` jika URL dikosongkan
 - **Dashboard chart:** Revenue chart di admin dashboard merender data real dari `/api/analytics` — bukan mock data. Aggregasi revenue dari total nilai produk * klik per hari
 - **Click analytics:** Logs to `ClickLog` table with product ID and timestamp
 - **Empty states:** All listing pages handle zero-results gracefully with descriptive messages
@@ -379,7 +397,10 @@ Run `pnpm prisma:seed` to populate the database.
 - **A11y — reduced-motion:** CSS `@media (prefers-reduced-motion: reduce)` menonaktifkan animasi dan transisi — hormati preferensi aksesibilitas pengguna
 - **A11y — role attributes:** Element struktural menggunakan role seperti `banner`, `navigation`, `main`, `contentinfo`, `region` — landmark untuk assistive technology
 - **Performance — preconnect:** `<link rel="preconnect">` untuk Google Fonts dan origin eksternal — mengurangi latency koneksi
-- **Performance — font-display: swap:** Konfigurasi `next/font` dengan `display: 'swap'` — teks tetap terlihat selama font加载, fallback font ditampilkan sementara
+- **Performance — font-display: swap:** Konfigurasi `next/font` dengan `display: 'swap'` — teks tetap terlihat selama font loading, fallback font ditampilkan sementara
 - **Performance — Next.js Image fill+sizes:** Gambar menggunakan `fill` prop dengan `sizes` attribute — responsive image loading, browser pilih ukuran optimal
 - **Performance — lazy loading:** Komponen di bawah fold menggunakan `loading="lazy"` untuk native image lazy loading — non-critical images tidak blocking initial render
 - **Error boundaries:** `src/app/admin-shopby/error.tsx` menangkap error di admin pages dengan fallback UI dan tombol retry; `src/app/admin-shopby/loading.tsx` menyediakan loading spinner global untuk admin section
+- **Product numbering (computed):** Helper `getProductNumberMap()` query semua produk `{ id, createdAt }` order ASC, return `Map<productId, number>`. Dipanggil paralel dengan query utama di API. Nomor tidak disimpan di database — renumbering otomatis saat delete
+- **Sold Out:** Field `isSoldOut` di Prisma, toggle di admin panel (toggle langsung di tabel list, checkbox di form new/edit). Di landing page: overlay "Stok Habis" + disabled button, `aria-disabled="true"`
+- **Number range filter:** Chunk 100 produk per range (`NUMBER_RANGE_CHUNK_SIZE = 100`). Filter di CategoryFilter (sidebar & mobile chips), query params `numberFrom`/`numberTo` ke API

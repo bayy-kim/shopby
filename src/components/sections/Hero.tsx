@@ -22,6 +22,8 @@ const defaultFeatured: Product[] = [
     categoryId: "cat1",
     category: { id: "cat1", name: "Elektronik", slug: "elektronik" },
     isFeatured: true,
+    isSoldOut: false,
+    number: 0,
     createdAt: new Date().toISOString(),
   },
   {
@@ -37,6 +39,8 @@ const defaultFeatured: Product[] = [
     categoryId: "cat3",
     category: { id: "cat3", name: "Rumah Tangga", slug: "rumah-tangga" },
     isFeatured: true,
+    isSoldOut: false,
+    number: 0,
     createdAt: new Date().toISOString(),
   },
 ]

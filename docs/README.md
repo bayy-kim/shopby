@@ -9,12 +9,13 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 ### Landing Page
 - 🎯 **Hero section** — Headline + floating card produk unggulan
 - 🏷️ **Filter kategori** — Chip horizontal scroll (mobile) / sidebar (desktop)
+- #️⃣ **Filter nomor produk** — Range #1-100, #101-200, dst
 - 🔄 **Sorting** — Terbaru, termurah, termahal
-- 🖼️ **Grid produk** — Card dengan gambar, nama, harga, tombol "Beli di Shopee"
+- 🖼️ **Grid produk** — Card dengan gambar, nomor produk, nama, harga, tombol "Beli di Shopee"
 - ⭐ **Rekomendasi** — Section khusus produk pilihan (isFeatured)
 - 📊 **Klik tracking** — Setiap klik dicatat via API untuk analitik
 - ⚡ **Progressif load** — Tombol "Muat Lebih Banyak" tanpa reload
-- 🎨 **Animasi** — Scroll reveal + scan-line effect (Framer Motion)
+- 🚫 **Stok Habis** — Admin bisa tandai produk sold out, overlay + disabled button
 
 ### Admin Panel (Auth Guard)
 - 🔐 `/admin-shopby/login` — Login page receipt card brutalist style (POST ke API login)
@@ -22,8 +23,9 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - 🔑 **Single admin** — Credential dari `.env` (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH`), tanpa database/users table
 - 🍪 **Session JWT** — HttpOnly cookie `shopby_admin_session`, expiry 24 jam
 - 📈 `/admin-shopby` — Dashboard with stats, sales chart, recent activity
-- 📦 `/admin-shopby/products` — Product management table with CRUD
-- ✏️ `/admin-shopby/products/[id]` — Edit product form
+- 📦 `/admin-shopby/products` — Product management table with CRUD + Sold Out toggle
+- ✏️ `/admin-shopby/products/new` — Add product (URL image input)
+- ✏️ `/admin-shopby/products/[id]` — Edit product form (with Sold Out toggle)
 - 📊 `/admin-shopby/analytics` — Metrics, traffic sources, geographic data
 - ⚙️ `/admin-shopby/settings` — Store profile, payout, security toggles
 - 🚪 **Logout** — Hapus session cookie, redirect ke login
@@ -31,13 +33,12 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 ## Tech Stack
 
 | Stack | Keterangan |
-|---|---|
+|---|---|---|
 | **Framework** | Next.js 16 (App Router) + TypeScript |
 | **Styling** | Tailwind CSS v4 + shadcn/ui |
-| **Database** | Prisma ORM + SQLite (dev) → Postgres (prod) |
+| **Database** | Prisma ORM + PostgreSQL (Neon prod) |
 | **Auth** | JWT (jose) + scrypt password hash |
 | **State** | TanStack Query (React Query) |
-| **Animasi** | Framer Motion |
 | **Ikon** | lucide-react |
 
 ## Struktur Folder

@@ -4,14 +4,16 @@ import { fetchProducts } from "@/lib/services/products"
 interface UseProductsOptions {
   categorySlug?: string
   sort?: string
+  numberFrom?: number
+  numberTo?: number
 }
 
 export function useProducts(options?: UseProductsOptions) {
-  const { categorySlug, sort } = options ?? {}
+  const { categorySlug, sort, numberFrom, numberTo } = options ?? {}
 
   return useQuery({
-    queryKey: ["products", categorySlug ?? "all", sort ?? "newest"],
-    queryFn: () => fetchProducts(categorySlug, sort),
+    queryKey: ["products", categorySlug ?? "all", sort ?? "newest", numberFrom ?? 0, numberTo ?? 0],
+    queryFn: () => fetchProducts(categorySlug, sort, undefined, undefined, numberFrom, numberTo),
     placeholderData: (prev) => prev,
   })
 }

@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { checkAuth } from "@/lib/auth"
+import { getProductNumberMap } from "@/lib/products-numbering"
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { category: true },
-  })
+  const [product, numberMap] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    }),
+    getProductNumberMap(),
+  ])
   if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 })
-  return NextResponse.json({ data: product })
+  return NextResponse.json({ data: { ...product, number: numberMap.get(id) ?? 0 } })
 }
 
 export async function PUT(
@@ -24,11 +28,11 @@ export async function PUT(
   }
   const { id } = await params
   const body = await request.json()
-  const { name, price, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured } = body
+  const { name, price, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
 
   const product = await prisma.product.update({
     where: { id },
-    data: { name, price, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured },
+    data: { name, price, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut },
     include: { category: true },
   })
   return NextResponse.json({ data: product })

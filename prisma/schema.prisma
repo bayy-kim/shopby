@@ -17,6 +17,7 @@ model Product {
   shopeeUrl   String
   categoryId  String
   isFeatured  Boolean    @default(false)
+  isSoldOut   Boolean    @default(false)
   createdAt   DateTime   @default(now())
   clicks      ClickLog[]
   category    Category   @relation(fields: [categoryId], references: [id])

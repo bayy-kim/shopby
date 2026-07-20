@@ -10,6 +10,7 @@ import { useCategories } from "@/hooks/useCategories"
 export default function NewProduct() {
   const router = useRouter()
   const [status, setStatus] = useState(true)
+  const [isSoldOut, setIsSoldOut] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const [urlError, setUrlError] = useState("")
   const [showToast, setShowToast] = useState(false)
@@ -54,6 +55,7 @@ export default function NewProduct() {
         shopeeUrl,
         categoryId,
         isFeatured: status,
+        isSoldOut,
       })
       setShowToast(true)
       setTimeout(() => {
@@ -176,6 +178,15 @@ export default function NewProduct() {
                 <input type="checkbox" checked={status} onChange={() => setStatus(!status)} className="sr-only peer" />
                 <div className="w-14 h-7 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF4D2D]" />
                 <span className="ml-3 font-mono text-[13px] leading-[16px] tracking-[0.05em] uppercase text-[#1a1c1b]">{status ? "Yes" : "No"}</span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between py-4 border-b border-dashed border-[#e5e1d8] -mt-6">
+              <span className="font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase">Tandai Stok Habis</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={isSoldOut} onChange={() => setIsSoldOut(!isSoldOut)} className="sr-only peer" />
+                <div className="w-14 h-7 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#ba1a1a]" />
+                <span className="ml-3 font-mono text-[13px] leading-[16px] tracking-[0.05em] uppercase text-[#1a1c1b]">{isSoldOut ? "Yes" : "No"}</span>
               </label>
             </div>
 
