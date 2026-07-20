@@ -29,9 +29,6 @@ export default function Navbar() {
             Affiliate
           </Link>
         </div>
-        <Link href="/admin-shopby/login" className="bg-primary text-ink px-4 py-2 font-bold rounded-full brutalist-shadow text-sm uppercase tracking-wider inline-block focus-visible:ring-2 focus-visible:ring-primary">
-          Masuk
-        </Link>
       </div>
     </nav>
   )
