@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
-import { promises as fs } from "fs"
-import path from "path"
+import { prisma } from "@/lib/prisma"
 import { verifySessionToken } from "@/lib/auth"
 
-const settingsPath = path.join(process.cwd(), "data", "settings.json")
+const SETTINGS_KEY = "store_settings"
 
 const defaultSettings = {
   storeName: "Shopby Affiliate Store",
@@ -27,8 +26,9 @@ async function getAuth(request: Request) {
 
 async function readSettings(): Promise<Record<string, unknown>> {
   try {
-    const raw = await fs.readFile(settingsPath, "utf-8")
-    return { ...defaultSettings, ...JSON.parse(raw) }
+    const row = await prisma.appSetting.findUnique({ where: { key: SETTINGS_KEY } })
+    if (!row) return { ...defaultSettings }
+    return { ...defaultSettings, ...JSON.parse(row.value) }
   } catch {
     return { ...defaultSettings }
   }
@@ -52,8 +52,11 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const current = await readSettings()
     const merged = { ...current, ...body }
-    await fs.mkdir(path.dirname(settingsPath), { recursive: true })
-    await fs.writeFile(settingsPath, JSON.stringify(merged, null, 2), "utf-8")
+    await prisma.appSetting.upsert({
+      where: { key: SETTINGS_KEY },
+      update: { value: JSON.stringify(merged) },
+      create: { key: SETTINGS_KEY, value: JSON.stringify(merged) },
+    })
     return NextResponse.json({ success: true, settings: merged })
   } catch {
     return NextResponse.json(

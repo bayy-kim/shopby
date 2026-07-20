@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from "jose"
+import type { NextRequest } from "next/server"
 
 function getSecret(): Uint8Array {
   const secret = process.env.SESSION_SECRET
@@ -26,4 +27,11 @@ export async function verifySessionToken(
   } catch {
     return null
   }
+}
+
+export async function checkAuth(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get("shopby_admin_session")?.value
+  if (!token) return false
+  const payload = await verifySessionToken(token)
+  return !!payload
 }

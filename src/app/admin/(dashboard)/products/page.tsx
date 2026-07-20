@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { fetchProducts, deleteProduct } from "@/lib/services/products"
+import { formatPrice } from "@/lib/utils"
 import type { Product } from "@/types"
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty"]
@@ -198,7 +199,7 @@ export default function AdminProducts() {
                 </td>
                 <td className="py-4 px-6 align-middle text-right">
                   <span className="font-mono text-[16px] font-bold text-[#1a1c1b] bg-[#FFC93C] px-2 py-0.5">
-                    Rp{product.price.toLocaleString("id-ID")}
+                    {formatPrice(product.price)}
                   </span>
                 </td>
                 <td className="py-4 px-6 align-middle text-right">

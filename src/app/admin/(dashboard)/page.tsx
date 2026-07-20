@@ -7,7 +7,8 @@ import {
   MousePointerClick,
   Wallet,
 } from "lucide-react"
-import { fetchStats } from "@/lib/services/products"
+import { fetchStats, fetchAnalytics } from "@/lib/services/products"
+import { formatPrice } from "@/lib/utils"
 
 export default function AdminDashboard() {
   const [statsData, setStatsData] = useState<{
@@ -20,16 +21,21 @@ export default function AdminDashboard() {
     topProducts: { id: string; name: string; clicks: number; category: string }[]
   } | null>(null)
 
+  const [revenueData, setRevenueData] = useState<{ day: string; clicks: number; conversions: number; revenue: number }[]>([])
+
   useEffect(() => {
     fetchStats()
       .then(setStatsData)
       .catch(() => setStatsData(null))
+    fetchAnalytics()
+      .then((d) => setRevenueData(d.revenueData || []))
+      .catch(() => {})
   }, [])
 
   const statCards = [
     {
       label: "Total Sales",
-      value: statsData ? `Rp${(statsData.totalSales || 0).toLocaleString("id-ID")}` : "$24,590",
+      value: statsData ? formatPrice(statsData.totalSales || 0) : "Rp0",
       trend: statsData ? `${statsData.totalClicks} total clicks` : "+12.5% vs last month",
       icon: TrendingUp,
       color: "text-[#b51c00]",
@@ -50,7 +56,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Est. Commission",
-      value: statsData ? `Rp${(statsData.avgCommission || 0).toLocaleString("id-ID")}` : "$3,420",
+      value: statsData ? formatPrice(statsData.avgCommission || 0) : "Rp0",
       trend: "Pending payout",
       icon: Wallet,
       color: "text-[#1a1c1b]",
@@ -121,22 +127,43 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="border border-[#e5e1e9] bg-[#f9f9f6] p-4 flex-1 min-h-[300px] relative">
-            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 300">
-              {[50, 125, 200, 275].map((y) => (
-                <line key={y} className="stroke-[#e5beb6] stroke-dashed" x1="0" x2="800" y1={y} y2={y} />
-              ))}
-              <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="45">$3k</text>
-              <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="120">$2k</text>
-              <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="195">$1k</text>
-              <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="270">0</text>
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => (
-                <text key={day} fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x={80 + i * 120} y="295">{day}</text>
-              ))}
-              <path className="stroke-[#FF4D2D] fill-none stroke-[3]" d="M 80 250 L 200 180 L 320 210 L 440 90 L 560 120 L 680 40" />
-              {[[80, 250], [200, 180], [320, 210], [440, 90], [560, 120], [680, 40]].map(([cx, cy], i) => (
-                <circle key={i} cx={cx} cy={cy} fill="#FF4D2D" r="4" />
-              ))}
-            </svg>
+            {revenueData.length > 0 ? (
+              <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 300">
+                {[50, 125, 200, 275].map((y) => (
+                  <line key={y} className="stroke-[#e5beb6] stroke-dashed" x1="0" x2="800" y1={y} y2={y} />
+                ))}
+                <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="45">Rp{Math.max(...revenueData.map(d => d.revenue), 1).toLocaleString("id-ID")}</text>
+                <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="120">Rp{Math.round(Math.max(...revenueData.map(d => d.revenue), 1) * 2/3).toLocaleString("id-ID")}</text>
+                <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="195">Rp{Math.round(Math.max(...revenueData.map(d => d.revenue), 1) * 1/3).toLocaleString("id-ID")}</text>
+                <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="270">0</text>
+                {revenueData.map((d, i) => {
+                  const x = 80 + i * (600 / Math.max(revenueData.length - 1, 1))
+                  const maxRev = Math.max(...revenueData.map(r => r.revenue), 1)
+                  const y = 275 - (d.revenue / maxRev) * 225
+                  return (
+                    <text key={d.day} fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x={x - 15} y="295">{d.day}</text>
+                  )
+                })}
+                <path className="stroke-[#FF4D2D] fill-none stroke-[3]" d={
+                  revenueData.map((d, i) => {
+                    const x = 80 + i * (600 / Math.max(revenueData.length - 1, 1))
+                    const maxRev = Math.max(...revenueData.map(r => r.revenue), 1)
+                    const y = 275 - (d.revenue / maxRev) * 225
+                    return `${i === 0 ? "M" : "L"} ${x} ${y}`
+                  }).join(" ")
+                } />
+                {revenueData.map((d, i) => {
+                  const x = 80 + i * (600 / Math.max(revenueData.length - 1, 1))
+                  const maxRev = Math.max(...revenueData.map(r => r.revenue), 1)
+                  const y = 275 - (d.revenue / maxRev) * 225
+                  return <circle key={i} cx={x} cy={y} fill="#FF4D2D" r="4" />
+                })}
+              </svg>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground font-mono text-[13px]">
+                No revenue data yet
+              </div>
+            )}
           </div>
         </section>
 

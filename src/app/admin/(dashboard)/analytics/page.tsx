@@ -13,6 +13,7 @@ import {
   MapPin,
 } from "lucide-react"
 import { fetchAnalytics } from "@/lib/services/products"
+import { formatPrice } from "@/lib/utils"
 
 export default function AdminAnalytics() {
   const [data, setData] = useState<{
@@ -33,7 +34,7 @@ export default function AdminAnalytics() {
   const metrics = [
     {
       label: "Total Revenue",
-      value: data ? `Rp${(data.totalRevenue || 0).toLocaleString("id-ID")}` : "Rp 15.400",
+      value: data ? formatPrice(data.totalRevenue || 0) : "Rp15.400",
       trend: "Based on click data",
       icon: Wallet,
       trendIcon: TrendingUp,
@@ -41,7 +42,7 @@ export default function AdminAnalytics() {
     },
     {
       label: "Avg Order Value",
-      value: data ? `Rp${(data.aov || 0).toLocaleString("id-ID")}` : "Rp 245.000",
+      value: data ? formatPrice(data.aov || 0) : "Rp245.000",
       trend: "Per estimated conversion",
       icon: Receipt,
       trendIcon: Minus,

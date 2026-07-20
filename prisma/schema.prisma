@@ -35,3 +35,9 @@ model ClickLog {
   product   Product  @relation(fields: [productId], references: [id])
   clickedAt DateTime @default(now())
 }
+
+model AppSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
