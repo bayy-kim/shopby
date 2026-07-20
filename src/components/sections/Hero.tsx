@@ -97,6 +97,7 @@ export default function Hero({
                     src={card1.imageUrl}
                     alt={card1.imageAlt}
                     fill
+                    priority
                     className="object-cover"
                     sizes="256px"
                   />
@@ -138,6 +139,7 @@ export default function Hero({
                     src={card2.imageUrl}
                     alt={card2.imageAlt}
                     fill
+                    priority
                     className="object-cover"
                     sizes="256px"
                   />

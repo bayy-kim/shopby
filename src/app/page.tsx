@@ -1,16 +1,22 @@
 "use client"
 
 import { useState, useCallback, useMemo } from "react"
+import dynamic from "next/dynamic"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
-import CategoryFilter from "@/components/sections/CategoryFilter"
-import ProductGrid from "@/components/sections/ProductGrid"
-import Footer from "@/components/layout/Footer"
 import { useProducts } from "@/hooks/useProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { logClick } from "@/lib/services/click"
 import { buildNumberRanges } from "@/lib/utils"
 import type { Product } from "@/types"
+
+const CategoryFilter = dynamic(() => import("@/components/sections/CategoryFilter"), {
+  loading: () => <div className="h-10 animate-pulse bg-[#f4f4f1]" />,
+})
+const ProductGrid = dynamic(() => import("@/components/sections/ProductGrid"), {
+  loading: () => <div className="h-96 animate-pulse bg-[#f4f4f1]" />,
+})
+const Footer = dynamic(() => import("@/components/layout/Footer"))
 
 const PAGE_SIZE = 8
 
@@ -24,6 +30,8 @@ export default function Home() {
     categorySlug:
       selectedCategory === "semua" ? undefined : selectedCategory,
     sort,
+    skip: 0,
+    take: visibleCount,
     numberFrom: numberRange?.from,
     numberTo: numberRange?.to,
   })
@@ -41,8 +49,7 @@ export default function Home() {
     () => allProducts.filter((p: Product) => p.isFeatured),
     [allProducts]
   )
-  const visibleProducts = allProducts.slice(0, visibleCount)
-  const hasMore = visibleCount < allProducts.length
+  const hasMore = visibleCount < total
 
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])
 
@@ -113,7 +120,7 @@ export default function Home() {
           />
           <ProductGrid
             featuredProducts={featuredProducts}
-            allProducts={visibleProducts}
+            allProducts={allProducts}
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
