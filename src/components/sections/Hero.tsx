@@ -46,9 +46,10 @@ const defaultFeatured: Product[] = [
 ]
 
 export default function Hero({
-  featuredProducts = defaultFeatured,
+  featuredProducts,
 }: HeroProps) {
-  const [card1, card2] = featuredProducts.slice(0, 2)
+  const displayProducts = featuredProducts?.length ? featuredProducts : defaultFeatured
+  const [card1, card2] = displayProducts.slice(0, 2)
 
   return (
     <header className="pt-32 pb-20 px-4 md:px-8 max-w-[1200px] mx-auto w-full relative overflow-hidden">
