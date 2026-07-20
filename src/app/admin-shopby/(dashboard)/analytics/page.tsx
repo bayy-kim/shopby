@@ -29,11 +29,12 @@ export default function AdminAnalytics() {
   const [analyticsPeriod, setAnalyticsPeriod] = useState("All Time")
 
   useEffect(() => {
-    fetchAnalytics()
+    setLoading(true)
+    fetchAnalytics(analyticsPeriod)
       .then(setData)
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [analyticsPeriod])
 
   const metrics = [
     {

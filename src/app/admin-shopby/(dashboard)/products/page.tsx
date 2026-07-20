@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -13,28 +13,29 @@ import {
   SortAsc,
   ChevronLeft,
   ChevronRight,
+  LayoutGrid,
   Laptop,
   Shirt,
   Home,
   Sparkles,
 } from "lucide-react"
 import { fetchProducts, deleteProduct, updateProduct } from "@/lib/services/products"
+import { useCategories } from "@/hooks/useCategories"
 import { formatPrice } from "@/lib/utils"
-import type { Product } from "@/types"
+import type { Product, Category } from "@/types"
 
 type ProductWithClicks = Product & { _count?: { clicks: number } }
 
-const categories = ["All", "Electronics", "Fashion", "Home", "Beauty"]
-const categoryIcons: Record<string, React.ReactNode> = {
-  Electronics: <Laptop className="size-3" aria-hidden="true" />,
-  Fashion: <Shirt className="size-3" aria-hidden="true" />,
-  Home: <Home className="size-3" aria-hidden="true" />,
-  Beauty: <Sparkles className="size-3" aria-hidden="true" />,
+const defaultIcons: Record<string, React.ReactNode> = {
+  elektronik: <Laptop className="size-3" aria-hidden="true" />,
+  fashion: <Shirt className="size-3" aria-hidden="true" />,
+  "rumah-tangga": <Home className="size-3" aria-hidden="true" />,
+  kecantikan: <Sparkles className="size-3" aria-hidden="true" />,
 }
 
 export default function AdminProducts() {
   const searchParams = useSearchParams()
-  const [activeCategory, setActiveCategory] = useState("All")
+  const [activeCategory, setActiveCategory] = useState("semua")
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
   const paramsQ = searchParams.get("q") || ""
   if (paramsQ && paramsQ !== searchQuery) {
@@ -46,12 +47,25 @@ export default function AdminProducts() {
   const pageSize = 10
   const [sort, setSort] = useState("newest")
 
+  const { data: dbCategories } = useCategories()
+  const categories = useMemo(() => {
+    const all: { slug: string; name: string; icon: React.ReactNode }[] = [
+      { slug: "semua", name: "All", icon: <LayoutGrid className="size-3" aria-hidden="true" /> },
+    ]
+    if (dbCategories) {
+      for (const cat of dbCategories) {
+        all.push({ slug: cat.slug, name: cat.name, icon: defaultIcons[cat.slug] ?? <LayoutGrid className="size-3" aria-hidden="true" /> })
+      }
+    }
+    return all
+  }, [dbCategories])
+
   useEffect(() => {
     const load = async () => {
       setLoading(true)
       try {
         const result = await fetchProducts(
-          activeCategory === "All" ? undefined : activeCategory.toLowerCase(),
+          activeCategory === "semua" ? undefined : activeCategory,
           sort
         )
         setProducts(result.data)
@@ -140,19 +154,19 @@ export default function AdminProducts() {
 
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
           {categories.map((cat) => {
-            const isActive = cat === activeCategory
+            const isActive = cat.slug === activeCategory
             return (
               <button
-                key={cat}
-                onClick={() => { setActiveCategory(cat); setPage(1) }}
+                key={cat.slug}
+                onClick={() => { setActiveCategory(cat.slug); setPage(1) }}
                 className={`flex items-center gap-1 px-4 py-1.5 rounded-full font-mono text-[11px] whitespace-nowrap transition-all active:translate-y-0.5 active:translate-x-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
                   isActive
                     ? "bg-[#1a1c1b] text-[#FAFAF7]"
                     : "border border-[#e5e1d8] text-[#1a1c1b] hover:bg-[#f4f4f1]"
                 }`}
               >
-                {categoryIcons[cat]}
-                {cat}
+                {cat.icon}
+                {cat.name}
               </button>
             )
           })}

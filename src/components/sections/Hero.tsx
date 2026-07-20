@@ -6,6 +6,7 @@ import type { Product } from "@/types"
 
 interface HeroProps {
   featuredProducts?: Product[]
+  onBuyProduct?: (productId: string, shopeeUrl: string) => void
 }
 
 const defaultFeatured: Product[] = [
@@ -47,9 +48,15 @@ const defaultFeatured: Product[] = [
 
 export default function Hero({
   featuredProducts,
+  onBuyProduct,
 }: HeroProps) {
   const displayProducts = featuredProducts?.length ? featuredProducts : defaultFeatured
   const [card1, card2] = displayProducts.slice(0, 2)
+
+  const handleCardClick = (productId: string, shopeeUrl: string) => {
+    if (!onBuyProduct || shopeeUrl === "#") return
+    onBuyProduct(productId, shopeeUrl)
+  }
 
   return (
     <header className="pt-32 pb-20 px-4 md:px-8 max-w-[1200px] mx-auto w-full relative overflow-hidden">
@@ -73,7 +80,11 @@ export default function Hero({
         <div className="relative h-[400px] hidden md:block">
           {card1 && (
             <div
-              className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10"
+              onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card1.id, card1.shopeeUrl) }}
+              role="button"
+              tabIndex={0}
+              className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer"
               style={{
                 background: "white",
                 clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
@@ -110,7 +121,11 @@ export default function Hero({
 
           {card2 && (
             <div
-              className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0"
+              onClick={() => handleCardClick(card2.id, card2.shopeeUrl)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(card2.id, card2.shopeeUrl) }}
+              role="button"
+              tabIndex={0}
+              className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0 cursor-pointer"
               style={{
                 background: "white",
                 clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",

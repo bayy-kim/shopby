@@ -27,7 +27,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([fetchStats(), fetchAnalytics()])
+    setLoading(true)
+    Promise.all([fetchStats(period), fetchAnalytics(period)])
       .then(([stats, analytics]) => {
         setStatsData(stats)
         setRevenueData(analytics.revenueData || [])
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
         setRevenueData([])
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [period])
 
   const statCards = [
     {

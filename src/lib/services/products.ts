@@ -88,7 +88,7 @@ export async function deleteProduct(id: string): Promise<void> {
   if (!res.ok) throw new Error("Failed to delete product")
 }
 
-export async function fetchStats(): Promise<{
+export async function fetchStats(period?: string): Promise<{
   totalSales: number
   totalProducts: number
   activeProducts: number
@@ -98,13 +98,14 @@ export async function fetchStats(): Promise<{
   recentClicks: { productName: string; clickedAt: string }[]
   topProducts: { id: string; name: string; clicks: number; category: string }[]
 }> {
-  const res = await fetch("/api/stats")
+  const params = period && period !== "all" ? `?period=${period}` : ""
+  const res = await fetch(`/api/stats${params}`)
   if (!res.ok) throw new Error("Failed to fetch stats")
   const json = await res.json()
   return json.data
 }
 
-export async function fetchAnalytics(): Promise<{
+export async function fetchAnalytics(period?: string): Promise<{
   totalRevenue: number
   aov: number
   conversionRate: number
@@ -114,7 +115,13 @@ export async function fetchAnalytics(): Promise<{
   revenueData: { day: string; clicks: number; conversions: number; revenue: number }[]
   topProducts: Record<string, { name: string; clicks: number; revenue: number }>
 }> {
-  const res = await fetch("/api/analytics")
+  const mapped = period === "All Time" ? "all"
+    : period === "This Week" ? "week"
+    : period === "This Month" ? "month"
+    : period === "This Year" ? "year"
+    : period
+  const params = mapped && mapped !== "all" ? `?period=${mapped}` : ""
+  const res = await fetch(`/api/analytics${params}`)
   if (!res.ok) throw new Error("Failed to fetch analytics")
   const json = await res.json()
   return json.data

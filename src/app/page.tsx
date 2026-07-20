@@ -37,11 +37,11 @@ export default function Home() {
   }
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
-  const visibleProducts = allProducts.slice(0, visibleCount)
   const featuredProducts = useMemo(
-    () => visibleProducts.filter((p: Product) => p.isFeatured),
-    [visibleProducts]
+    () => allProducts.filter((p: Product) => p.isFeatured),
+    [allProducts]
   )
+  const visibleProducts = allProducts.slice(0, visibleCount)
   const hasMore = visibleCount < allProducts.length
 
   const numberRanges = useMemo(() => buildNumberRanges(displayTotal), [displayTotal])
@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Hero featuredProducts={featuredProducts} />
+      <Hero featuredProducts={featuredProducts} onBuyProduct={handleBuyProduct} />
       <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
         <div id="categories">
           <CategoryFilter
