@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const [totalProducts, totalClicks, activeProducts, recentClicks, topProducts] = await Promise.all([
     prisma.product.count(),
     prisma.clickLog.count(),
-    prisma.product.count({ where: { isFeatured: true } }),
+    prisma.product.count({ where: { isSoldOut: false } }),
     prisma.clickLog.findMany({ take: 5, orderBy: { clickedAt: "desc" }, include: { product: { select: { name: true } } } }),
     prisma.product.findMany({ take: 5, orderBy: { clicks: { _count: "desc" } }, include: { _count: { select: { clicks: true } }, category: true } }),
   ])
