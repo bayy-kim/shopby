@@ -300,6 +300,7 @@ Run `pnpm prisma:seed` to populate the database.
 | `/admin/login`           | Client Component      | Login form → POST `/api/admin/login` |
 | `/admin`                 | Client Component      | Dashboard (protected by middleware)  |
 | `/admin/products`        | Client Component      | Product table (protected)            |
+| `/admin/products/new`    | Client Component      | Add new product with image upload    |
 | `/admin/products/[id]`   | Client Component      | Edit product (protected)             |
 | `/admin/analytics`       | Client Component      | Analytics panel (protected)          |
 | `/admin/settings`        | Client Component      | Settings page (protected)            |

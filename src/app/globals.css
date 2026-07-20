@@ -79,6 +79,8 @@
   --text-body-md--font-weight: 400;
 }
 
+@custom-variant motion-safe (&:where(.motion-safe, .motion-safe *));
+
 :root {
   --radius: 0.625rem;
   --background: #FAFAF7;
@@ -161,26 +163,28 @@
     border-bottom: 1px dashed #E5E1D8;
   }
 
-  .brutalist-shadow {
-    box-shadow: 4px 4px 0px 0px #17161C;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
+  @media (prefers-reduced-motion: no-preference) {
+    .brutalist-shadow {
+      box-shadow: 4px 4px 0px 0px #17161C;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-  .brutalist-shadow:active {
-    box-shadow: 2px 2px 0px 0px #17161C;
-    transform: translate(2px, 2px);
-  }
+    .brutalist-shadow:active {
+      box-shadow: 2px 2px 0px 0px #17161C;
+      transform: translate(2px, 2px);
+    }
 
-  .receipt-card {
-    background: #ffffff;
-    border: 1px solid #E5E1D8;
-    position: relative;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-  }
+    .receipt-card {
+      background: #ffffff;
+      border: 1px solid #E5E1D8;
+      position: relative;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
 
-  .receipt-card:hover {
-    transform: translate(2px, 2px);
-    background-color: #FAFAF7;
+    .receipt-card:hover {
+      transform: translate(2px, 2px);
+      background-color: #FAFAF7;
+    }
   }
 
   .receipt-hole {
@@ -217,14 +221,16 @@
     100% { top: 100%; }
   }
 
-  .hero-scan-line {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 2px;
-    background: rgba(23, 22, 28, 0.2);
-    animation: heroScan 3s ease-out forwards;
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-scan-line {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 2px;
+      background: rgba(23, 22, 28, 0.2);
+      animation: heroScan 3s ease-out forwards;
+    }
   }
 
   @keyframes heroScan {

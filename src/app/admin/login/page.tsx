@@ -43,9 +43,9 @@ export default function AdminLogin() {
         <div className="bg-white border border-[#906f69] relative flex flex-col">
           <div className="p-6 border-b border-dashed border-[#e5beb6] text-center">
             <div className="flex justify-center mb-2">
-              <Receipt className="size-12 text-[#b51c00]" />
+              <Receipt className="size-12 text-[#b51c00]" aria-hidden="true" />
             </div>
-            <h1 className="font-sans text-[32px] md:text-[40px] leading-[38px] md:leading-[48px] tracking-[-0.01em] md:tracking-[-0.02em] font-extrabold text-[#b51c00]">
+            <h1 className="font-sans text-[32px] md:text-[40px] leading-[38px] md:leading-[48px] tracking-[-0.01em] md:tracking-[-0.02em] font-extrabold text-[#b51c00] text-pretty">
               SHOPBY ADMIN
             </h1>
             <p className="font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] mt-2">
@@ -60,7 +60,7 @@ export default function AdminLogin() {
                   Email Address
                 </label>
                 <div className="flex items-center mt-1">
-                  <Mail className="size-5 text-[#5c403a] mr-3 absolute" />
+                  <Mail className="size-5 text-[#5c403a] mr-3 absolute" aria-hidden="true" />
                   <input
                     id="email"
                     type="email"
@@ -68,7 +68,7 @@ export default function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@shopby.com"
                     required
-                    className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus:outline-none"
+                    className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                   />
                 </div>
               </div>
@@ -78,7 +78,7 @@ export default function AdminLogin() {
                   Passcode
                 </label>
                 <div className="flex items-center mt-1">
-                  <Lock className="size-5 text-[#5c403a] mr-3 absolute" />
+                  <Lock className="size-5 text-[#5c403a] mr-3 absolute" aria-hidden="true" />
                   <input
                     id="password"
                     type="password"
@@ -86,13 +86,13 @@ export default function AdminLogin() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus:outline-none"
+                    className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                   />
                 </div>
               </div>
 
               {error && (
-                <div className="bg-[#ffdad6] border border-[#ba1a1a] rounded px-4 py-3 font-mono text-[13px] leading-[16px] text-[#ba1a1a]">
+                <div className="bg-[#ffdad6] border border-[#ba1a1a] rounded px-4 py-3 font-mono text-[13px] leading-[16px] text-[#ba1a1a]" role="alert">
                   {error}
                 </div>
               )}
@@ -101,26 +101,26 @@ export default function AdminLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#b51c00] text-white font-mono text-[13px] leading-[16px] tracking-[0.05em] py-4 rounded-full transition-transform active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#b51c00] text-white font-mono text-[13px] leading-[16px] tracking-[0.05em] py-4 rounded-full transition-transform active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                 >
                   {loading ? (
-                    <Loader2 className="size-[18px] animate-spin" />
+                    <Loader2 className="size-[18px] animate-spin" aria-hidden="true" />
                   ) : (
-                    <ArrowRight className="size-[18px]" />
+                    <ArrowRight className="size-[18px]" aria-hidden="true" />
                   )}
-                  <span>{loading ? "AUTHORIZING..." : "AUTHORIZE_LOGIN"}</span>
+                  <span aria-live="polite">{loading ? "AUTHORIZING…" : "AUTHORIZE_LOGIN"}</span>
                 </button>
               </div>
             </form>
           </div>
 
           <div className="p-4 bg-[#f4f4f1] border-t border-[#906f69] flex flex-col items-center gap-3">
-            <a className="font-sans text-[12px] leading-[16px] font-medium text-[#1a1c1b] hover:text-[#b51c00] transition-colors border-b border-transparent hover:border-[#b51c00]" href="#">
+            <button type="button" className="font-sans text-[12px] leading-[16px] font-medium text-[#1a1c1b] hover:text-[#b51c00] transition-colors border-b border-transparent hover:border-[#b51c00] focus-visible:ring-2 focus-visible:ring-[#b51c00]" onClick={() => {}}>
               Forgot Passcode?
-            </a>
+            </button>
             <div className="w-full border-t border-dashed border-[#e5beb6] my-1" />
-            <a className="font-sans text-[12px] leading-[16px] font-medium text-[#5c403a] hover:text-[#1a1c1b] transition-colors flex items-center gap-1" href="/">
-              <Store className="size-4" />
+            <a className="font-sans text-[12px] leading-[16px] font-medium text-[#5c403a] hover:text-[#1a1c1b] transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#b51c00]" href="/">
+              <Store className="size-4" aria-hidden="true" />
               Return to Storefront
             </a>
           </div>

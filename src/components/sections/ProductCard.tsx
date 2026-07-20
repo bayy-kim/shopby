@@ -62,14 +62,14 @@ export default function ProductCard({
         </p>
         <button
           onClick={handleBuy}
-          className={`w-full py-1 font-bold text-xs uppercase brutalist-border transition-colors flex justify-center items-center gap-1.5 ${
+          className={`w-full py-1 font-bold text-xs uppercase brutalist-border transition-colors flex justify-center items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-primary ${
             isHighlight
               ? "bg-primary text-white hover:bg-ink"
               : "bg-[#e8e8e5] text-ink hover:bg-primary hover:text-white"
           }`}
         >
           {isHighlight ? "Beli di Shopee" : "Beli"}
-          <ExternalLink className="size-3" />
+          <ExternalLink className="size-3" aria-hidden="true" />
         </button>
       </div>
       <div className="scan-line" />

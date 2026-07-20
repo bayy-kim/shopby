@@ -77,12 +77,15 @@ export default function Home() {
       <Navbar />
       <Hero featuredProducts={featuredProducts} />
       <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
-        <CategoryFilter
-          categories={categories}
-          activeSlug={selectedCategory}
-          onSelect={handleCategoryChange}
-          variant="chips"
-        />
+        <div id="categories">
+          <CategoryFilter
+            categories={categories}
+            activeSlug={selectedCategory}
+            onSelect={handleCategoryChange}
+            variant="chips"
+          />
+        </div>
+        <div id="products">
         <div className="flex flex-col md:flex-row gap-8 mt-3 md:mt-0">
           <CategoryFilter
             categories={categories}
@@ -106,6 +109,7 @@ export default function Home() {
             hasMore={hasMore}
             onLoadMore={handleLoadMore}
           />
+        </div>
         </div>
       </main>
       <Footer />

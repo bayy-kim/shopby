@@ -10,6 +10,7 @@ export default function ProductCardSkeleton({
   return (
     <div
       className="receipt-card p-3 animate-pulse"
+      aria-hidden="true"
       style={{
         clipPath:
           "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",

@@ -64,7 +64,7 @@ export default function ProductGrid({
 }: ProductGridProps) {
   if (error) {
     return (
-      <div className="flex-grow flex items-center justify-center py-16">
+      <div className="flex-grow flex items-center justify-center py-16" role="alert">
         <p className="text-destructive">
           Gagal memuat produk. Coba refresh halaman.
         </p>
@@ -73,10 +73,10 @@ export default function ProductGrid({
   }
 
   return (
-    <div className="flex-grow">
-      <div className="mb-12">
+      <div className="flex-grow" aria-live="polite">
+        <div className="mb-12">
         <div className="flex items-center gap-4 mb-6 border-b border-dashed border-border-color pb-4">
-          <h2 className="text-headline-md text-ink uppercase tracking-tight font-sans">
+          <h2 className="text-headline-md text-ink uppercase tracking-tight font-sans text-pretty">
             Rekomendasi Hari Ini
           </h2>
           <span className="bg-tag-yellow px-2 py-1 font-mono text-xs font-bold border border-ink">
@@ -108,7 +108,7 @@ export default function ProductGrid({
       </div>
 
       <div className="flex items-center justify-between mb-6 border-b border-dashed border-border-color pb-4">
-        <h2 className="text-headline-md text-ink uppercase tracking-tight font-sans">
+        <h2 className="text-headline-md text-ink uppercase tracking-tight font-sans text-pretty">
           Semua Produk
         </h2>
         <div className="flex items-center gap-3">
@@ -126,13 +126,13 @@ export default function ProductGrid({
                   <button
                     key={opt.value}
                     onClick={() => onSortChange(opt.value)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono uppercase transition-all ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono uppercase transition-all focus-visible:ring-2 focus-visible:ring-primary ${
                       isActive
                         ? "bg-ink text-white"
                         : "text-ink/50 hover:text-ink"
                     }`}
                   >
-                    <Icon className="size-3" />
+                    <Icon className="size-3" aria-hidden="true" />
                     {opt.label}
                   </button>
                 )
@@ -140,7 +140,7 @@ export default function ProductGrid({
             </div>
           )}
           <span className="font-mono text-sm text-ink/60">
-            {isLoading ? "..." : `${total}`} items
+            {isLoading ? "…" : `${total}`} items
           </span>
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function ProductGrid({
               <button
                 key={opt.value}
                 onClick={() => onSortChange(opt.value)}
-                className={`whitespace-nowrap px-3 py-1 rounded-full text-xs font-mono uppercase border transition-all ${
+                className={`whitespace-nowrap px-3 py-1 rounded-full text-xs font-mono uppercase border transition-all focus-visible:ring-2 focus-visible:ring-primary ${
                   isActive
                     ? "bg-ink text-white border-ink"
                     : "bg-white text-ink/50 border-border-color"
@@ -201,9 +201,9 @@ export default function ProductGrid({
           <button
             onClick={onLoadMore}
             disabled={isLoadMoreLoading}
-            className="bg-transparent border-2 border-ink text-ink px-6 py-2 font-bold text-sm uppercase tracking-wider hover:bg-ink hover:text-white transition-colors disabled:opacity-40"
+            className="bg-transparent border-2 border-ink text-ink px-6 py-2 font-bold text-sm uppercase tracking-wider hover:bg-ink hover:text-white transition-colors disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary"
           >
-            {isLoadMoreLoading ? "Memuat..." : "Muat Lebih Banyak"}
+            {isLoadMoreLoading ? "Memuat…" : "Muat Lebih Banyak"}
           </button>
         </div>
       )}

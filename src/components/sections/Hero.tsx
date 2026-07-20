@@ -51,7 +51,7 @@ export default function Hero({
       <div className="hero-scan-line" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6 z-10">
-          <h1 className="font-sans text-display-lg-mobile md:text-display-lg text-ink leading-none uppercase">
+          <h1 className="font-sans text-display-lg-mobile md:text-display-lg text-ink leading-none uppercase text-pretty">
             Belanja Cerdas,
             <br />
             Struk Berkualitas
@@ -60,7 +60,7 @@ export default function Hero({
             Koleksi produk Shopee Affiliate pilihan dalam satu nota digital.
             Kurasi terbaik, navigasi cepat, harga transparan.
           </p>
-          <button className="bg-primary text-ink px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 inline-block">
+          <button className="bg-primary text-ink px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 inline-block focus-visible:ring-2 focus-visible:ring-primary">
             Lihat Semua Deal
           </button>
         </div>
@@ -97,7 +97,7 @@ export default function Hero({
                 >
                   Rp{(card1.price / 1000).toFixed(0)}k
                 </span>
-                <ArrowRight className="text-primary size-5" />
+                <ArrowRight className="text-primary size-5" aria-hidden="true" />
               </div>
               <div className="scan-line" />
             </div>
@@ -134,7 +134,7 @@ export default function Hero({
                 >
                   Rp{(card2.price / 1000).toFixed(0)}k
                 </span>
-                <ArrowRight className="text-primary size-5" />
+                <ArrowRight className="text-primary size-5" aria-hidden="true" />
               </div>
               <div className="scan-line" />
             </div>

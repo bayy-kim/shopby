@@ -15,8 +15,13 @@ import {
   ChevronDown,
   Menu,
   ExternalLink,
+  X,
+  User,
+  LifeBuoy,
+  FileText,
+  ChevronRight,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -24,6 +29,16 @@ const navItems = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
+
+function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) handler()
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [ref, handler])
+}
 
 export default function AdminDashboardLayout({
   children,
@@ -33,11 +48,29 @@ export default function AdminDashboardLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const helpRef = useRef<HTMLDivElement>(null!)
+  const notifRef = useRef<HTMLDivElement>(null!)
+  const profileRef = useRef<HTMLDivElement>(null!)
+
+  useClickOutside(helpRef, () => setHelpOpen(false))
+  useClickOutside(notifRef, () => setNotifOpen(false))
+  useClickOutside(profileRef, () => setProfileOpen(false))
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" })
     router.push("/admin/login")
   }
+
+  const notifications = [
+    { id: 1, text: "New click: Mechanical Keyboard Pro", time: "2m ago" },
+    { id: 2, text: "Commission payout processed", time: "1h ago" },
+    { id: 3, text: "Product link expiring soon", time: "1d ago" },
+  ]
 
   return (
     <div className="min-h-screen flex bg-[#f9f9f6] text-[#1a1c1b] font-sans antialiased">
@@ -65,13 +98,13 @@ export default function AdminDashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-all active:translate-x-0.5 active:translate-y-0.5 ${
+                className={`flex items-center gap-3 px-4 py-3 rounded font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-all active:translate-x-0.5 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
                   isActive
                     ? "bg-[#fdc73a] text-[#6f5400] font-bold border-l-4 border-[#b51c00]"
                     : "text-[#5c403a] hover:bg-[#f4f4f1]"
                 }`}
               >
-                <Icon className={`size-5 ${isActive ? "text-[#6f5400]" : ""}`} />
+                <Icon className={`size-5 ${isActive ? "text-[#6f5400]" : ""}`} aria-hidden="true" />
                 {item.label}
               </Link>
             )
@@ -81,18 +114,18 @@ export default function AdminDashboardLayout({
         <div className="px-4 mt-auto space-y-4 pt-4 border-t border-dashed border-[#e5beb6]">
           <Link
             href="/"
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-full font-mono text-[13px] leading-[16px] tracking-[0.05em] border border-[#906f69] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-full font-mono text-[13px] leading-[16px] tracking-[0.05em] border border-[#906f69] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
           >
-            <ExternalLink className="size-[18px]" />
+            <ExternalLink className="size-[18px]" aria-hidden="true" />
             View Storefront
           </Link>
           <div className="space-y-1">
-            <a className="flex items-center gap-3 px-4 py-2 rounded text-[#5c403a] hover:bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors" href="#">
-              <HelpCircle className="size-[18px]" />
+            <button onClick={() => setHelpOpen(true)} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#5c403a] hover:bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+              <HelpCircle className="size-[18px]" aria-hidden="true" />
               Help
-            </a>
-            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors">
-              <LogOut className="size-[18px]" />
+            </button>
+            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+              <LogOut className="size-[18px]" aria-hidden="true" />
               Logout
             </button>
           </div>
@@ -107,8 +140,10 @@ export default function AdminDashboardLayout({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 -ml-2 rounded-full hover:bg-[#f4f4f1] transition-colors"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
             >
-              <Menu className="size-5" />
+              <Menu className="size-5" aria-hidden="true" />
             </button>
             <span className="font-sans text-[20px] leading-[28px] font-black text-[#b51c00] tracking-tight">
               Shopby
@@ -117,32 +152,106 @@ export default function AdminDashboardLayout({
 
           <div className="hidden md:flex flex-1 items-center max-w-md">
             <div className="relative w-full">
-              <Search className="size-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#5c403a]" />
+              <Search className="size-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#5c403a]" aria-hidden="true" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search orders, products..."
+                aria-label="Search orders, products"
                 className="w-full bg-transparent border-0 border-b border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 pl-10 pr-4 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 transition-colors"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <button className="p-2 rounded-full text-[#5c403a] hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5 relative">
-              <Bell className="size-5" />
-              <span className="absolute top-2 right-2 size-2 bg-[#b51c00] rounded-full" />
-            </button>
-            <button className="p-2 rounded-full text-[#5c403a] hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5 hidden sm:block">
-              <HelpCircle className="size-5" />
-            </button>
+            <div ref={notifRef} className="relative">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="p-2 rounded-full text-[#5c403a] hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5 relative focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
+                aria-label="Notifications"
+              >
+                <Bell className="size-5" aria-hidden="true" />
+                <span className="absolute top-2 right-2 size-2 bg-[#b51c00] rounded-full" aria-hidden="true" />
+              </button>
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-[#e5e1d8] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] z-50" role="menu" aria-label="Notifications">
+                  <div className="p-3 border-b border-dashed border-[#e5e1d8]">
+                    <p className="font-mono text-[11px] tracking-[0.05em] font-bold text-[#1a1c1b] uppercase">Notifications</p>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto">
+                    {notifications.map((n) => (
+                      <div key={n.id} className="p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors cursor-pointer">
+                        <p className="font-sans text-[13px] text-[#1a1c1b]">{n.text}</p>
+                        <p className="font-mono text-[10px] text-[#5c403a] mt-0.5">{n.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="w-full p-2 font-mono text-[11px] tracking-[0.05em] text-[#b51c00] hover:bg-[#f4f4f1] transition-colors uppercase focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+                    Mark All as Read
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div ref={helpRef} className="relative">
+              <button
+                onClick={() => setHelpOpen(!helpOpen)}
+                className="p-2 rounded-full text-[#5c403a] hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5 hidden sm:block focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
+                aria-label="Help"
+              >
+                <HelpCircle className="size-5" aria-hidden="true" />
+              </button>
+              {helpOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#e5e1d8] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] z-50">
+                  <a href="/admin/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                    <LifeBuoy className="size-4 text-[#5c403a]" aria-hidden="true" />
+                    Help Center
+                  </a>
+                  <a href="/admin/help" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                    <FileText className="size-4 text-[#5c403a]" aria-hidden="true" />
+                    Documentation
+                  </a>
+                  <a href="/admin/help" className="flex items-center gap-3 p-3 hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]">
+                    <ChevronRight className="size-4 text-[#5c403a]" aria-hidden="true" />
+                    Quick Tutorial
+                  </a>
+                </div>
+              )}
+            </div>
+
             <div className="h-6 w-px border-r border-dashed border-[#e5beb6] mx-2 hidden sm:block" />
-            <button className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5">
-              <span className="font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#b51c00] hidden sm:block font-bold">
-                Profile
-              </span>
-              <div className="size-8 rounded-full bg-[#e2e3e0] border border-[#e5beb6] flex items-center justify-center text-[13px] font-bold text-[#5c403a]">
-                A
-              </div>
-            </button>
+
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-[#ffdf9a] transition-colors active:translate-x-0.5 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
+                aria-label="Profile menu"
+              >
+                <span className="font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#b51c00] hidden sm:block font-bold">
+                  Admin
+                </span>
+                <div className="size-8 rounded-full bg-[#e2e3e0] border border-[#e5beb6] flex items-center justify-center text-[13px] font-bold text-[#5c403a]">
+                  A
+                </div>
+              </button>
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-[#e5e1d8] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] z-50">
+                  <div className="p-3 border-b border-dashed border-[#e5e1d8]">
+                    <p className="font-sans text-[13px] font-bold text-[#1a1c1b]">Admin</p>
+                    <p className="font-mono text-[10px] text-[#5c403a]">admin@shopby.com</p>
+                  </div>
+                  <Link href="/admin/settings" className="flex items-center gap-3 p-3 border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#1a1c1b]" onClick={() => setProfileOpen(false)}>
+                    <Settings className="size-4 text-[#5c403a]" aria-hidden="true" />
+                    Settings
+                  </Link>
+                  <button onClick={() => { setProfileOpen(false); handleLogout(); }} className="w-full flex items-center gap-3 p-3 hover:bg-[#f4f4f1] transition-colors font-sans text-[13px] text-[#ba1a1a]">
+                    <LogOut className="size-4" aria-hidden="true" />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -163,29 +272,61 @@ export default function AdminDashboardLayout({
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-all ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-all focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
                         isActive
                           ? "bg-[#fdc73a] text-[#6f5400] font-bold border-l-4 border-[#b51c00]"
                           : "text-[#5c403a] hover:bg-[#f4f4f1]"
                       }`}
                     >
-                      <Icon className="size-5" />
+                      <Icon className="size-5" aria-hidden="true" />
                       {item.label}
                     </Link>
                   )
                 })}
               </div>
               <div className="pt-4 border-t border-dashed border-[#e5beb6] space-y-1">
-                <a className="flex items-center gap-3 px-4 py-2 rounded text-[#5c403a] hover:bg-[#f4f4f1] font-mono text-[13px] transition-colors" href="#">
-                  <HelpCircle className="size-[18px]" />
+                <button onClick={() => { setHelpOpen(true); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#5c403a] hover:bg-[#f4f4f1] font-mono text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+                  <HelpCircle className="size-[18px]" aria-hidden="true" />
                   Help
-                </a>
-                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] transition-colors">
-                  <LogOut className="size-[18px]" />
+                </button>
+                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#ba1a1a] hover:bg-[#ffdad6]/20 font-mono text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
+                  <LogOut className="size-[18px]" aria-hidden="true" />
                   Logout
                 </button>
               </div>
             </nav>
+          </div>
+        )}
+
+        {/* Help Modal */}
+        {helpOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setHelpOpen(false)} />
+            <div className="relative bg-white border border-[#e5e1d8] shadow-[8px_8px_0px_0px_rgba(26,28,27,1)] max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-sans text-[20px] font-black text-[#1a1c1b] tracking-tight uppercase">Help & Resources</h2>
+                <button onClick={() => setHelpOpen(false)} className="p-1 hover:bg-[#f4f4f1] rounded transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none" aria-label="Close help">
+                  <X className="size-5" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <a href="/admin/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📖 Help Center</h3>
+                  <p className="font-sans text-[13px] text-[#5c403a] mt-1">Browse guides and FAQs for managing your affiliate links.</p>
+                </a>
+                <a href="/admin/help" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">📊 Analytics Guide</h3>
+                  <p className="font-sans text-[13px] text-[#5c403a] mt-1">Understand your metrics and optimize conversions.</p>
+                </a>
+                <a href="https://shopee.co.id" target="_blank" rel="noopener noreferrer" className="block p-4 border border-[#e5e1d8] hover:bg-[#f4f4f1] transition-colors" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
+                  <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b]">🔗 Shopee Affiliate</h3>
+                  <p className="font-sans text-[13px] text-[#5c403a] mt-1">Visit Shopee Affiliate Program for more resources.</p>
+                </a>
+              </div>
+              <div className="mt-6 pt-4 border-t border-dashed border-[#e5e1d8] text-center">
+                <p className="font-mono text-[11px] text-[#5c403a]">Need more help? Contact support</p>
+              </div>
+            </div>
           </div>
         )}
 
