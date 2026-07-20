@@ -38,11 +38,9 @@ export default function Home() {
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
   const visibleProducts = allProducts.slice(0, visibleCount)
-  const featuredProducts = visibleProducts.filter(
-    (p: Product) => p.isFeatured
-  )
-  const regularProducts = visibleProducts.filter(
-    (p: Product) => !p.isFeatured
+  const featuredProducts = useMemo(
+    () => visibleProducts.filter((p: Product) => p.isFeatured),
+    [visibleProducts]
   )
   const hasMore = visibleCount < allProducts.length
 
@@ -118,7 +116,7 @@ export default function Home() {
           />
           <ProductGrid
             featuredProducts={featuredProducts}
-            allProducts={regularProducts}
+            allProducts={visibleProducts}
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
