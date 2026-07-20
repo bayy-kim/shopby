@@ -86,13 +86,6 @@ export default function AdminAnalytics() {
 
   const totalProductClicks = topProducts.reduce((sum, p) => sum + p.clicks, 0)
 
-  const topSources = [
-    { rank: 1, name: "Instagram", pct: 45 },
-    { rank: 2, name: "TikTok", pct: 30 },
-    { rank: 3, name: "Direct", pct: 15 },
-    { rank: 4, name: "Twitter", pct: 10 },
-  ]
-
   const cities = [
     { name: "Jakarta", users: "12,450" },
     { name: "Surabaya", users: "8,210" },
@@ -159,7 +152,7 @@ export default function AdminAnalytics() {
               <div key={i} className="w-full h-px bg-[#e5beb6] border-t border-dashed opacity-50" />
             ))}
           </div>
-          {barData.map((d, i) => (
+          {barData.map((d) => (
             <div key={d.day} className="flex-1 flex items-end gap-1 h-full">
               <div className="w-1/2 bg-[#b51c00] transition-all hover:opacity-80" style={{ height: `${(d.clicks / maxClicks) * 100}%` }} title={`${d.clicks} clicks`} />
               <div className="w-1/2 bg-[#FFC93C] transition-all hover:opacity-80" style={{ height: `${(d.conversions / maxClicks) * 100}%` }} title={`${d.conversions} conversions`} />

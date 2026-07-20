@@ -1,8 +1,9 @@
 "use client"
 
+import Image from "next/image"
 import { Upload, X, Save, ArrowDown, ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { createProduct } from "@/lib/services/products"
 import { useCategories } from "@/hooks/useCategories"
 
@@ -10,6 +11,7 @@ export default function NewProduct() {
   const router = useRouter()
   const [status, setStatus] = useState(true)
   const [image, setImage] = useState<string | null>(null)
+  const [fileName, setFileName] = useState("product-image")
   const [dragOver, setDragOver] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -23,6 +25,7 @@ export default function NewProduct() {
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) return
+    setFileName(file.name)
     const reader = new FileReader()
     reader.onload = (e) => setImage(e.target?.result as string)
     reader.readAsDataURL(file)
@@ -42,6 +45,7 @@ export default function NewProduct() {
 
   const removeImage = () => {
     setImage(null)
+    setFileName("product-image")
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
@@ -143,10 +147,12 @@ export default function NewProduct() {
               ) : (
                 <div className="relative border border-[#e5e1d8] p-2 bg-white" style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}>
                   <div className="relative aspect-[4/3] bg-[#e2e3e0] overflow-hidden">
-                    <img
+                    <Image
                       src={image}
                       alt="Product preview"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                   </div>
@@ -154,7 +160,7 @@ export default function NewProduct() {
                     <div className="flex items-center gap-2">
                       <ImageIcon className="size-4 text-[#5c403a]" aria-hidden="true" />
                       <span className="font-mono text-[11px] text-[#5c403a] truncate max-w-[200px]">
-                        {fileInputRef.current?.files?.[0]?.name || "product-image"}
+                        {fileName}
                       </span>
                     </div>
                     <button
@@ -186,7 +192,7 @@ export default function NewProduct() {
                 <select ref={categoryRef} id="category" defaultValue=""
                   className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] appearance-none pr-8 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none">
                   <option value="" disabled>Select a category</option>
-                  {categories?.map((cat: any) => (
+                  {categories?.map((cat: { id: string; name: string }) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>

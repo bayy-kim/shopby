@@ -280,7 +280,7 @@ Proyek kini memiliki halaman statis tambahan yang dapat diakses publik:
 | `/about` | Tentang Shopby |
 | `/privacy` | Kebijakan Privasi |
 | `/terms` | Syarat & Ketentuan |
-| `/contact` | Formulir kontak |
+| `/contact` | Formulir kontak (aktif — kirim ke `/api/contact`) |
 
 Semua halaman ini diakses dari link navbar ("Affiliate") dan footer.
 
@@ -330,7 +330,7 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 - **Password Hashing:** Node.js `crypto.scryptSync` dengan salt 16-byte, stored sebagai `salt:derivedKey` (base64)
 - **Session JWT:** `jose` library, algoritma HS256, payload `{ role: "admin" }`, expiry 24 jam
 - **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/admin, maxAge 86400s
-- **Middleware:** Edge runtime, matcher `["/admin/:path*"]`, mengecualikan `/admin/login` dari proteksi
+- **Middleware:** Edge runtime, matcher `["/admin/:path*", "/api/stats/:path*", "/api/analytics/:path*", "/api/settings/:path*"]` — melindungi admin pages + API sensitive routes
 
 #### Credential Default (Development)
 
@@ -658,9 +658,9 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 | Tombol | Fungsi |
 |---|---|
 | **Discard** | Reset form |
-| **Save Changes** | `PUT /api/settings` → simpan ke `data/settings.json` → toast konfirmasi |
+| **Save Changes** | `PUT /api/settings` → simpan ke database (Prisma `AppSetting`) → toast konfirmasi |
 
-> ✅ Pengaturan kini benar-benar tersimpan ke file `data/settings.json` melalui `PUT /api/settings` — tidak hanya dekoratif.
+> ✅ Pengaturan kini tersimpan ke database (model `AppSetting` via Prisma) melalui `PUT /api/settings` — kompatibel dengan serverless deployment.
 
 ---
 
@@ -920,25 +920,23 @@ Mengembalikan data analitik detail.
 
 #### GET /api/settings
 
-Mengambil data pengaturan toko dari `data/settings.json`.
+Mengambil data pengaturan toko dari database (Prisma `AppSetting` model).
 
 **Response (200):**
 ```json
 {
-  "data": {
-    "storeName": "Shopby Affiliate Store",
-    "bio": "Kurator produk...",
-    "primaryColor": "red",
-    "bankName": "BCA",
-    "accountNumber": "1234-5678-9012",
-    "accountHolder": "JOHN DOE"
-  }
+  "storeName": "Shopby Affiliate Store",
+  "bio": "Kurator produk...",
+  "primaryColor": "red",
+  "bankName": "BCA",
+  "accountNumber": "1234-5678-9012",
+  "accountHolder": "JOHN DOE"
 }
 ```
 
 #### PUT /api/settings
 
-Memperbarui pengaturan toko dan menyimpannya ke `data/settings.json`.
+Memperbarui pengaturan toko dan menyimpannya ke database.
 
 **Request Body:**
 ```json
@@ -954,10 +952,38 @@ Memperbarui pengaturan toko dan menyimpannya ke `data/settings.json`.
 
 **Response (200):**
 ```json
-{ "success": true }
+{ "success": true, "settings": { ... } }
 ```
 
-### 4.7 Click Tracking
+### 4.7 Contact Form
+
+#### POST /api/contact
+
+Mengirim pesan dari form kontak.
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "message": "Saya tertarik dengan produk..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Pesan berhasil dikirim. Kami akan menghubungi Anda segera."
+}
+```
+
+**Response (400):**
+```json
+{ "error": "Semua field harus diisi" }
+```
+
+### 4.8 Click Tracking
 
 #### POST /api/click
 
@@ -1023,6 +1049,14 @@ Mencatat klik produk dan mengembalikan URL Shopee.
 | `id` | String (CUID) | Primary key |
 | `productId` | String | Foreign Key → Product |
 | `clickedAt` | DateTime | Waktu klik |
+
+#### AppSetting
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | String (CUID) | Primary key |
+| `key` | String (unique) | Nama pengaturan (`store_settings`) |
+| `value` | String | JSON string berisi semua nilai |
 
 ### 5.2 Seed Data (9 Produk)
 

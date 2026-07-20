@@ -1,10 +1,4 @@
-import { scryptSync, randomBytes, timingSafeEqual } from "crypto"
-
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("base64")
-  const derivedKey = scryptSync(password, salt, 64).toString("base64")
-  return `${salt}:${derivedKey}`
-}
+import { scryptSync, timingSafeEqual } from "crypto"
 
 function verifyPassword(password: string, stored: string): boolean {
   const parts = stored.split(":")

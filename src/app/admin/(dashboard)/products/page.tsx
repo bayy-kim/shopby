@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import Image from "next/image"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Plus,
@@ -20,6 +21,8 @@ import { fetchProducts, deleteProduct } from "@/lib/services/products"
 import { formatPrice } from "@/lib/utils"
 import type { Product } from "@/types"
 
+type ProductWithClicks = Product & { _count?: { clicks: number } }
+
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty"]
 const categoryIcons: Record<string, React.ReactNode> = {
   Electronics: <Laptop className="size-3" aria-hidden="true" />,
@@ -36,24 +39,23 @@ export default function AdminProducts() {
   const [page, setPage] = useState(1)
   const pageSize = 10
 
-  const loadProducts = useCallback(async () => {
-    setLoading(true)
-    try {
-      const result = await fetchProducts(
-        activeCategory === "All" ? undefined : activeCategory.toLowerCase(),
-        "newest"
-      )
-      setProducts(result.data)
-    } catch {
-      setProducts([])
-    } finally {
-      setLoading(false)
-    }
-  }, [activeCategory])
-
   useEffect(() => {
-    loadProducts()
-  }, [loadProducts])
+    const load = async () => {
+      setLoading(true)
+      try {
+        const result = await fetchProducts(
+          activeCategory === "All" ? undefined : activeCategory.toLowerCase(),
+          "newest"
+        )
+        setProducts(result.data)
+      } catch {
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [activeCategory])
 
   const filtered = searchQuery
     ? products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -66,7 +68,7 @@ export default function AdminProducts() {
     if (!confirm("Delete this product?")) return
     try {
       await deleteProduct(id)
-      loadProducts()
+      setProducts((prev) => prev.filter((p) => p.id !== id))
     } catch {
       alert("Failed to delete product")
     }
@@ -183,7 +185,7 @@ export default function AdminProducts() {
                       style={{ clipPath: "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" }}
                     >
                       {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.imageAlt} className="w-full h-full object-cover" />
+                        <Image src={product.imageUrl} alt={product.imageAlt} fill className="object-cover" unoptimized />
                       ) : (
                         product.name.charAt(0)
                       )}
@@ -203,7 +205,7 @@ export default function AdminProducts() {
                   </span>
                 </td>
                 <td className="py-4 px-6 align-middle text-right">
-                  <span className="font-mono text-[16px] font-bold text-[#b51c00]">{(product as any)._count?.clicks ?? 0}</span>
+                  <span className="font-mono text-[16px] font-bold text-[#b51c00]">{(product as ProductWithClicks)._count?.clicks ?? 0}</span>
                 </td>
                 <td className="py-4 px-6 align-middle text-center">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 border font-mono text-[11px] uppercase ${

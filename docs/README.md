@@ -35,6 +35,7 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 | **Framework** | Next.js 16 (App Router) + TypeScript |
 | **Styling** | Tailwind CSS v4 + shadcn/ui |
 | **Database** | Prisma ORM + SQLite (dev) → Postgres (prod) |
+| **Auth** | JWT (jose) + scrypt password hash |
 | **State** | TanStack Query (React Query) |
 | **Animasi** | Framer Motion |
 | **Ikon** | lucide-react |
@@ -43,25 +44,11 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 
 ```
 shopby/
-├── middleware.ts                # Edge auth guard untuk /admin/*
+├── middleware.ts                # Edge auth guard untuk /admin/* + API admin
 ├── design/                      # Referensi desain (landing + admin panel)
-│   ├── shopby-landing.md
-│   ├── admin-login.md
-│   ├── admin-dashboard.md
-│   ├── admin-dashboard-empty.md
-│   ├── admin-analytics.md
-│   ├── admin-products.md
-│   ├── admin-products-mobile.md
-│   ├── admin-settings.md
-│   ├── admin-settings-mobile.md
-│   └── admin-edit-product.md
 ├── docs/                        # Dokumentasi
-│   ├── README.md                # README utama
-│   ├── SAR.md                   # Software Architecture Review
-│   ├── PRD.md                   # Product Requirements Document
-│   └── project-reference.md     # Referensi teknis lengkap
 ├── prisma/
-│   ├── schema.prisma
+│   ├── schema.prisma            # Product, Category, ClickLog, AppSetting
 │   ├── seed.ts
 │   ├── dev.db
 │   └── migrations/
@@ -71,24 +58,35 @@ shopby/
 │   │   ├── page.tsx             # Landing page
 │   │   ├── globals.css          # Tailwind v4 + custom CSS
 │   │   ├── providers.tsx        # TanStack Query
+│   │   ├── sitemap.ts           # Auto-generated sitemap
 │   │   ├── admin/               # Admin panel
 │   │   │   ├── login/
-│   │   │   └── (dashboard)/
+│   │   │   ├── (dashboard)/
+│   │   │   ├── error.tsx        # Error boundary
+│   │   │   ├── loading.tsx      # Loading fallback
+│   │   │   └── help/
+│   │   ├── about/               # /about
+│   │   ├── affiliate/           # /affiliate
+│   │   ├── privacy/             # /privacy
+│   │   ├── terms/               # /terms
+│   │   ├── contact/             # /contact (client form + layout)
 │   │   └── api/                 # REST API
-│   │       ├── admin/
-│   │       │   ├── login/       # POST /api/admin/login
-│   │       │   └── logout/      # POST /api/admin/logout
-│   │       ├── products/
+│   │       ├── admin/ (login, logout)
+│   │       ├── products/ (GET, POST) + [id]/ (GET, PUT, DELETE)
 │   │       ├── categories/
-│   │       └── click/
+│   │       ├── click/
+│   │       ├── stats/
+│   │       ├── analytics/
+│   │       ├── settings/        # via Prisma (AppSetting model)
+│   │       └── contact/
 │   ├── components/              # UI, layout, sections
 │   ├── hooks/                   # TanStack Query hooks
 │   ├── lib/
-│   │   ├── auth.ts              # JWT session (jose, edge-compatible)
+│   │   ├── auth.ts              # JWT session + checkAuth (edge-compatible)
 │   │   ├── auth-password.ts     # Password hash/verify (crypto built-in)
 │   │   ├── prisma.ts
-│   │   ├── utils.ts
-│   │   └── services/
+│   │   ├── utils.ts             # cn(), formatPrice()
+│   │   └── services/            # products, categories, click
 │   └── types/
 ```
 
@@ -134,24 +132,34 @@ Buka `http://localhost:3000` di browser.
 
 ## API Endpoints
 
-| Endpoint | Method | Fungsi |
+| Endpoint | Method | Auth | Fungsi |
 |---|---|---|---|
-| `/api/admin/login` | POST | Login admin (return session cookie) |
-| `/api/admin/logout` | POST | Hapus session cookie |
-| `/api/products?category=&sort=` | GET | Ambil produk |
-| `/api/categories` | GET | Ambil kategori |
-| `/api/click` | POST | Catat klik + return URL Shopee |
+| `/api/admin/login` | POST | — | Login admin (return session cookie) |
+| `/api/admin/logout` | POST | — | Hapus session cookie |
+| `/api/products` | GET | — | Ambil produk (`?category=&sort=`) |
+| `/api/products` | POST | ✅ | Tambah produk baru |
+| `/api/products/[id]` | GET | — | Detail produk |
+| `/api/products/[id]` | PUT | ✅ | Update produk |
+| `/api/products/[id]` | DELETE | ✅ | Hapus produk |
+| `/api/categories` | GET | — | Ambil kategori |
+| `/api/click` | POST | — | Catat klik + return URL Shopee |
+| `/api/stats` | GET | ✅ | Statistik dashboard |
+| `/api/analytics` | GET | ✅ | Data analitik |
+| `/api/settings` | GET/PUT | ✅ | Pengaturan toko (via Prisma) |
+| `/api/contact` | POST | — | Kirim pesan kontak |
 
 ## Admin Routes
 
 | Route | Deskripsi |
 |---|---|
 | `/admin/login` | Login page (standalone, no sidebar) |
-| `/admin` | Dashboard |
-| `/admin/products` | Product table |
+| `/admin` | Dashboard — statistik real + grafik revenue |
+| `/admin/products` | Product table — filter, search, pagination |
+| `/admin/products/new` | Tambah produk baru (image upload + form) |
 | `/admin/products/[id]` | Edit product |
-| `/admin/analytics` | Analytics panel |
-| `/admin/settings` | Settings page |
+| `/admin/analytics` | Analytics panel — metrik, chart, top products |
+| `/admin/settings` | Settings — storefront, payout, security |
+| `/admin/help` | Pusat bantuan |
 
 ## Deploy ke Vercel
 

@@ -18,82 +18,64 @@
 ```
 shopby/
 ├── design/                         # Referensi desain (landing + admin panel)
-│   ├── shopby-landing.md
-│   ├── admin-login.md
-│   ├── admin-dashboard.md
-│   ├── admin-dashboard-empty.md
-│   ├── admin-analytics.md
-│   ├── admin-products.md
-│   ├── admin-products-mobile.md
-│   ├── admin-settings.md
-│   ├── admin-settings-mobile.md
-│   └── admin-edit-product.md
+├── docs/                           # Dokumentasi
+├── middleware.ts                   # Edge auth guard untuk /admin/* + /api/admin/*
 ├── prisma/
-│   ├── schema.prisma
+│   ├── schema.prisma               # Product, Category, ClickLog, AppSetting
 │   ├── seed.ts
-│   ├── dev.db                      # SQLite database (local dev)
+│   ├── dev.db
 │   └── migrations/
-│       └── 20260719173140_init/
-│           └── migration.sql
 ├── src/
 │   ├── app/
-│   │   ├── favicon.ico
 │   │   ├── layout.tsx              # Root layout, metadata, font
 │   │   ├── page.tsx                # Landing page (Hero + ProductGrid)
 │   │   ├── globals.css             # Tailwind v4 + @layer components
 │   │   ├── providers.tsx           # TanStack Query provider
+│   │   ├── sitemap.ts              # Auto-generated sitemap
 │   │   ├── admin/
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx        # Login page (standalone receipt card)
+│   │   │   ├── login/page.tsx
+│   │   │   ├── help/page.tsx
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
 │   │   │   └── (dashboard)/
-│   │   │       ├── layout.tsx      # Admin sidebar + topnav layout
-│   │   │       ├── page.tsx        # Dashboard (stats, chart, activity)
+│   │   │       ├── layout.tsx      # Sidebar + topnav
+│   │   │       ├── page.tsx        # Dashboard (stats real, revenue chart)
 │   │   │       ├── products/
-│   │   │       │   ├── page.tsx    # Product table list
-│   │   │       │   └── [id]/
-│   │   │       │       └── page.tsx# Edit product form
-│   │   │       ├── analytics/
-│   │   │       │   └── page.tsx    # Analytics (metrics, chart, sources)
-│   │   │       └── settings/
-│   │   │           └── page.tsx    # Settings (store, payout, security)
+│   │   │       │   ├── page.tsx    # CRUD product table
+│   │   │       │   ├── new/page.tsx# Add product
+│   │   │       │   └── [id]/page.tsx
+│   │   │       ├── analytics/page.tsx
+│   │   │       └── settings/page.tsx
+│   │   ├── about/page.tsx
+│   │   ├── affiliate/page.tsx
+│   │   ├── privacy/page.tsx
+│   │   ├── terms/page.tsx
+│   │   ├── contact/
+│   │   │   ├── page.tsx            # Client component form
+│   │   │   └── layout.tsx          # Metadata wrapper
 │   │   └── api/
-│   │       ├── products/route.ts   # GET: list produk (filter + sort)
-│   │       ├── categories/route.ts # GET: semua kategori
-│   │       └── click/route.ts      # POST: catat klik
+│   │       ├── admin/login/route.ts
+│   │       ├── admin/logout/route.ts
+│   │       ├── products/route.ts   # GET (public) + POST (auth)
+│   │       ├── products/[id]/route.ts # GET + PUT + DELETE
+│   │       ├── categories/route.ts
+│   │       ├── click/route.ts
+│   │       ├── stats/route.ts
+│   │       ├── analytics/route.ts
+│   │       ├── settings/route.ts   # via Prisma AppSetting
+│   │       └── contact/route.ts
 │   ├── components/
-│   │   ├── ui/                     # shadcn/ui + custom components
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── badge.tsx
-│   │   │   ├── ProductCardSkeleton.tsx
-│   │   │   └── EmptyState.tsx
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx
-│   │   │   └── Footer.tsx
-│   │   └── sections/
-│   │       ├── Hero.tsx
-│   │       ├── CategoryFilter.tsx   # sidebar (desktop) + chips (mobile)
-│   │       ├── ProductGrid.tsx      # grid + sort + load more
-│   │       └── ProductCard.tsx      # reusable, variant: highlight/compact
-│   ├── hooks/
-│   │   ├── useProducts.ts
-│   │   └── useCategories.ts
+│   │   ├── ui/                     # shadcn/ui + custom
+│   │   ├── layout/ (Navbar, Footer)
+│   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
+│   ├── hooks/ (useProducts, useCategories, useSettings, useContact)
 │   ├── lib/
-│   │   ├── prisma.ts               # Singleton Prisma client
+│   │   ├── auth.ts                 # JWT session + checkAuth (shared)
+│   │   ├── auth-password.ts        # scrypt hash/verify
+│   │   ├── prisma.ts
 │   │   ├── utils.ts                # cn(), formatPrice()
-│   │   └── services/
-│   │       ├── products.ts         # fetchProducts API
-│   │       ├── categories.ts       # fetchCategories API
-│   │       └── click.ts            # logClick API
+│   │   └── services/ (products, categories, click)
 │   └── types/
-│       └── index.ts                # Product, Category, ClickLog type
-├── .env / .env.example
-├── next.config.ts
-├── tsconfig.json
-├── package.json
-├── eslint.config.mjs
-├── postcss.config.mjs
-└── components.json                 # shadcn/ui config
 ```
 
 ## 3. Data Model (Prisma)
@@ -127,6 +109,12 @@ model ClickLog {
   product   Product  @relation(fields: [productId], references: [id])
   clickedAt DateTime @default(now())
 }
+
+model AppSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
 ```
 
 ## 4. Admin Panel Routes
@@ -144,11 +132,22 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 
 ## 5. API Contract (Internal)
 
-| Endpoint | Method | Query Params | Fungsi |
-|---|---|---|---|
-| `/api/products` | GET | `?category=<slug>&sort=price_asc\|price_desc\|newest` | Ambil produk (filter + sorting) |
-| `/api/categories` | GET | — | Ambil semua kategori |
-| `/api/click` | POST | — | Body: `{ productId }` → simpan log, balikin `{ shopeeUrl }` |
+| Endpoint | Method | Auth | Query/Body | Fungsi |
+|---|---|---|---|---|
+| `/api/admin/login` | POST | — | Body: `{ email, password }` | Login admin → Set-Cookie |
+| `/api/admin/logout` | POST | — | — | Hapus session cookie |
+| `/api/products` | GET | — | `?category=&sort=&search=` | Ambil produk (filter + sorting) |
+| `/api/products` | POST | ✅ | Body: `{ name, price, ... }` | Tambah produk baru |
+| `/api/products/[id]` | GET | — | — | Detail produk |
+| `/api/products/[id]` | PUT | ✅ | Body: `{ name, price, ... }` | Update produk |
+| `/api/products/[id]` | DELETE | ✅ | — | Hapus produk |
+| `/api/categories` | GET | — | — | Ambil semua kategori |
+| `/api/click` | POST | — | Body: `{ productId }` → simpan log, return `{ shopeeUrl }` |
+| `/api/stats` | GET | ✅ | — | Statistik dashboard |
+| `/api/analytics` | GET | ✅ | — | Data analitik (revenue, clicks) |
+| `/api/settings` | GET | ✅ | — | Baca pengaturan (via Prisma) |
+| `/api/settings` | PUT | ✅ | Body: `{ storeName, bio, ... }` | Simpan pengaturan |
+| `/api/contact` | POST | — | Body: `{ name, email, message }` | Kirim pesan kontak |
 
 ### Response Format
 

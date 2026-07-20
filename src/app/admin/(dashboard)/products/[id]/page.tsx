@@ -128,7 +128,7 @@ export default function EditProduct() {
               <div className="relative">
                 <select ref={categoryRef} id="category" defaultValue={product.categoryId}
                   className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] appearance-none pr-8 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none">
-                  {categories?.map((cat: any) => (
+                  {categories?.map((cat: { id: string; name: string }) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>

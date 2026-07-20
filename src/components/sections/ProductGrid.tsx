@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import ProductCard from "./ProductCard"
 import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton"
@@ -62,6 +62,7 @@ export default function ProductGrid({
   onLoadMore,
   isLoadMoreLoading,
 }: ProductGridProps) {
+  const prefersReducedMotion = useReducedMotion()
   if (error) {
     return (
       <div className="flex-grow flex items-center justify-center py-16" role="alert">
@@ -86,10 +87,10 @@ export default function ProductGrid({
 
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          variants={prefersReducedMotion ? undefined : containerVariants}
+          initial={prefersReducedMotion ? undefined : "hidden"}
+          whileInView={prefersReducedMotion ? undefined : "visible"}
+          viewport={prefersReducedMotion ? undefined : { once: true, amount: 0.2 }}
         >
           {isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
@@ -169,10 +170,10 @@ export default function ProductGrid({
 
       <motion.div
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
+        variants={prefersReducedMotion ? undefined : containerVariants}
+        initial={prefersReducedMotion ? undefined : "hidden"}
+        whileInView={prefersReducedMotion ? undefined : "visible"}
+        viewport={prefersReducedMotion ? undefined : { once: true, amount: 0.1 }}
       >
         {isLoading
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (

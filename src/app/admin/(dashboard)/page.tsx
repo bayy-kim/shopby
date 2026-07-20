@@ -138,8 +138,6 @@ export default function AdminDashboard() {
                 <text fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x="10" y="270">0</text>
                 {revenueData.map((d, i) => {
                   const x = 80 + i * (600 / Math.max(revenueData.length - 1, 1))
-                  const maxRev = Math.max(...revenueData.map(r => r.revenue), 1)
-                  const y = 275 - (d.revenue / maxRev) * 225
                   return (
                     <text key={d.day} fill="#5c403a" fontFamily="JetBrains Mono" fontSize="12" x={x - 15} y="295">{d.day}</text>
                   )

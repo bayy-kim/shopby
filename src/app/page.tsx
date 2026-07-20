@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
 import CategoryFilter from "@/components/sections/CategoryFilter"
@@ -26,8 +26,8 @@ export default function Home() {
 
   const { data: categories } = useCategories()
 
-  const allProducts = data?.data ?? []
   const total = data?.total ?? 0
+  const allProducts = useMemo(() => data?.data ?? [], [data])
   const visibleProducts = allProducts.slice(0, visibleCount)
   const featuredProducts = visibleProducts.filter(
     (p: Product) => p.isFeatured

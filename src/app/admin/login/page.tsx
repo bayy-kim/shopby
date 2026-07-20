@@ -1,6 +1,7 @@
 "use client"
 
 import { Receipt, Mail, Lock, ArrowRight, Store, Loader2 } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -119,10 +120,10 @@ export default function AdminLogin() {
               Forgot Passcode?
             </button>
             <div className="w-full border-t border-dashed border-[#e5beb6] my-1" />
-            <a className="font-sans text-[12px] leading-[16px] font-medium text-[#5c403a] hover:text-[#1a1c1b] transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#b51c00]" href="/">
+            <Link href="/" className="font-sans text-[12px] leading-[16px] font-medium text-[#5c403a] hover:text-[#1a1c1b] transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-[#b51c00]">
               <Store className="size-4" aria-hidden="true" />
               Return to Storefront
-            </a>
+            </Link>
           </div>
 
           <div className="absolute -bottom-3 left-0 w-full h-3 overflow-hidden flex justify-around opacity-50">

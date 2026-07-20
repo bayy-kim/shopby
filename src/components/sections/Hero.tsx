@@ -60,9 +60,9 @@ export default function Hero({
             Koleksi produk Shopee Affiliate pilihan dalam satu nota digital.
             Kurasi terbaik, navigasi cepat, harga transparan.
           </p>
-          <button className="bg-primary text-ink px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 inline-block focus-visible:ring-2 focus-visible:ring-primary">
+          <a href="#products" className="inline-block bg-primary text-ink px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 focus-visible:ring-2 focus-visible:ring-primary">
             Lihat Semua Deal
-          </button>
+          </a>
         </div>
 
         <div className="relative h-[400px] hidden md:block">
