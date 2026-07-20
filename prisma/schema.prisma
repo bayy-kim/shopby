@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
   price       Int
   discountPct Int?
@@ -16,10 +16,10 @@ model Product {
   imageAlt    String
   shopeeUrl   String
   categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  isFeatured  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  isFeatured  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
   clicks      ClickLog[]
+  category    Category   @relation(fields: [categoryId], references: [id])
 }
 
 model Category {
@@ -32,8 +32,8 @@ model Category {
 model ClickLog {
   id        String   @id @default(cuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
   clickedAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model AppSetting {
