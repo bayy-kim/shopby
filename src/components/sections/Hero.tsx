@@ -15,6 +15,7 @@ const defaultFeatured: Product[] = [
     id: "1",
     name: "Mechanical Keyboard Pro",
     price: 450000,
+    commission: 0,
     discountPct: null,
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAStz6MWdhJ1zh4c0FwFqadWl6CZq5yq6-UlVR_qmFH3_loMLyyqbx3zne-khm5hPTJvfh1jA52Rnza1u51vuol1UW2bCTvHPHKqORb1UGD1RNbFG_MVh5A69rXC3IbEtRojtC9QmdCOivROrbCKT-ltHi0VDusfzZFZ263onsWtLZ8Kq0Em-IwzPQHBRdFNez08kHupdRaWZE1ZJY7to6Yaw_Fb-3xKMD806mIvw6va3dJeJvMrTegl9c3V-SVYZdaZlca2ZD5_Wc",
@@ -32,6 +33,7 @@ const defaultFeatured: Product[] = [
     id: "2",
     name: "Steel Tumbler 500ml",
     price: 120000,
+    commission: 0,
     discountPct: null,
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAq3uVOfDHT35zefCDRgrqt2khWekMJD-uhSl5FzLgypPRdHepB2_ejWNHK7FJCA0zRbKqNm4IE_3qScrEx0KQ96sUDbjCmvhA5kryVfBw3OJltTCotP_W8vgbo-3JYrifB7rSWiOioLD-98KffR6uva4DWoA_nNdmcUaplsTn1ph53oD9lCo3xbgFvX21dBmBTmgewH6TWmU4G-ADl2QFPnXkGSbsOvC2zXHFkRLCyBaUhxbF7Sb5V8ff8tYaOZbg9n-7gDWxfF4I",
@@ -71,8 +73,7 @@ export default function Hero({
             Struk Berkualitas
           </h1>
           <p className="text-ink/60 max-w-md">
-            Koleksi produk Shopee Affiliate pilihan dalam satu nota digital.
-            Kurasi terbaik, navigasi cepat, harga transparan.
+            Rekomendasi produk pilihan dari berbagai kategori. Terkurasi, terpercaya, harga transparan.
           </p>
           <a href="#products" className="inline-block bg-primary text-ink px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 focus-visible:ring-2 focus-visible:ring-primary">
             Lihat Semua Deal
@@ -126,6 +127,7 @@ export default function Hero({
                         src={card1.imageUrl}
                         alt={card1.imageAlt}
                         fill
+                        priority
                         className="object-cover"
                         sizes="256px"
                       />
@@ -165,6 +167,7 @@ export default function Hero({
                         src={card2.imageUrl}
                         alt={card2.imageAlt}
                         fill
+                        priority
                         className="object-cover"
                         sizes="256px"
                       />

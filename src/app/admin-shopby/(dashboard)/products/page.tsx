@@ -184,7 +184,7 @@ export default function AdminProducts() {
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-[#f4f4f1]/50">
-              {["#", "Product", "Category", "Price", "Clicks", "Status", "Actions"].map((h) => (
+              {["#", "Product", "Category", "Price", "Komisi", "Clicks", "Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className={`py-4 px-6 font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] font-bold uppercase ${
@@ -199,7 +199,7 @@ export default function AdminProducts() {
           <tbody className="divide-y divide-dashed divide-[#e5e1d8]">
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-12" aria-busy="true">
+                <td colSpan={8} className="text-center py-12" aria-busy="true">
                   <div className="animate-pulse space-y-3 max-w-md mx-auto">
                     <div className="h-4 bg-[#e2e3e0] rounded" />
                     <div className="h-4 bg-[#e2e3e0] rounded w-3/4 mx-auto" />
@@ -210,7 +210,7 @@ export default function AdminProducts() {
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
+                <td colSpan={8} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
                   <div role="status">
                     <p className="font-mono text-[13px] text-[#5c403a]">No products found</p>
                     <p className="font-mono text-[11px] text-[#906f69] mt-2">Try adjusting your search or filter to find what you&apos;re looking for.</p>
@@ -246,6 +246,11 @@ export default function AdminProducts() {
                 <td className="py-4 px-6 align-middle text-right">
                   <span className="font-mono text-[16px] font-bold text-[#1a1c1b] bg-[#FFC93C] px-2 py-0.5">
                     {formatPrice(product.price)}
+                  </span>
+                </td>
+                <td className="py-4 px-6 align-middle text-right">
+                  <span className="font-mono text-[16px] font-bold text-[#b51c00]">
+                    {formatPrice(product.commission)}
                   </span>
                 </td>
                 <td className="py-4 px-6 align-middle text-right">

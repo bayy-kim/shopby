@@ -87,14 +87,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const body = await request.json()
-  const { name, price, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
+  const { name, price, commission, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
 
   if (!name || !price || !imageUrl || !shopeeUrl || !categoryId) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
   const product = await prisma.product.create({
-    data: { name, price: Number(price), discountPct: discountPct ? Number(discountPct) : null, imageUrl, imageAlt: imageAlt || name, shopeeUrl, categoryId, isFeatured: isFeatured || false, isSoldOut: isSoldOut || false },
+    data: { name, price: Number(price), commission: commission ? Number(commission) : 0, discountPct: discountPct ? Number(discountPct) : null, imageUrl, imageAlt: imageAlt || name, shopeeUrl, categoryId, isFeatured: isFeatured || false, isSoldOut: isSoldOut || false },
     include: { category: true },
   })
   return NextResponse.json({ data: product }, { status: 201 })

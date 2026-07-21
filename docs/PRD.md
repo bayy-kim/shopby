@@ -42,8 +42,8 @@ Bayu sudah disetujui sebagai Shopee Affiliate dan butuh satu halaman pusat (land
 | `/admin-shopby/login` | Login page dengan receipt card, brutalist styling, form auth |
 | `/admin-shopby` | Dashboard — statistik real dari API, grafik performa, aktivitas terbaru |
 | `/admin-shopby/products` | Tabel manajemen produk lengkap dengan filter, search, pagination, toggle Sold Out per baris, CRUD via API |
-| `/admin-shopby/products/new` | Form tambah produk baru — URL image input, kategori, link afiliasi, harga, toggle Stok Habis |
-| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, featured status, sold out status |
+| `/admin-shopby/products/new` | Form tambah produk baru — URL image input, kategori, link afiliasi, harga, komisi, toggle Stok Habis |
+| `/admin-shopby/products/[id]` | Edit produk — form nama, kategori, link afiliasi, harga, komisi, featured status, sold out status |
 | `/admin-shopby/analytics` | Panel metrik — revenue, AOV, conversion rate, traffic sources, geografis |
 | `/admin-shopby/settings` | Konfigurasi store profile, payout info, keamanan (password) |
 | `/admin-shopby/help` | Pusat bantuan panduan & resources |
@@ -160,6 +160,9 @@ shopby/
 │   ├── lib/
 │   │   ├── auth.ts             # JWT session: createSessionToken, verifySessionToken, checkAuth
 │   │   ├── auth-password.ts    # scrypt hash/verify untuk admin password
+│   │   ├── csrf.ts             # CSRF token validation guard
+│   │   ├── validate-settings.ts # Settings input validation whitelist
+│   │   ├── rate-limit.ts       # In-memory rate limiter with staggered cleanup
 │   │   ├── prisma.ts           # Prisma client singleton
 │   │   ├── utils.ts            # cn(), formatPrice()
 │   │   └── services/

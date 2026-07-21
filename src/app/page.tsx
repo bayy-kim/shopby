@@ -63,7 +63,7 @@ export default function Home() {
   }, [])
 
   const handleCategoryChange = useCallback((slug: string) => {
-    setSelectedCategory(slug)
+    setSelectedCategory(prev => prev === slug ? "semua" : slug)
   }, [])
 
   const handleSortChange = useCallback((newSort: string) => {

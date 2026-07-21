@@ -19,6 +19,7 @@ export default function EditProduct() {
   const [isSoldOut, setIsSoldOut] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const [urlError, setUrlError] = useState("")
+  const [commission, setCommission] = useState("")
   const { data: categories } = useCategories()
 
   const nameRef = useRef<HTMLInputElement>(null)
@@ -35,6 +36,7 @@ export default function EditProduct() {
         setImageUrl(p.imageUrl)
         setIsFeatured(p.isFeatured)
         setIsSoldOut(p.isSoldOut)
+        setCommission(p.commission.toLocaleString("id-ID"))
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -59,11 +61,14 @@ export default function EditProduct() {
       return
     }
 
+    const commissionVal = parseInt(commission.replace(/\./g, ""), 10) || 0
+
     setSaving(true)
     try {
       await updateProduct(product.id, {
         name,
         price,
+        commission: commissionVal,
         imageUrl: trimmedUrl || product.imageUrl,
         imageAlt: name,
         shopeeUrl,
@@ -197,6 +202,18 @@ export default function EditProduct() {
                 <span className="font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#b51c00]">Rp</span>
                 <input ref={priceRef} id="price" type="text" defaultValue={product.price.toLocaleString("id-ID")}
                   className="flex-1 border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#1a1c1b] focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-1" htmlFor="commission">
+                Komisi per Produk (IDR)
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#b51c00]">Rp</span>
+                <input id="commission" type="text" value={commission} onChange={(e) => setCommission(e.target.value)}
+                  placeholder="50.000"
+                  className="flex-1 border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#1a1c1b] placeholder:text-[#5c403a]/20 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
               </div>
             </div>
 

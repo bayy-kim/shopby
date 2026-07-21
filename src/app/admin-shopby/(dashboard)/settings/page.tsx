@@ -1,21 +1,22 @@
 "use client"
 
-import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw } from "lucide-react"
+import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw, TriangleAlert } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
-const tabs = ["General", "Storefront", "Payouts", "Account"]
+const tabs = ["Storefront", "Payouts", "Account"]
 
 const defaultSettings = {
-  storeName: "Shopby Affiliate Store",
-  storeUrl: "shopby.io",
-  bio: "Kurator produk affiliate Shopee pilihan — rekomendasi terbaik, harga transparan.",
-  bankName: "BCA",
-  accountNumber: "1234-5678-9012",
-  accountHolder: "JOHN DOE",
+  storeName: "",
+  storeUrl: "",
+  bio: "",
+  bankName: "",
+  accountNumber: "",
+  accountHolder: "",
   minPayout: 100000,
   primaryColor: "red",
   autoPayout: true,
   twoFA: false,
+  logo: "",
 }
 
 type Settings = typeof defaultSettings
@@ -27,20 +28,24 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [changingPassword, setChangingPassword] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const originalRef = useRef<Settings>(defaultSettings)
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch("/api/settings", { headers: { "x-csrf-token": "shopby-admin-1" } })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch")
         return res.json()
       })
       .then((data) => {
-        setSettings(data)
-        originalRef.current = { ...data }
+        const normalized = { ...defaultSettings, ...data }
+        setSettings(normalized)
+        originalRef.current = { ...normalized }
+        if (data.logo) setLogoPreview(data.logo)
       })
       .catch(() => setMessage({ type: "error", text: "Failed to load settings" }))
       .finally(() => setLoading(false))
@@ -55,19 +60,55 @@ export default function AdminSettings() {
     setSaving(true)
     setMessage(null)
     try {
+      const payload = { ...settings }
+      if (logoPreview && logoPreview.startsWith("data:")) {
+        payload.logo = logoPreview
+      }
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+        body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error("Failed to save")
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.details?.join(", ") || err.error || "Failed to save")
+      }
       const data = await res.json()
       setSettings(data.settings)
+      originalRef.current = { ...data.settings }
       setMessage({ type: "success", text: "Settings saved successfully!" })
-    } catch {
-      setMessage({ type: "error", text: "Failed to save settings" })
+    } catch (e) {
+      setMessage({ type: "error", text: e instanceof Error ? e.message : "Failed to save settings" })
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleChangePassword() {
+    if (newPassword.length < 6) {
+      setMessage({ type: "error", text: "Password must be at least 6 characters" })
+      return
+    }
+    setChangingPassword(true)
+    setMessage(null)
+    try {
+      const res = await fetch("/api/settings/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed to update password")
+      }
+      setMessage({ type: "success", text: "Password updated successfully" })
+      setShowPasswordForm(false)
+      setCurrentPassword("")
+      setNewPassword("")
+    } catch (e) {
+      setMessage({ type: "error", text: e instanceof Error ? e.message : "Failed to update password" })
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -114,7 +155,7 @@ export default function AdminSettings() {
         </aside>
 
         <div className="flex-1 space-y-8">
-          {(activeTab === "General" || activeTab === "Storefront") && (
+          {activeTab === "Storefront" && (
           <section className="bg-white border border-[#e5e1d8] p-6 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-6 bg-[#FAFAF7] rounded-full border border-[#e5e1d8]" />
             <h3 className="font-sans text-[20px] leading-[28px] font-bold text-[#1a1c1b] mb-6 flex items-center gap-2 border-b border-dashed border-[#e5beb6] pb-4">
@@ -167,6 +208,10 @@ export default function AdminSettings() {
                       onChange={(e) => {
                         const file = e.target.files?.[0]
                         if (file) {
+                          if (file.size > 500_000) {
+                            setMessage({ type: "error", text: "Image too large. Max 500KB." })
+                            return
+                          }
                           const reader = new FileReader()
                           reader.onloadend = () => setLogoPreview(reader.result as string)
                           reader.readAsDataURL(file)
@@ -256,13 +301,16 @@ export default function AdminSettings() {
               </div>
               <div className="flex justify-between items-center py-3">
                 <div>
-                  <div className="font-sans text-[16px] text-[#1a1c1b]">Two-Factor Authentication</div>
-                  <div className="font-sans text-[12px] text-[#5c403a] mt-1">Enhance account security</div>
+                  <div className="font-sans text-[16px] text-[#1a1c1b] flex items-center gap-2">
+                    Two-Factor Authentication
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#fdc73a] text-[#6f5400] font-mono text-[10px] uppercase font-bold">
+                      <TriangleAlert className="size-3" aria-hidden="true" />
+                      Planned
+                    </span>
+                  </div>
+                  <div className="font-sans text-[12px] text-[#5c403a] mt-1">Coming in a future update</div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked={settings.twoFA} onChange={() => update("twoFA", !settings.twoFA)} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-[#e2e3e0] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF4D2D]" />
-                </label>
+                <div className="w-11 h-6 bg-[#e2e3e0] rounded-full opacity-50" />
               </div>
             </div>
           </section>
@@ -270,31 +318,33 @@ export default function AdminSettings() {
 
           {showPasswordForm && (
             <div className="bg-white border border-[#e5e1d8] p-6 relative">
-              <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] mb-4">New Password</h3>
+              <h3 className="font-sans text-[16px] font-bold text-[#1a1c1b] mb-4">Change Password</h3>
               <input
                 type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Current password"
+                className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[13px] tracking-[0.05em] text-[#1a1c1b] focus:border-[#1a1c1b] focus:ring-0 focus:outline-none mb-4"
+              />
+              <input
+                type="password"
+                autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder="New password (min 6 characters)"
                 className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[13px] tracking-[0.05em] text-[#1a1c1b] focus:border-[#1a1c1b] focus:ring-0 focus:outline-none mb-4"
               />
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    if (newPassword.length < 6) {
-                      setMessage({ type: "error", text: "Password must be at least 6 characters" })
-                      return
-                    }
-                    setMessage({ type: "success", text: "Password updated successfully" })
-                    setShowPasswordForm(false)
-                    setNewPassword("")
-                  }}
-                  className="px-4 py-2 rounded-full font-mono text-[13px] bg-[#FF4D2D] text-white font-bold hover:shadow-lg transition-all"
+                  onClick={handleChangePassword}
+                  disabled={changingPassword || !currentPassword || !newPassword}
+                  className="px-4 py-2 rounded-full font-mono text-[13px] bg-[#FF4D2D] text-white font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                 >
-                  Update Password
+                  {changingPassword ? "Updating..." : "Update Password"}
                 </button>
                 <button
-                  onClick={() => { setShowPasswordForm(false); setNewPassword("") }}
+                  onClick={() => { setShowPasswordForm(false); setCurrentPassword(""); setNewPassword("") }}
                   className="px-4 py-2 rounded-full font-mono text-[13px] border border-[#e5e1d8] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors"
                 >
                   Cancel
@@ -310,6 +360,8 @@ export default function AdminSettings() {
                   ? "bg-green-50 border-green-200 text-green-800"
                   : "bg-red-50 border-red-200 text-red-800"
               }`}
+              role="alert"
+              aria-live="polite"
             >
               {message.text}
             </div>

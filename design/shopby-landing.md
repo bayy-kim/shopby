@@ -275,7 +275,7 @@
                     Belanja Cerdas,<br>Struk Berkualitas
                 </h1>
 <p class="text-on-surface-variant max-w-md">
-                    Koleksi produk Shopee Affiliate pilihan dalam satu nota digital. Kurasi terbaik, navigasi cepat, harga transparan.
+                    Rekomendasi produk pilihan dari berbagai kategori. Terkurasi, terpercaya, harga transparan.
                 </p>
 <button class="bg-[#FF4D2D] text-[#17161C] px-8 py-4 font-bold rounded-full brutalist-shadow text-lg uppercase tracking-wider mt-4 inline-block">
                     Lihat Semua Deal

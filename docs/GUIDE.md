@@ -311,6 +311,8 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 
 > ✅ Semua halaman admin kini menggunakan data dari API nyata — tidak ada data hardcoded atau simulasi.
 
+> ⚠️ **CSRF Protection:** Semua state-changing admin API (`POST`, `PUT`) memerlukan header `x-csrf-token: shopby-admin-1`. Frontend mengirim header ini otomatis di setiap request. Settings API juga memvalidasi input dengan whitelist 11 keys + tipe checking.
+
 ### 3.1 Alur Autentikasi
 
 ```
@@ -333,9 +335,9 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 #### Detail Autentikasi
 
 - **Single Admin:** Email dan password hash berasal dari `.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`)
-- **Password Hashing:** Node.js `crypto.scryptSync` dengan salt 16-byte, stored sebagai `salt:derivedKey` (base64)
-- **Session JWT:** `jose` library, algoritma HS256, payload `{ role: "admin" }`, expiry 24 jam
-- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Lax, path=/, maxAge 86400s
+- **Password Hashing:** Node.js `crypto.scryptSync` dengan salt 16-byte, stored sebagai `salt:derivedKey` (base64). Password juga bisa diubah via `PUT /api/settings/password` (verifikasi current password + simpan hash baru di DB `AppSetting` key `admin_password_hash`).
+- **Session JWT:** `jose` library, algoritma HS256, payload `{ role: "admin" }`, expiry 24 jam. Secret wajib ≥ 32 karakter (validasi startup).
+- **Cookie:** Nama `shopby_admin_session`, HttpOnly, Secure (production), SameSite=Strict, path=/, maxAge 86400s
 - **Middleware:** Edge runtime, matcher `["/admin-shopby/:path*", "/api/stats/:path*", "/api/analytics/:path*", "/api/settings/:path*"]` — melindungi admin pages + API sensitive routes
 
 #### Credential Default (Development)
@@ -427,23 +429,26 @@ Halaman utama admin dengan data real-time dari API:
 | Total Sales | $24,590 | +12.5% (hijau) |
 | Active Links | 142 | Across 5 platforms |
 | Total Clicks | 89.2K | +5.2% (hijau) |
-| Est. Commission | $3,420 | Pending payout |
+| Total Sales (Rp) | Rp 24.590.000 | +12.5% (hijau) |
+| Active Links | 142 | Across 5 platforms |
+| Total Clicks | 89.2K | +5.2% (hijau) |
+| Est. Commission | Rp 3.420.000 | Dari komisi real per produk |
 
-> ✅ Statistik kini berasal dari API nyata (`GET /api/stats`) — bukan data hardcoded.
+> ✅ Statistik kini berasal dari API nyata (`GET /api/stats`) — bukan data hardcoded. Revenue = sum(commission × clicks) per produk.
 
 #### Grafik Sales Performance
 - SVG inline line chart (Mon–Sat, 6 titik data)
 - Sumbu Y: revenue ($0–$8,000)
 - Garis merah dengan area fill transparan
 
-#### Recent Activity
-Tabel 3 baris dengan data contoh:
+#### Top Products by Clicks (dengan Komisi & Revenue)
 
-| Product | Clicks | Status |
-|---|---|---|
-| Mechanical Keyboard Pro | 1,284 | Active (hijau) |
-| Smartwatch Series X | 892 | Active (hijau) |
-| Minimalist Leather Wallet | 456 | Ended (abu-abu) |
+| Product | Komisi | Clicks | Revenue |
+|---|---|---|---|
+| Mechanical Keyboard Pro | Rp10.000 | 12 | Rp120.000 |
+| Smartwatch Series X | Rp15.000 | 8 | Rp120.000 |
+
+Revenue = komisi × jumlah klik. Data dari `GET /api/stats`.
 
 ### 3.5 Halaman Analytics
 
@@ -461,15 +466,15 @@ Tabel 3 baris dengan data contoh:
 
 | Metrik | Nilai | Perubahan |
 |---|---|---|
-| Total Revenue | Rp 15.400 | +12% (hijau) |
+| Komisi Terkumpul | Rp 15.400 (dari komisi real) | +12% (hijau) |
 | Avg Order Value | Rp 245.000 | 0% (abu-abu) |
 | Conversion Rate | 4.2% | +0.5% (hijau) |
 | Bounce Rate | 28.5% | -2.1% (hijau) |
 
-#### Clicks vs Conversions
+#### Clicks & Revenue (Daily)
 - Bar chart per hari (7 hari: Sen–Min)
-- Bar merah = clicks, bar kuning = conversions
-- Data contoh (range clicks 10rb–18rb, conversions 400–1.1rb)
+- Bar merah = clicks, garis = revenue
+- Revenue dari komisi real per klik
 
 #### Top Traffic Sources
 
@@ -534,12 +539,13 @@ URL Gambar Produk
 | Affiliate Link | URL | `https://shopee.co.id/...` |
 | Price (IDR) | Text with "Rp" prefix | `1.250.000` |
 | Featured | Toggle switch | Yes / No |
+| Komisi per Produk (IDR) | Text with "Rp" prefix | — |
 | Tandai Stok Habis | Toggle switch | Yes / No |
 
 #### Tombol Aksi
 
 | Tombol | Fungsi |
-|---|---|
+|---|---|---|
 | **Create Product Link** (merah) | `POST /api/products` → simpan ke DB → toast "Product link created successfully!" (3 detik) |
 | **Cancel** | `router.back()` kembali ke halaman sebelumnya |
 
@@ -567,6 +573,7 @@ URL Gambar Produk
 | Product | Gambar thumbnail + nama + ID produk |
 | Category | Badge kategori |
 | Price | Format Rp (contoh: Rp450.000) |
+| Komisi | Komisi per produk (IDR) |
 | Clicks | Jumlah klik (dari ClickLog) |
 | Status | Badge Featured/Standard + toggle Sold Out (Active/Sold Out) |
 | Actions | Copy Link (ikon `Copy`), Edit (ikon `Edit` → `/admin-shopby/products/[id]`), Delete (ikon `Trash2`) |
@@ -597,6 +604,7 @@ URL Gambar Produk
 | Category | Select | Furniture, Electronics, Apparel, Rumah Tangga |
 | Affiliate Link | URL input | `https://shopby.com/ref/8923a` |
 | Price | Text with "Rp" prefix | "1.250.000" |
+| Komisi per Produk (IDR) | Text with "Rp" prefix | — |
 | Featured | Toggle switch | Yes / No |
 | Tandai Stok Habis | Toggle switch | Yes / No |
 
@@ -648,9 +656,9 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 
 | Fitur | Tipe | Default |
 |---|---|---|
-| Change Password | Link | Dekoratif |
+| Change Password | Form | Current password + new password → `PUT /api/settings/password` |
 | Auto-Payouts | Toggle | ON (default) |
-| Two-Factor Auth | Toggle | OFF (default) |
+| Two-Factor Auth | Badge | **Planned** (coming soon, disabled) |
 
 #### Tombol Aksi
 
@@ -660,6 +668,8 @@ Popup kuning di bagian atas: "Success! Product has been saved." — hilang otoma
 | **Save Changes** | `PUT /api/settings` → simpan ke database (Prisma `AppSetting`) → toast konfirmasi |
 
 > ✅ Pengaturan kini tersimpan ke database (model `AppSetting` via Prisma) melalui `PUT /api/settings` — kompatibel dengan serverless deployment.
+>
+> ⚠️ **Input Validation:** `PUT /api/settings` memvalidasi semua field dengan whitelist 11 keys + tipe checking + batas ukuran (logo max 500KB). Invalid request mengembalikan 400 dengan detail error.
 
 ---
 
@@ -683,7 +693,7 @@ Login admin, mengembalikan session cookie.
 ```json
 { "success": true }
 ```
-Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400`
+Set cookie: `shopby_admin_session=<JWT>; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
 
 **Response (400):**
 ```json
@@ -714,7 +724,7 @@ Mengambil daftar produk.
 **Query Parameters:**
 
 | Parameter | Tipe | Default | Deskripsi |
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 | `category` | string | — | Slug kategori untuk filter |
 | `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc` |
 | `numberFrom` | number | — | Filter nomor produk awal (inklusif) |
@@ -728,6 +738,7 @@ Mengambil daftar produk.
       "id": "clx...",
       "name": "Mechanical Keyboard Pro",
       "price": 450000,
+      "commission": 10000,
       "discountPct": null,
       "imageUrl": "https://picsum.photos/...",
       "imageAlt": "Mechanical Keyboard Pro",
@@ -808,7 +819,8 @@ Menambahkan produk baru ke database.
   "shopeeUrl": "https://shopee.co.id/...",
   "imageUrl": "https://picsum.photos/...",
   "isFeatured": false,
-  "isSoldOut": false
+  "isSoldOut": false,
+  "commission": 0
 }
 ```
 
@@ -846,6 +858,7 @@ Memperbarui data produk.
 {
   "name": "Mechanical Keyboard Pro V2",
   "price": 500000,
+  "commission": 10000,
   "categoryId": "clx...",
   "shopeeUrl": "https://shopee.co.id/...",
   "imageUrl": "https://picsum.photos/...",
@@ -887,8 +900,8 @@ Mengembalikan data statistik untuk dashboard admin.
       { "id": "clc...", "product": { "name": "Mechanical Keyboard Pro" }, "clickedAt": "2026-07-20T10:30:00.000Z" }
     ],
     "topProducts": [
-      { "id": "cla...", "name": "Mechanical Keyboard Pro", "_count": { "clicks": 12 } },
-      { "id": "clb...", "name": "Steel Tumbler 500ml", "_count": { "clicks": 8 } }
+      { "id": "cla...", "name": "Mechanical Keyboard Pro", "commission": 10000, "revenue": 120000, "_count": { "clicks": 12 } },
+      { "id": "clb...", "name": "Steel Tumbler 500ml", "commission": 15000, "revenue": 120000, "_count": { "clicks": 8 } }
     ]
   }
 }
@@ -908,7 +921,7 @@ Mengembalikan data analitik detail.
 ```json
 {
   "data": {
-    "revenue": 15400000,
+    "totalRevenue": 15400000,
     "totalClicks": 47,
     "conversionRate": 4.2,
     "dailyData": [
@@ -961,6 +974,28 @@ Memperbarui pengaturan toko dan menyimpannya ke database.
 **Response (200):**
 ```json
 { "success": true, "settings": { ... } }
+```
+
+#### PUT /api/settings/password
+
+Mengubah password admin (memerlukan CSRF header).
+
+**Request Body:**
+```json
+{
+  "currentPassword": "admin123",
+  "newPassword": "new-secure-password"
+}
+```
+
+**Response (200):**
+```json
+{ "success": true }
+```
+
+**Response (400):**
+```json
+{ "error": "Current password is incorrect" }
 ```
 
 ### 4.7 Contact Form
@@ -1034,6 +1069,7 @@ Mencatat klik produk dan mengembalikan URL Shopee.
 | `id` | String (CUID) | Primary key |
 | `name` | String | Nama produk |
 | `price` | Int | Harga dalam Rupiah (tanpa desimal) |
+| `commission` | Int | Komisi per produk dalam IDR (default 0) |
 | `discountPct` | Int? | Persentase diskon (nullable) |
 | `imageUrl` | String | URL gambar produk |
 | `imageAlt` | String | Teks alternatif gambar |
@@ -1370,10 +1406,13 @@ shopby/
     │   ├── useProducts.ts          # TanStack Query untuk produk
     │   └── useCategories.ts        # TanStack Query untuk kategori
     ├── lib/
-    │   ├── auth.ts                 # JWT session (jose, edge-safe)
-    │   ├── auth-password.ts        # Password scrypt (node crypto)
-    │   ├── prisma.ts               # Prisma client singleton
-    │   ├── utils.ts                # cn(), formatPrice()
+│   ├── auth.ts                 # JWT session (jose, edge-safe)
+│   ├── auth-password.ts        # Password scrypt (node crypto)
+│   ├── csrf.ts                 # CSRF token validation guard
+│   ├── validate-settings.ts    # Settings input validation whitelist
+│   ├── rate-limit.ts           # In-memory rate limiter with staggered cleanup
+│   ├── prisma.ts               # Prisma client singleton
+│   ├── utils.ts                # cn(), formatPrice()
     │   └── services/
     │       ├── products.ts         # fetchProducts()
     │       ├── categories.ts       # fetchCategories()

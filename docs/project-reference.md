@@ -72,7 +72,10 @@ src/
 │   └── useCategories.ts
 ├── lib/
 │   ├── auth.ts           # JWT session (jose) — edge-compatible
-│   ├── auth-password.ts  # scrypt hash/verify
+│   ├── auth-password.ts  # scrypt hash/verify — fallback DB hash
+│   ├── csrf.ts           # CSRF token validation guard
+│   ├── validate-settings.ts # Settings input validation whitelist (11 keys)
+│   ├── rate-limit.ts     # In-memory rate limiter with staggered cleanup
 │   ├── prisma.ts         # Prisma client singleton
 │   ├── utils.ts          # cn(), formatPrice(), NUMBER_RANGE_CHUNK_SIZE, buildNumberRanges()
 │   ├── products-numbering.ts # getProductNumberMap(), resolveNumberRangeToIds()
@@ -112,6 +115,7 @@ prisma/
 | `id`         | `String`     | Auto-generated CUID          |
 | `name`       | `String`     | Product name                 |
 | `price`      | `Int`        | Price in IDR (integer)       |
+| `commission` | `Int`        | Komisi per produk in IDR     |
 | `discountPct`| `Int?`       | Discount percentage (nullable)|
 | `imageUrl`   | `String`     | Primary product image URL    |
 | `imageAlt`   | `String`     | Alt text for product image   |
@@ -156,7 +160,7 @@ prisma/
 
 | Method | Route                 | Auth  | Description                             |
 | ------ | --------------------- | ----- | --------------------------------------- |
-| POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set HttpOnly JWT cookie   |
+| POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set HttpOnly JWT cookie (`SameSite=Strict`) |
 | POST   | `/api/admin-shopby/logout`   | —     | Clear session cookie                    |
 | GET    | `/api/products`       | —     | List products (`?category=&sort=&numberFrom=&numberTo=`) |
 | POST   | `/api/products`       | Yes   | Create product                          |
@@ -167,7 +171,8 @@ prisma/
 | GET    | `/api/stats`          | Yes   | Dashboard stats — totalSales, totalProducts, totalClicks, recentClicks, topProducts |
 | GET    | `/api/analytics`      | Yes   | Analytics data — revenue, clicks, traffic sources, geography |
 | GET    | `/api/settings`       | Yes   | Read AppSetting via Prisma              |
-| PUT    | `/api/settings`       | Yes   | Update AppSetting via Prisma            |
+| PUT    | `/api/settings`       | Yes   | Update AppSetting via Prisma (+ Zod validation, CSRF guard) |
+| PUT    | `/api/settings/password` | Yes | Change admin password (scrypt, stored in DB AppSetting) |
 | POST   | `/api/click`          | —     | Track product click → returns `{ shopeeUrl }` |
 | POST   | `/api/contact`        | —     | Submit contact form                     |
 
@@ -401,6 +406,26 @@ Run `pnpm prisma:seed` to populate the database.
 
 ---
 
+### 18. Commission per Product (July 2026)
+Revenue dihitung dari komisi per produk: setiap klik = `product.commission` IDR. Dashboard dan analytics menampilkan komisi per produk, total revenue berbasis komisi real (bukan estimasi `clicks * 50000`).
+
+### 19. CSRF Protection (July 2026)
+Semua state-changing admin API (`PUT`, `POST`) membutuhkan header `x-csrf-token: shopby-admin-1`. Session cookie menggunakan `SameSite=Strict`. Helper `csrfGuard()` di `src/lib/csrf.ts`.
+
+### 20. Settings Input Validation (July 2026)
+`PUT /api/settings` memvalidasi semua field dengan whitelist 11 keys, tipe checking, dan batas panjang/ukuran via `validate-settings.ts`.
+
+### 21. Password Change via API (July 2026)
+`PUT /api/settings/password` — verifikasi current password (scrypt), simpan hash baru di DB AppSetting `admin_password_hash`. Auth-password fallback: env var → DB.
+
+### 22. Rate Limiter Improved (July 2026)
+Staggered cleanup tiap 60 detik (sebelumnya: nuke 10K entries). Mencegah memory leak tanpa kehilangan semua state.
+
+### 23. Auth Secret Length Enforced (July 2026)
+`SESSION_SECRET` minimal 32 karakter — throws error saat startup jika kurang.
+
+---
+
 ## Audit & Fixes (July 2026)
 
 ### Emoji Audit
@@ -422,6 +447,40 @@ Run `pnpm prisma:seed` to populate the database.
 | 10 | `components/ui/card.tsx` | Orphaned component (never imported) | Deleted |
 | 11 | `components/ui/button.tsx` | Orphaned component (never imported) | Deleted |
 | 12 | `components/ui/badge.tsx` | Orphaned component (never imported) | Deleted |
+
+### Security Audit & Fixes (July 2026)
+
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| 1 | `settings/page.tsx` | Change password was client-only (no API) | Wired to `PUT /api/settings/password` — verifies current + stores new hash |
+| 2 | `settings/page.tsx` | Logo upload never persisted (base64 in state only) | Logo included in settings PUT body, stored in DB JSON |
+| 3 | `settings/route.ts`, `login/route.ts`, `logout/route.ts` | No CSRF protection | Added `x-csrf-token` header check + `SameSite=Strict` on session cookie |
+| 4 | `settings/route.ts` | PUT accepted arbitrary keys | Added Zod-style validation whitelist (11 keys) + type/size checks |
+| 5 | `rate-limit.ts` | In-memory Map with 10K-entry nuke | Staggered cleanup every 60s |
+| 6 | `auth.ts` | No secret length check | Added min 32 chars requirement for `SESSION_SECRET` |
+| 7 | `settings/page.tsx` | 2FA toggle was placebo | Changed to "Planned" badge + disabled state |
+| 8 | `layout.tsx` | Notification dot always shown (empty state) | Conditional rendering based on `notifications.length` |
+| 9 | `layout.tsx` | Hardcoded email in profile dropdown | Removed hardcoded email |
+| 10 | `layout.tsx` | Help drawer had no focus trap | Added `FocusTrap` component |
+| 11 | `login/page.tsx` | Missing `autoComplete` attributes | Added `autoComplete="email"` and `autoComplete="current-password"` |
+| 12 | `dashboard/page.tsx` | Fetch errors silently ignored | Added visible error banner |
+
+### Commission Feature (July 2026)
+
+| # | File | Change |
+|---|------|--------|
+| 1 | `prisma/schema.prisma` | Added `commission Int @default(0)` to Product |
+| 2 | `types/index.ts` | Added `commission: number` to Product interface |
+| 3 | `services/products.ts` | Added `commission` param to `createProduct`/`updateProduct` |
+| 4 | `api/products/route.ts` | POST handles `commission` |
+| 5 | `api/products/[id]/route.ts` | PUT handles `commission` |
+| 6 | `api/stats/route.ts` | Revenue = sum(commission × clicks) instead of estimate |
+| 7 | `api/analytics/route.ts` | Revenue from real commission data |
+| 8 | `products/new/page.tsx` | Added "Komisi per Produk" input |
+| 9 | `products/[id]/page.tsx` | Added "Komisi per Produk" input |
+| 10 | `products/page.tsx` | Added "Komisi" column to table |
+| 11 | `dashboard/page.tsx` | Top Products shows Komisi + Revenue columns |
+| 12 | `analytics/page.tsx` | Top Products shows Komisi + Revenue columns |
 
 ### Search Bar Functional
 - Layout top navbar search navigates to `/admin-shopby/products?q=<query>` on Enter

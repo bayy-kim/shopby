@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
       where: clickWhere,
       take: 1000,
       orderBy: { clickedAt: "desc" },
-      include: { product: { select: { name: true, price: true } } },
+      include: { product: { select: { name: true, price: true, commission: true } } },
     }),
   ])
 
-  const totalRevenue = totalClicks * 50000
+  const totalRevenue = clicksWithProducts.reduce((sum, c) => sum + (c.product.commission || 0), 0)
   const aov = totalClicks > 0 ? Math.round(totalRevenue / totalClicks) : 0
   const conversionRate = totalClicks > 0
     ? Math.min(5.2, (totalClicks / (totalClicks * 20)) * 100)
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
 
   const dailyClicks: Record<string, number> = {}
   const dailyConversions: Record<string, number> = {}
+  const dailyRevenue: Record<string, number> = {}
   const now = new Date()
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now)
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
     const key = d.toLocaleDateString("en-US", { weekday: "short" })
     dailyClicks[key] = 0
     dailyConversions[key] = 0
+    dailyRevenue[key] = 0
   }
   clicksWithProducts.forEach((c) => {
     const key = new Date(c.clickedAt).toLocaleDateString("en-US", {
@@ -54,6 +56,7 @@ export async function GET(request: NextRequest) {
     })
     if (dailyClicks[key] !== undefined) {
       dailyClicks[key]++
+      dailyRevenue[key] += c.product.commission || 0
       if (c.product.price > 200000) dailyConversions[key]++
     }
   })
@@ -62,8 +65,23 @@ export async function GET(request: NextRequest) {
     day,
     clicks,
     conversions: Math.round(clicks * 0.045),
-    revenue: clicks * 50000,
+    revenue: Math.round(dailyRevenue[day]),
   }))
+
+  const productRevenueMap = clicksWithProducts.reduce<
+    Record<string, { name: string; clicks: number; revenue: number; commission: number }>
+  >((acc, c) => {
+    if (!acc[c.product.name])
+      acc[c.product.name] = {
+        name: c.product.name,
+        clicks: 0,
+        revenue: 0,
+        commission: c.product.commission || 0,
+      }
+    acc[c.product.name].clicks++
+    acc[c.product.name].revenue += c.product.commission || 0
+    return acc
+  }, {})
 
   return NextResponse.json({
     data: {
@@ -74,19 +92,12 @@ export async function GET(request: NextRequest) {
       totalClicks,
       totalProducts,
       revenueData,
-      topProducts: clicksWithProducts.reduce<
-        Record<string, { name: string; clicks: number; revenue: number }>
-      >((acc, c) => {
-        if (!acc[c.product.name])
-          acc[c.product.name] = {
-            name: c.product.name,
-            clicks: 0,
-            revenue: 0,
-          }
-        acc[c.product.name].clicks++
-        acc[c.product.name].revenue += c.product.price
-        return acc
-      }, {}),
+      topProducts: Object.fromEntries(
+        Object.entries(productRevenueMap).map(([name, val]) => [
+          name,
+          { name: val.name, clicks: val.clicks, revenue: val.revenue, commission: val.commission },
+        ])
+      ),
     },
   })
 }

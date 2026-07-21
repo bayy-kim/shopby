@@ -68,6 +68,7 @@ export default function AdminLogin() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@shopby.com"
+                    autoComplete="email"
                     required
                     className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                   />
@@ -86,6 +87,7 @@ export default function AdminLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     required
                     className="w-full pl-10 py-2 font-sans text-[16px] leading-[24px] text-[#1a1c1b] placeholder:text-[#5c403a]/50 bg-transparent border-0 border-b-2 border-dashed border-[#e5beb6] focus:border-[#b51c00] focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#b51c00]"
                   />

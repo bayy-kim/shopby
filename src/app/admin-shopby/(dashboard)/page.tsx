@@ -19,15 +19,18 @@ export default function AdminDashboard() {
     totalClicks: number
     avgCommission: number
     recentClicks: { productName: string; clickedAt: string }[]
-    topProducts: { id: string; name: string; clicks: number; category: string }[]
+    topProducts: { id: string; name: string; clicks: number; commission: number; revenue: number; category: string }[]
   } | null>(null)
   const [period, setPeriod] = useState("all")
 
   const [revenueData, setRevenueData] = useState<{ day: string; clicks: number; conversions: number; revenue: number }[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
   useEffect(() => {
     setLoading(true)
+    setFetchError(null)
     Promise.all([fetchStats(period), fetchAnalytics(period)])
       .then(([stats, analytics]) => {
         setStatsData(stats)
@@ -36,6 +39,7 @@ export default function AdminDashboard() {
       .catch(() => {
         setStatsData(null)
         setRevenueData([])
+        setFetchError("Failed to load dashboard data. Please try again.")
       })
       .finally(() => setLoading(false))
   }, [period])
@@ -77,6 +81,8 @@ export default function AdminDashboard() {
     .map((p) => ({
       product: p.name,
       clicks: p.clicks.toLocaleString("id-ID"),
+      commission: formatPrice(p.commission),
+      revenue: formatPrice(p.revenue),
       status: p.clicks >= 10 ? "Active" : "New",
     }))
 
@@ -98,6 +104,12 @@ export default function AdminDashboard() {
           {period === "all" ? "All Time" : "This Week"}
         </button>
       </div>
+
+      {fetchError && (
+        <div className="bg-[#ffdad6] border border-[#ba1a1a] rounded px-4 py-3 font-mono text-[13px] leading-[16px] text-[#ba1a1a]" role="alert" aria-live="polite">
+          {fetchError}
+        </div>
+      )}
 
       {loading ? (
         <div className="space-y-8" aria-busy="true">
@@ -201,31 +213,23 @@ export default function AdminDashboard() {
                 </h3>
               </div>
               <div className="border border-[#e5e1e9] bg-[#f9f9f6] flex-1 overflow-hidden">
-                <div className="grid grid-cols-[2fr_1fr_1fr] p-3 border-b border-[#e5e1e9] bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] uppercase text-xs">
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr] p-3 border-b border-[#e5e1e9] bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] uppercase text-xs">
                   <div>Product</div>
                   <div className="text-right">Clicks</div>
-                  <div className="text-right">Status</div>
+                  <div className="text-right">Komisi</div>
+                  <div className="text-right">Revenue</div>
                 </div>
                 {hasTopProducts ? (
                   <ul className="flex flex-col">
                     {topProducts.map((item, i) => (
                       <li
                         key={i}
-                        className={`grid grid-cols-[2fr_1fr_1fr] p-3 border-b border-dashed border-[#e5e1e9] items-center hover:bg-[#f4f4f1] transition-colors ${i % 2 === 1 ? "bg-[#f4f4f1]/50" : ""}`}
+                        className={`grid grid-cols-[2fr_1fr_1fr_1fr] p-3 border-b border-dashed border-[#e5e1e9] items-center hover:bg-[#f4f4f1] transition-colors ${i % 2 === 1 ? "bg-[#f4f4f1]/50" : ""}`}
                       >
                         <div className="truncate pr-2 font-sans text-[14px] font-bold text-[#1a1c1b]">{item.product}</div>
                         <div className="text-right font-mono text-[14px] text-[#1a1c1b]">{item.clicks}</div>
-                        <div className="text-right">
-                          <span
-                            className={`inline-block px-2 py-0.5 font-mono text-[10px] uppercase ${
-                              item.status === "Active"
-                                ? "bg-[#fdc73a] text-[#6f5400]"
-                                : "border border-[#e5e1e9] text-[#5c403a]"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </div>
+                        <div className="text-right font-mono text-[14px] text-[#b51c00]">{item.commission}</div>
+                        <div className="text-right font-mono text-[14px] text-[#1a1c1b] font-bold">{item.revenue}</div>
                       </li>
                     ))}
                   </ul>

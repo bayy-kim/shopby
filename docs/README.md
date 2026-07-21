@@ -20,12 +20,15 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 ### Admin Panel (Auth Guard)
 - 🔐 `/admin-shopby/login` — Login page receipt card brutalist style (POST ke API login)
 - 🛡️ **Middleware auth** — Semua route `/admin-shopby/*` diproteksi, redirect ke login jika session invalid
+- 🛡️ **CSRF protection** — Semua state-changing API memerlukan `x-csrf-token` header + `SameSite=Strict` cookie
+- 🛡️ **Input validation** — Settings API memvalidasi whitelist 11 keys dengan tipe/ukuran checking
 - 🔑 **Single admin** — Credential dari `.env` (`ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH`), tanpa database/users table
 - 🍪 **Session JWT** — HttpOnly cookie `shopby_admin_session`, expiry 24 jam
 - 📈 `/admin-shopby` — Dashboard with stats, sales chart, recent activity
 - 📦 `/admin-shopby/products` — Product management table with CRUD + Sold Out toggle
-- ✏️ `/admin-shopby/products/new` — Add product (URL image input)
-- ✏️ `/admin-shopby/products/[id]` — Edit product form (with Sold Out toggle)
+- ✏️ `/admin-shopby/products/new` — Add product (URL image input + komisi per produk)
+- ✏️ `/admin-shopby/products/[id]` — Edit product form (with Komisi, Sold Out toggle)
+
 - 📊 `/admin-shopby/analytics` — Metrics, traffic sources, geographic data
 - ⚙️ `/admin-shopby/settings` — Store profile, payout, security toggles
 - 🚪 **Logout** — Hapus session cookie, redirect ke login
@@ -84,7 +87,7 @@ shopby/
 │   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
 │   ├── hooks/ (useProducts, useCategories)
 │   ├── lib/
-│   │   ├── auth.ts, auth-password.ts, prisma.ts, utils.ts
+│   │   ├── auth.ts, auth-password.ts, csrf.ts, validate-settings.ts, rate-limit.ts, prisma.ts, utils.ts
 │   │   └── services/ (products, categories, click)
 │   └── types/ (Product, Category, ClickLog)
 ```
@@ -144,7 +147,8 @@ Buka `http://localhost:3000` di browser.
 | `/api/click` | POST | — | Catat klik + return URL Shopee |
 | `/api/stats` | GET | ✅ | Statistik dashboard |
 | `/api/analytics` | GET | ✅ | Data analitik |
-| `/api/settings` | GET/PUT | ✅ | Pengaturan toko (via Prisma) |
+| `/api/settings` | GET/PUT | ✅ | Pengaturan toko (via Prisma, + CSRF + validation) |
+| `/api/settings/password` | PUT | ✅ | Ganti password (verifikasi current + hash baru) |
 | `/api/contact` | POST | — | Kirim pesan kontak |
 
 ## Admin Routes

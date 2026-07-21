@@ -55,12 +55,14 @@ export async function GET(request: NextRequest) {
       id: c.productId,
       name: p?.name ?? "Unknown",
       clicks: c._count.productId,
+      commission: p?.commission ?? 0,
+      revenue: (p?.commission ?? 0) * c._count.productId,
       category: p?.category.name ?? "Uncategorized",
     }
   })
 
-  const totalSales = totalClicks * 50000
-  const avgCommission = Math.round(totalSales * 0.08)
+  const totalSales = topProducts.reduce((sum, p) => sum + p.revenue, 0)
+  const avgCommission = totalClicks > 0 ? Math.round(totalSales / totalClicks) : 0
 
   return NextResponse.json({
     data: {

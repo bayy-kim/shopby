@@ -6,7 +6,7 @@ export async function POST() {
   response.cookies.set("shopby_admin_session", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 0,
   })

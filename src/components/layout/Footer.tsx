@@ -13,7 +13,7 @@ export default function Footer() {
             ini membantu kami terus berbagi rekomendasi terbaik.
           </p>
           <p className="text-caption text-ink/60 mt-2">
-            &copy; 2026 Shopby Affiliate. Utilitarian Playful Design.
+            &copy; 2026 abny project
           </p>
         </div>
         <div className="flex flex-wrap gap-4">

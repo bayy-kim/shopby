@@ -22,7 +22,7 @@ export default function AdminAnalytics() {
     totalClicks: number
     totalProducts: number
     revenueData: { day: string; clicks: number; conversions: number; revenue: number }[]
-    topProducts: Record<string, { name: string; clicks: number; revenue: number }>
+    topProducts: Record<string, { name: string; clicks: number; revenue: number; commission: number }>
   } | null>(null)
 
   const [loading, setLoading] = useState(true)
@@ -56,18 +56,18 @@ export default function AdminAnalytics() {
     {
       label: "Avg per Click",
       value: data && data.totalClicks > 0 ? formatPrice(Math.round(data.totalRevenue / data.totalClicks)) : "Rp0",
-      trend: "Revenue ÷ clicks",
+      trend: "Komisi per klik",
       icon: Receipt,
       trendIcon: Minus,
       trendColor: "text-[#5c403a]",
     },
     {
-      label: "Est. Commission",
-      value: data ? formatPrice(Math.round((data.totalRevenue || 0) * 0.08)) : "Rp0",
-      trend: "~8% of total revenue",
+      label: "Komisi Terkumpul",
+      value: data ? formatPrice(data.totalRevenue || 0) : "Rp0",
+      trend: "Total dari semua produk",
       icon: Wallet,
-      trendIcon: TrendingDown,
-      trendColor: "text-[#ba1a1a]",
+      trendIcon: TrendingUp,
+      trendColor: "text-[#b51c00]",
     },
   ]
 
@@ -82,6 +82,7 @@ export default function AdminAnalytics() {
     : []
 
   const totalProductClicks = topProducts.reduce((sum, p) => sum + p.clicks, 0)
+  const totalProductRevenue = topProducts.reduce((sum, p) => sum + p.revenue, 0)
 
   if (loading) {
     return (
@@ -200,18 +201,21 @@ export default function AdminAnalytics() {
           </div>
           {topProducts.length > 0 ? (
             <ul className="flex flex-col">
+              <li className="grid grid-cols-[2fr_1fr_1fr_1fr] p-3 border-b border-[#e5e1e9] bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] uppercase text-xs">
+                <div>Product</div>
+                <div className="text-right">Clicks</div>
+                <div className="text-right">Komisi</div>
+                <div className="text-right">Revenue</div>
+              </li>
               {topProducts.map((p, i) => (
-                <li key={p.name} className="flex items-center justify-between p-4 border-b border-dashed border-[#e5e1e9] hover:bg-[#FAFAF7] transition-colors hover:border-l-4 hover:border-[#b51c00]">
+                <li key={p.name} className="grid grid-cols-[2fr_1fr_1fr_1fr] p-4 border-b border-dashed border-[#e5e1e9] hover:bg-[#FAFAF7] transition-colors hover:border-l-4 hover:border-[#b51c00] items-center">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[13px] font-bold text-[#1a1c1b] w-4">{i + 1}.</span>
                     <span className="font-sans text-[16px] leading-[24px] text-[#1a1c1b]">{p.name}</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 h-2 bg-[#e2e3e0] rounded-full overflow-hidden hidden sm:block">
-                      <div className="h-full bg-[#b51c00]" style={{ width: `${totalProductClicks > 0 ? (p.clicks / totalProductClicks) * 100 : 0}%` }} />
-                    </div>
-                    <span className="font-mono text-[13px] font-bold text-[#1a1c1b] w-16 text-right">{p.clicks} clicks</span>
-                  </div>
+                  <div className="text-right font-mono text-[14px] text-[#1a1c1b]">{p.clicks}</div>
+                  <div className="text-right font-mono text-[14px] text-[#b51c00]">{formatPrice(p.commission)}</div>
+                  <div className="text-right font-mono text-[14px] font-bold text-[#1a1c1b]">{formatPrice(p.revenue)}</div>
                 </li>
               ))}
             </ul>

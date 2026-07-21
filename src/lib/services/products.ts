@@ -43,6 +43,7 @@ export async function fetchProductById(id: string): Promise<Product> {
 export async function createProduct(data: {
   name: string
   price: number
+  commission?: number
   discountPct?: number | null
   imageUrl: string
   imageAlt?: string
@@ -66,6 +67,7 @@ export async function updateProduct(
   data: {
     name: string
     price: number
+    commission?: number
     discountPct?: number | null
     imageUrl: string
     imageAlt?: string
@@ -98,7 +100,7 @@ export async function fetchStats(period?: string): Promise<{
   totalClicks: number
   avgCommission: number
   recentClicks: { productName: string; clickedAt: string }[]
-  topProducts: { id: string; name: string; clicks: number; category: string }[]
+  topProducts: { id: string; name: string; clicks: number; commission: number; revenue: number; category: string }[]
 }> {
   const params = period && period !== "all" ? `?period=${period}` : ""
   const res = await fetch(`/api/stats${params}`)
@@ -115,7 +117,7 @@ export async function fetchAnalytics(period?: string): Promise<{
   totalClicks: number
   totalProducts: number
   revenueData: { day: string; clicks: number; conversions: number; revenue: number }[]
-  topProducts: Record<string, { name: string; clicks: number; revenue: number }>
+  topProducts: Record<string, { name: string; clicks: number; revenue: number; commission: number }>
 }> {
   const mapped = period === "All Time" ? "all"
     : period === "This Week" ? "week"

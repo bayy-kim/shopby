@@ -2,6 +2,7 @@ export interface Product {
   id: string
   name: string
   price: number
+  commission: number
   discountPct: number | null
   imageUrl: string
   imageAlt: string

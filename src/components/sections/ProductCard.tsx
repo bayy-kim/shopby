@@ -26,12 +26,17 @@ export default function ProductCard({
 
   return (
     <div
-      className="receipt-card p-3 flex flex-col justify-between"
+      className="receipt-card p-3 flex flex-col justify-between hover-lift"
       style={{
         clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
       }}
     >
       <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
+      {isHighlight && !isSoldOut && (
+        <span className="absolute top-2 right-2 bg-primary text-white font-mono text-[9px] font-bold uppercase px-2 py-0.5 z-30 tag-pulse">
+          Hot Deal
+        </span>
+      )}
       <div>
         <div
           className={`relative w-full border border-border-color mb-3 overflow-hidden ${isHighlight ? "h-48" : "h-32"}`}

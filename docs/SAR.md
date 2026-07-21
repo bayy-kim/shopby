@@ -78,6 +78,9 @@ shopby/
 │   ├── lib/
 │   │   ├── auth.ts                 # JWT session + checkAuth (shared)
 │   │   ├── auth-password.ts        # scrypt hash/verify
+│   │   ├── csrf.ts                 # CSRF token validation guard
+│   │   ├── validate-settings.ts    # Settings input validation whitelist
+│   │   ├── rate-limit.ts           # In-memory rate limiter with staggered cleanup
 │   │   ├── prisma.ts
 │   │   ├── utils.ts                # cn(), formatPrice()
 │   │   └── services/ (products, categories, click)
@@ -91,6 +94,7 @@ model Product {
   id          String    @id @default(cuid())
   name        String
   price       Int
+  commission  Int       @default(0)
   discountPct Int?
   imageUrl    String
   imageAlt    String
@@ -153,9 +157,10 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 | `/api/categories` | GET | — | — | Ambil semua kategori → `[{ id, name, slug }]` (plain array) |
 | `/api/click` | POST | — | Body: `{ productId }` | Simpan log klik → `{ shopeeUrl }` |
 | `/api/stats` | GET | ✅ | — | `{ data: { totalSales, totalProducts, activeProducts, totalClicks, avgCommission, recentClicks, topProducts } }` |
-| `/api/analytics` | GET | ✅ | — | Data analitik — revenue, clicks, traffic sources, geography |
+| `/api/analytics` | GET | ✅ | `?period=all|week|month|year` | Data analitik — totalRevenue, clicks, traffic sources, geography |
 | `/api/settings` | GET | ✅ | — | Baca AppSetting via Prisma |
-| `/api/settings` | PUT | ✅ | Body: `{ storeName, bio, ... }` | Simpan AppSetting via Prisma |
+| `/api/settings` | PUT | ✅ | Body: `{ storeName, bio, ... }` (CSRF + validation) | Simpan AppSetting via Prisma |
+| `/api/settings/password` | PUT | ✅ | Body: `{ currentPassword, newPassword }` | Ganti password (scrypt, DB AppSetting) |
 | `/api/contact` | POST | — | Body: `{ name, email, message }` | Kirim pesan kontak |
 
 ### Response Format
@@ -196,7 +201,7 @@ Semua endpoint mengembalikan JSON.
 ```json
 {
   "data": {
-    "totalSales": 0,
+    "totalSales": 240000,
     "totalProducts": 5,
     "activeProducts": 3,
     "totalClicks": 47,
@@ -205,7 +210,7 @@ Semua endpoint mengembalikan JSON.
       { "id": "clc1...", "product": { "name": "Product A" }, "clickedAt": "2026-07-20T..." }
     ],
     "topProducts": [
-      { "id": "cla1...", "name": "Product A", "_count": { "clicks": 12 } }
+      { "id": "cla1...", "name": "Product A", "commission": 10000, "revenue": 120000, "_count": { "clicks": 12 } }
     ]
   }
 }

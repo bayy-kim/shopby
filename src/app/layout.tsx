@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     template: "%s — Shopby",
   },
   description:
-    "Koleksi produk Shopee Affiliate pilihan dalam satu nota digital. Kurasi terbaik, navigasi cepat, harga transparan.",
+      "Rekomendasi produk pilihan dari berbagai kategori. Terkurasi, terpercaya, harga transparan.",
   openGraph: {
     title: "Shopby — Belanja Cerdas, Struk Berkualitas",
     description:
-      "Koleksi produk Shopee Affiliate pilihan dalam satu nota digital. Kurasi terbaik, navigasi cepat, harga transparan.",
+    "Rekomendasi produk pilihan dari berbagai kategori. Terkurasi, terpercaya, harga transparan.",
     type: "website",
     locale: "id_ID",
     siteName: "Shopby",
@@ -72,6 +72,14 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://picsum.photos" />
         <meta name="color-scheme" content="light" />
         <meta name="theme-color" content="#FAFAF7" />
+        <script type="speculationrules">
+          {JSON.stringify({
+            prerender: [{
+              where: { href_matches: "/*" },
+              eagerness: "moderate"
+            }]
+          })}
+        </script>
       </head>
       <body className="min-h-screen flex flex-col" translate="no">
         <a
@@ -81,6 +89,17 @@ export default function RootLayout({
           Langsung ke konten utama
         </a>
         <Providers>{children}</Providers>
+        <Script id="schema-breadcrumb" type="application/ld+json" strategy="beforeInteractive">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            name: "Shopby Breadcrumb",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Beranda", item: "https://shopby.io" },
+              { "@type": "ListItem", position: 2, name: "Produk", item: "https://shopby.io/#products" },
+            ],
+          })}
+        </Script>
         <Script id="schema-structured-data" type="application/ld+json" strategy="beforeInteractive">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -88,7 +107,7 @@ export default function RootLayout({
             name: "Shopby",
             url: "https://shopby.io",
             description:
-              "Koleksi produk Shopee Affiliate pilihan dalam satu nota digital.",
+      "Rekomendasi produk pilihan dari berbagai kategori. Terkurasi, terpercaya, harga transparan.",
             potentialAction: {
               "@type": "SearchAction",
               target: {

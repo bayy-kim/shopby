@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { checkAuth } from "@/lib/auth"
+import { csrfGuard } from "@/lib/csrf"
+import { validateSettings } from "@/lib/validate-settings"
 
 const SETTINGS_KEY = "store_settings"
 
@@ -39,10 +41,20 @@ export async function PUT(request: NextRequest) {
   if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const csrf = csrfGuard(request)
+  if (csrf) return csrf
+
   try {
     const body = await request.json()
+    const { cleaned, errors } = validateSettings(body)
+
+    if (errors.length > 0) {
+      return NextResponse.json({ error: "Validation failed", details: errors }, { status: 400 })
+    }
+
     const current = await readSettings()
-    const merged = { ...current, ...body }
+    const merged = { ...current, ...cleaned }
     await prisma.appSetting.upsert({
       where: { key: SETTINGS_KEY },
       update: { value: JSON.stringify(merged) },
