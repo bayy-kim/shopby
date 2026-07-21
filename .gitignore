@@ -51,5 +51,8 @@ next-env.d.ts
 *.png
 *.jpg
 
+# CSB/product CSVs
+produc/
+
 .vercel
 .env*
