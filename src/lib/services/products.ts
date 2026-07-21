@@ -11,9 +11,11 @@ export async function fetchProducts(
   skip?: number,
   take?: number,
   numberFrom?: number,
-  numberTo?: number
+  numberTo?: number,
+  q?: string
 ): Promise<ProductsResponse> {
   const params = new URLSearchParams()
+  if (q) params.set("q", q)
   if (categorySlug) params.set("category", categorySlug)
   if (sort) params.set("sort", sort)
   if (skip) params.set("skip", String(skip))
@@ -26,9 +28,9 @@ export async function fetchProducts(
   return res.json()
 }
 
-export async function fetchFeaturedProducts(): Promise<Product[]> {
-  const res = await fetch("/api/products?featured=true")
-  if (!res.ok) throw new Error("Failed to fetch featured products")
+export async function fetchTopRatedProducts(limit = 6): Promise<Product[]> {
+  const res = await fetch(`/api/products?sort=rating_desc,price_asc&take=${limit}`)
+  if (!res.ok) throw new Error("Failed to fetch top rated products")
   const json = await res.json()
   return json.data
 }
@@ -44,6 +46,7 @@ export async function createProduct(data: {
   name: string
   price: number
   commission?: number
+  rating?: number
   discountPct?: number | null
   imageUrl: string
   imageAlt?: string
@@ -68,6 +71,7 @@ export async function updateProduct(
     name: string
     price: number
     commission?: number
+    rating?: number
     discountPct?: number | null
     imageUrl: string
     imageAlt?: string

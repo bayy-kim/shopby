@@ -18,6 +18,7 @@ export default function NewProduct() {
   const { data: categories } = useCategories()
 
   const [commission, setCommission] = useState("")
+  const [rating, setRating] = useState(0)
   const nameRef = useRef<HTMLInputElement>(null)
   const categoryRef = useRef<HTMLSelectElement>(null)
   const linkRef = useRef<HTMLInputElement>(null)
@@ -53,6 +54,7 @@ export default function NewProduct() {
         name,
         price,
         commission: commissionVal,
+        rating,
         imageUrl: trimmedUrl || "https://picsum.photos/seed/" + Date.now() + "/400/400",
         imageAlt: name,
         shopeeUrl,
@@ -183,6 +185,28 @@ export default function NewProduct() {
                 <span className="font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#b51c00]">Rp</span>
                 <input id="commission" type="text" value={commission} onChange={(e) => setCommission(e.target.value)} placeholder="50.000"
                   className="flex-1 border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#1a1c1b] placeholder:text-[#5c403a]/20 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-3">
+                Rating
+              </label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className={`size-8 flex items-center justify-center text-xl transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
+                      star <= rating ? "text-[#f59e0b]" : "text-[#e2e3e0]"
+                    }`}
+                    aria-label={`Rating ${star} bintang`}
+                  >
+                    ★
+                  </button>
+                ))}
+                <span className="font-mono text-[13px] text-[#76737b] ml-2">{rating > 0 ? `${rating}/5` : "Belum di rating"}</span>
               </div>
             </div>
 

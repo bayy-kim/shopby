@@ -1,9 +1,9 @@
 "use client"
 
-import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw, TriangleAlert } from "lucide-react"
+import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw, TriangleAlert, Monitor, Smartphone, RefreshCw } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
-const tabs = ["Storefront", "Payouts", "Account"]
+const tabs = ["Storefront", "Payouts", "Account", "Preview"]
 
 const defaultSettings = {
   storeName: "",
@@ -34,6 +34,9 @@ export default function AdminSettings() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const originalRef = useRef<Settings>(defaultSettings)
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
+  const [previewKey, setPreviewKey] = useState(0)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     fetch("/api/settings", { headers: { "x-csrf-token": "shopby-admin-1" } })
@@ -77,6 +80,7 @@ export default function AdminSettings() {
       setSettings(data.settings)
       originalRef.current = { ...data.settings }
       setMessage({ type: "success", text: "Settings saved successfully!" })
+      setPreviewKey((k) => k + 1)
     } catch (e) {
       setMessage({ type: "error", text: e instanceof Error ? e.message : "Failed to save settings" })
     } finally {
@@ -274,6 +278,83 @@ export default function AdminSettings() {
                   className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[13px] font-bold text-[#1a1c1b] focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
               </div>
             </div>
+          </section>
+          )}
+
+          {activeTab === "Preview" && (
+          <section className="bg-white border border-[#e5e1d8] p-6 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 size-6 bg-[#FAFAF7] rounded-full border border-[#e5e1d8]" />
+            <h3 className="font-sans text-[20px] leading-[28px] font-bold text-[#1a1c1b] mb-6 flex items-center gap-2 border-b border-dashed border-[#e5beb6] pb-4">
+              <Monitor className="size-5 text-[#b51c00]" aria-hidden="true" />
+              Live Preview
+            </h3>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex bg-[#f4f4f1] rounded-full p-0.5 border border-[#e5e1d8]">
+                <button
+                  onClick={() => setPreviewMode("desktop")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono uppercase transition-all focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
+                    previewMode === "desktop"
+                      ? "bg-white text-[#1a1c1b] font-bold shadow-sm"
+                      : "text-[#5c403a] hover:text-[#1a1c1b]"
+                  }`}
+                >
+                  <Monitor className="size-4" aria-hidden="true" />
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setPreviewMode("mobile")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono uppercase transition-all focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
+                    previewMode === "mobile"
+                      ? "bg-white text-[#1a1c1b] font-bold shadow-sm"
+                      : "text-[#5c403a] hover:text-[#1a1c1b]"
+                  }`}
+                >
+                  <Smartphone className="size-4" aria-hidden="true" />
+                  Mobile
+                </button>
+              </div>
+              <button
+                onClick={() => setPreviewKey((k) => k + 1)}
+                className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-mono uppercase border border-[#e5e1d8] text-[#5c403a] hover:bg-[#f4f4f1] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
+                aria-label="Refresh preview"
+              >
+                <RefreshCw className="size-3.5" aria-hidden="true" />
+                Refresh
+              </button>
+            </div>
+
+            <div
+              className={`border border-[#e5e1d8] bg-[#f4f4f1] overflow-hidden transition-all duration-300 ${
+                previewMode === "mobile"
+                  ? "max-w-[390px] mx-auto rounded-[32px] shadow-[0_0_0_1px_#e5e1d8,0_8px_32px_rgba(0,0,0,0.1)]"
+                  : "w-full"
+              }`}
+              style={
+                previewMode === "mobile"
+                  ? { height: "750px" }
+                  : { height: "600px" }
+              }
+            >
+              <div
+                className={`w-full h-full ${previewMode === "mobile" ? "overflow-y-auto overflow-x-hidden rounded-[31px]" : ""}`}
+              >
+                <iframe
+                  key={previewKey}
+                  ref={iframeRef}
+                  src={typeof window !== "undefined" ? window.location.origin : "/"}
+                  title="Site Preview"
+                  className="w-full h-full border-0"
+                  style={previewMode === "mobile" ? { width: "390px", minWidth: "390px" } : {}}
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            <p className="font-mono text-[11px] text-[#5c403a] mt-4 text-center">
+              Preview refreshes when you save changes. Use {previewMode === "desktop" ? "Mobile" : "Desktop"} view to check responsive layout.
+            </p>
           </section>
           )}
 

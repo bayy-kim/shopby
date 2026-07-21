@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Star } from "lucide-react"
 import type { Product } from "@/types"
 import { formatPrice } from "@/lib/utils"
 
@@ -65,6 +65,17 @@ export default function ProductCard({
               <span className="font-mono text-xs text-ink/60 uppercase">
                 {product.category.name}
               </span>
+            )}
+            {isHighlight && product.rating > 0 && (
+              <div className="flex items-center gap-0.5 mt-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={`size-3 ${s <= product.rating ? "text-[#f59e0b] fill-[#f59e0b]" : "text-[#e2e3e0]"}`}
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
             )}
             <h3
               className={`font-bold text-ink leading-tight mt-1 ${isHighlight ? "" : "text-sm"}`}

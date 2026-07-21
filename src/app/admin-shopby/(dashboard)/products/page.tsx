@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -22,6 +22,7 @@ import {
 import { fetchProducts, deleteProduct, updateProduct } from "@/lib/services/products"
 import { useCategories } from "@/hooks/useCategories"
 import { formatPrice } from "@/lib/utils"
+import { Star } from "lucide-react"
 import type { Product, Category } from "@/types"
 
 type ProductWithClicks = Product & { _count?: { clicks: number } }
@@ -184,7 +185,7 @@ export default function AdminProducts() {
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="bg-[#f4f4f1]/50">
-              {["#", "Product", "Category", "Price", "Komisi", "Clicks", "Status", "Actions"].map((h) => (
+              {["#", "Product", "Category", "Price", "Rating", "Komisi", "Clicks", "Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className={`py-4 px-6 font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] font-bold uppercase ${
@@ -197,9 +198,9 @@ export default function AdminProducts() {
             </tr>
           </thead>
           <tbody className="divide-y divide-dashed divide-[#e5e1d8]">
-            {loading ? (
-              <tr>
-                <td colSpan={8} className="text-center py-12" aria-busy="true">
+              {loading ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-12" aria-busy="true">
                   <div className="animate-pulse space-y-3 max-w-md mx-auto">
                     <div className="h-4 bg-[#e2e3e0] rounded" />
                     <div className="h-4 bg-[#e2e3e0] rounded w-3/4 mx-auto" />
@@ -210,7 +211,7 @@ export default function AdminProducts() {
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
+                <td colSpan={9} className="text-center py-12 font-mono text-[13px] text-[#5c403a]">
                   <div role="status">
                     <p className="font-mono text-[13px] text-[#5c403a]">No products found</p>
                     <p className="font-mono text-[11px] text-[#906f69] mt-2">Try adjusting your search or filter to find what you&apos;re looking for.</p>
@@ -229,7 +230,9 @@ export default function AdminProducts() {
                       style={{ clipPath: "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" }}
                     >
                       {product.imageUrl ? (
-                        <Image src={product.imageUrl} alt={product.imageAlt} fill className="object-cover" unoptimized />
+                        <ImagePreview src={product.imageUrl} alt={product.imageAlt}>
+                          <Image src={product.imageUrl} alt={product.imageAlt} fill className="object-cover" unoptimized />
+                        </ImagePreview>
                       ) : (
                         product.name.charAt(0)
                       )}
@@ -247,6 +250,17 @@ export default function AdminProducts() {
                   <span className="font-mono text-[16px] font-bold text-[#1a1c1b] bg-[#FFC93C] px-2 py-0.5">
                     {formatPrice(product.price)}
                   </span>
+                </td>
+                <td className="py-4 px-6 align-middle text-center">
+                  <div className="flex items-center justify-center gap-0.5">
+                    {product.rating > 0 ? (
+                      [1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={`size-3 ${s <= product.rating ? "text-[#f59e0b] fill-[#f59e0b]" : "text-[#e2e3e0]"}`} aria-hidden="true" />
+                      ))
+                    ) : (
+                      <span className="font-mono text-[11px] text-[#906f69]">—</span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-6 align-middle text-right">
                   <span className="font-mono text-[16px] font-bold text-[#b51c00]">
@@ -317,6 +331,54 @@ export default function AdminProducts() {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ImagePreview({ src, alt, children }: { src: string; alt: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const handleMouseEnter = () => {
+    timerRef.current = setTimeout(() => setShow(true), 400)
+  }
+
+  const handleMouseLeave = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setShow(false)
+  }
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+      {show && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: "calc(50% + 120px)",
+            top: "50%",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <div className="border-2 border-[#1a1c1b] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] overflow-hidden bg-white">
+            {/* receipt-card notch */}
+            <span className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-[#FAFAF7] border border-[#e5e1d8] z-10" aria-hidden="true" />
+            <Image
+              src={src}
+              alt={alt}
+              width={240}
+              height={240}
+              className="object-cover"
+              unoptimized
+              style={{ maxWidth: "240px", maxHeight: "240px" }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

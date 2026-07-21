@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import type { Prisma } from "@prisma/client"
 import { checkAuth } from "@/lib/auth"
 import { getProductNumberMap, resolveNumberRangeToIds } from "@/lib/products-numbering"
 
@@ -15,6 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data, total: products.length })
   }
 
+  const q = searchParams.get("q")
   const categorySlug = searchParams.get("category")
   const sort = searchParams.get("sort") ?? "newest"
   const skipParam = searchParams.get("skip")
@@ -24,23 +26,33 @@ export async function GET(request: NextRequest) {
   const numberFrom = searchParams.get("numberFrom") ? Number(searchParams.get("numberFrom")) : undefined
   const numberTo = searchParams.get("numberTo") ? Number(searchParams.get("numberTo")) : undefined
 
-  const categoryWhere =
+  const searchWhere = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { imageAlt: { contains: q, mode: "insensitive" as const } },
+          { category: { name: { contains: q, mode: "insensitive" as const } } },
+        ],
+      }
+    : {}
+
+  const categoryWhere: Record<string, unknown> =
     categorySlug && categorySlug !== "semua"
       ? { category: { slug: categorySlug } }
       : {}
 
   const hasNumberFilter = numberFrom !== undefined && numberTo !== undefined
 
-  const orderBy =
-    sort === "price_asc"
-      ? { price: "asc" as const }
-      : sort === "price_desc"
-        ? { price: "desc" as const }
-        : { createdAt: "desc" as const }
+  let orderBy: Prisma.ProductOrderByWithRelationInput[]
+  if (sort === "price_asc") orderBy = [{ price: "asc" }]
+  else if (sort === "price_desc") orderBy = [{ price: "desc" }]
+  else if (sort === "rating_desc") orderBy = [{ rating: "desc" }]
+  else if (sort === "rating_desc,price_asc") orderBy = [{ rating: "desc" }, { price: "asc" }]
+  else orderBy = [{ createdAt: "desc" }]
 
   const numberMapPromise = getProductNumberMap()
 
-  let where: Record<string, unknown> = categoryWhere
+  let where: Record<string, unknown> = { ...categoryWhere, ...searchWhere }
   if (hasNumberFilter) {
     const numberMap = await numberMapPromise
     const idsInRange = resolveNumberRangeToIds(numberMap, numberFrom!, numberTo!)
@@ -65,13 +77,13 @@ export async function GET(request: NextRequest) {
   const [numberMap, products, total] = await Promise.all([
     numberMapPromise,
     prisma.product.findMany({
-      where: categoryWhere,
+      where,
       include: { category: true, _count: { select: { clicks: true } } },
       orderBy,
       skip,
       take,
     }),
-    prisma.product.count({ where: categoryWhere }),
+    prisma.product.count({ where }),
   ])
 
   const data = products.map((p) => ({
@@ -87,14 +99,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const body = await request.json()
-  const { name, price, commission, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
+  const { name, price, commission, rating, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
 
   if (!name || !price || !imageUrl || !shopeeUrl || !categoryId) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
   const product = await prisma.product.create({
-    data: { name, price: Number(price), commission: commission ? Number(commission) : 0, discountPct: discountPct ? Number(discountPct) : null, imageUrl, imageAlt: imageAlt || name, shopeeUrl, categoryId, isFeatured: isFeatured || false, isSoldOut: isSoldOut || false },
+    data: { name, price: Number(price), commission: commission ? Number(commission) : 0, rating: rating ? Number(rating) : 0, discountPct: discountPct ? Number(discountPct) : null, imageUrl, imageAlt: imageAlt || name, shopeeUrl, categoryId, isFeatured: isFeatured || false, isSoldOut: isSoldOut || false },
     include: { category: true },
   })
   return NextResponse.json({ data: product }, { status: 201 })

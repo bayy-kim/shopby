@@ -18,6 +18,8 @@ import {
   LifeBuoy,
   FileText,
   ChevronRight,
+  Tags,
+  MousePointerClick,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
@@ -25,6 +27,8 @@ const navItems = [
   { href: "/admin-shopby", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin-shopby/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin-shopby/products", label: "Products", icon: Package },
+  { href: "/admin-shopby/categories", label: "Categories", icon: Tags },
+  { href: "/admin-shopby/click-logs", label: "Click Logs", icon: MousePointerClick },
   { href: "/admin-shopby/settings", label: "Settings", icon: Settings },
 ]
 
@@ -153,13 +157,15 @@ export default function AdminDashboardLayout({
         </div>
 
         <div className="px-4 mt-auto space-y-4 pt-4 border-t border-dashed border-[#e5beb6]">
-          <Link
+          <a
             href="/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-full font-mono text-[13px] leading-[16px] tracking-[0.05em] border border-[#906f69] text-[#1a1c1b] hover:bg-[#f4f4f1] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
           >
             <ExternalLink className="size-[18px]" aria-hidden="true" />
             View Storefront
-          </Link>
+          </a>
           <div className="space-y-1">
             <button onClick={() => setHelpOpen(true)} className="w-full flex items-center gap-3 px-4 py-2 rounded text-[#5c403a] hover:bg-[#f4f4f1] font-mono text-[13px] leading-[16px] tracking-[0.05em] transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none">
               <HelpCircle className="size-[18px]" aria-hidden="true" />

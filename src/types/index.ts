@@ -3,6 +3,7 @@ export interface Product {
   name: string
   price: number
   commission: number
+  rating: number
   discountPct: number | null
   imageUrl: string
   imageAlt: string

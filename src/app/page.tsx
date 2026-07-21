@@ -5,8 +5,9 @@ import dynamic from "next/dynamic"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
 import { useProducts } from "@/hooks/useProducts"
-import { useFeaturedProducts } from "@/hooks/useFeaturedProducts"
+import { useTopRatedProducts } from "@/hooks/useTopRatedProducts"
 import { useCategories } from "@/hooks/useCategories"
+import { useSettings } from "@/hooks/useSettings"
 import { logClick } from "@/lib/services/click"
 import { buildNumberRanges } from "@/lib/utils"
 
@@ -22,6 +23,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("semua")
   const [sort, setSort] = useState<string>("newest")
   const [numberRange, setNumberRange] = useState<{ from: number; to: number } | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useProducts({
     categorySlug:
@@ -29,10 +31,12 @@ export default function Home() {
     sort,
     numberFrom: numberRange?.from,
     numberTo: numberRange?.to,
+    q: searchQuery || undefined,
   })
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories()
-  const { data: featuredProducts, isLoading: isFeaturedLoading } = useFeaturedProducts()
+  const { data: topRatedProducts, isLoading: isTopRatedLoading } = useTopRatedProducts()
+  const { data: settings } = useSettings()
 
   const total = data?.total ?? 0
   const [globalTotal, setGlobalTotal] = useState(0)
@@ -56,10 +60,15 @@ export default function Home() {
     []
   )
 
+  const handleSearch = useCallback((q: string) => {
+    setSearchQuery(q)
+  }, [])
+
   const resetFilters = useCallback(() => {
     setSelectedCategory("semua")
     setSort("newest")
     setNumberRange(null)
+    setSearchQuery("")
   }, [])
 
   const handleCategoryChange = useCallback((slug: string) => {
@@ -80,8 +89,8 @@ export default function Home() {
 
   return (
     <>
-      <Navbar />
-      <Hero featuredProducts={featuredProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isFeaturedLoading} />
+      <Navbar onSearch={handleSearch} searchQuery={searchQuery} />
+      <Hero featuredProducts={topRatedProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isTopRatedLoading} storeName={settings?.storeName} tagline={settings?.bio} />
       <main id="skip-target" className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
         <div id="categories">
           <CategoryFilter
@@ -108,12 +117,12 @@ export default function Home() {
             isLoading={isCategoriesLoading}
           />
           <ProductGrid
-            featuredProducts={featuredProducts}
+            featuredProducts={topRatedProducts}
             allProducts={allProducts}
             total={total}
             onBuyProduct={handleBuyProduct}
             isLoading={isLoading}
-            isFeaturedLoading={isFeaturedLoading}
+            isFeaturedLoading={isTopRatedLoading}
             error={error?.message}
             activeCategory={categories?.find(
               (c) => c.slug === selectedCategory

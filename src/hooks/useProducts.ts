@@ -10,13 +10,14 @@ interface UseProductsOptions {
   sort?: string
   numberFrom?: number
   numberTo?: number
+  q?: string
 }
 
 export function useProducts(options?: UseProductsOptions) {
-  const { categorySlug, sort, numberFrom, numberTo } = options ?? {}
+  const { categorySlug, sort, numberFrom, numberTo, q } = options ?? {}
 
   const query = useInfiniteQuery({
-    queryKey: ["products", "paginated", categorySlug ?? "all", sort ?? "newest", numberFrom ?? 0, numberTo ?? 0],
+    queryKey: ["products", "paginated", categorySlug ?? "all", sort ?? "newest", numberFrom ?? 0, numberTo ?? 0, q ?? ""],
     queryFn: ({ pageParam }) =>
       fetchProducts(
         categorySlug,
@@ -24,7 +25,8 @@ export function useProducts(options?: UseProductsOptions) {
         pageParam.skip,
         pageParam.take,
         numberFrom,
-        numberTo
+        numberTo,
+        q
       ),
     initialPageParam: { skip: 0, take: PAGE_SIZE },
     getNextPageParam: (lastPage, allPages) => {
