@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Tags,
   MousePointerClick,
+  MessageSquare,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { getCsrfToken } from "@/lib/utils"
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/admin-shopby/products", label: "Products", icon: Package },
   { href: "/admin-shopby/categories", label: "Categories", icon: Tags },
   { href: "/admin-shopby/click-logs", label: "Click Logs", icon: MousePointerClick },
+  { href: "/admin-shopby/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/admin-shopby/settings", label: "Settings", icon: Settings },
 ]
 

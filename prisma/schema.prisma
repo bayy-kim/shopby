@@ -44,3 +44,11 @@ model AppSetting {
   key   String @unique
   value String
 }
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}

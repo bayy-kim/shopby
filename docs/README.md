@@ -19,6 +19,9 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - ⚡ **Progressif load** — Tombol "Muat Lebih Banyak" tanpa reload
 - 🚫 **Stok Habis** — Admin bisa tandai produk sold out, overlay + disabled button
 - 🏪 **Store settings** — Nama toko, tagline, logo dari admin settings
+- ⚠️ **Notification Banner** — Dismissible price disclaimer di atas landing page, tersimpan ke localStorage (tombol X, role="alert")
+- 💬 **Feedback Section** — Form saran/masukan di atas footer, kirim ke `POST /api/feedback` (rate-limited 2x/menit/IP)
+- 🗂️ **Feedback model** — Prisma `Feedback` dengan fields: id, name, email, message, createdAt
 
 ### Admin Panel (Auth Guard)
 - 🔐 `/admin-shopby/login` — Login page receipt card brutalist style
@@ -33,6 +36,7 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - 🖱️ `/admin-shopby/click-logs` — Riwayat klik dengan filter tanggal, pagination
 - 📊 `/admin-shopby/analytics` — Metrik, traffic sources, geographic data
 - ⚙️ `/admin-shopby/settings` — Storefront, payout, security, **live preview** (desktop/mobile toggle)
+- 💬 `/admin-shopby/feedback` — Manajemen feedback (tabel, pagination, hapus)
 - 🚪 **Logout** — Hapus session cookie, redirect ke login
 
 ## Tech Stack
@@ -61,7 +65,7 @@ shopby/
 │   └── design/                  # Referensi desain (landing + admin)
 ├── data/                        # Data imports (CSV, seed)
 ├── prisma/
-│   ├── schema.prisma            # Product, Category, ClickLog, AppSetting
+│   ├── schema.prisma            # Product, Category, ClickLog, AppSetting, Feedback
 │   └── migrations/
 ├── public/                      # Static assets
 ├── scripts/                     # Dev scripts
@@ -87,9 +91,12 @@ shopby/
 │   │   │   ├── help/
 │   │   │   ├── loading.tsx
 │   │   │   └── error.tsx
+│   │   ├── admin-shopby/(dashboard)/
+│   │   │   ├── page.tsx, analytics/, products/, categories/, click-logs/, feedback/, settings/
 │   │   ├── about/, affiliate/, privacy/, terms/, contact/
 │   │   └── api/
 │   │       ├── admin-shopby/ (login, logout)
+│   │       ├── feedback/ (POST public, GET|DELETE admin)
 │   │       ├── products/ + [id]/
 │   │       ├── categories/
 │   │       ├── click-logs/
@@ -99,7 +106,7 @@ shopby/
 │   │   ├── ui/ (ProductCardSkeleton, EmptyState)
 │   │   ├── layout/ (Navbar, Footer)
 │   │   ├── blocks/ (cta-section-with-gallery)
-│   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
+│   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter, NotificationBanner, FeedbackSection)
 │   ├── hooks/
 │   ├── lib/
 │   │   ├── auth.ts, auth-password.ts, csrf.ts, validate-settings.ts, rate-limit.ts, prisma.ts, utils.ts
@@ -147,6 +154,9 @@ npm run dev
 | `/api/analytics` | GET | ✅ | Data analitik |
 | `/api/settings` | GET/PUT | ✅ | Pengaturan toko (+ CSRF) |
 | `/api/settings/password` | PUT | ✅ | Ganti password |
+| `/api/feedback` | POST | — | Kirim saran/masukan (rate-limited 2x/menit/IP) |
+| `/api/feedback` | GET | ✅ | Ambil daftar feedback (pagination) |
+| `/api/feedback?id=` | DELETE | ✅ | Hapus feedback |
 | `/api/contact` | POST | — | Kirim pesan kontak |
 
 ## Deploy ke Vercel
@@ -157,5 +167,7 @@ npm run dev
 4. Deploy otomatis tiap push ke `main`.
 
 ---
+
+*Harga bisa berubah sewaktu-waktu — lihat banner info di halaman depan.
 
 Dibuat untuk Bayu — Shopee Affiliate Partner.

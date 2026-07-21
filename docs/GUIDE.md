@@ -88,6 +88,9 @@ Halaman utama di **`/`** — landing page untuk menampilkan produk affiliate Sho
 
 ```
 ┌─────────────────────────────────────────────────┐
+│ NOTIFICATION BANNER (dismissible)               │
+│ ⚠️ *harga bisa berubah kapan saja... [X]        │
+├─────────────────────────────────────────────────┤
 │ NAVBAR (fixed top)                              │
 │ Shopby    [Deals] [Kategori] [Affiliate] [Masuk]│
 ├─────────────────────────────────────────────────┤
@@ -118,6 +121,10 @@ Halaman utama di **`/`** — landing page untuk menampilkan produk affiliate Sho
 │           │ └────┘ └────┘ └────┘ └────┘       │ │
 │           │ [Muat Lebih Banyak ▼]              │ │
 │ └─────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────┤
+│ FEEDBACK SECTION                                │
+│ "Saran & Masukan"                               │
+│ [Nama] [Email] [Pesan...]            [Kirim]   │
 ├─────────────────────────────────────────────────┤
 │ FOOTER                                          │
 │ Shopby — Shopee Affiliate Partner               │
@@ -283,7 +290,36 @@ Dua varian:
 
 **Respon Klik:** Memanggil `logClick(productId)` → `POST /api/click` → buka URL Shopee di tab baru.
 
-### 2.7 Footer
+### 2.7 Notification Banner
+
+**File:** `src/components/sections/NotificationBanner.tsx`
+
+Banner dismissible di bagian paling atas landing page (sebelum navbar):
+
+- Menampilkan pesan: "*harga bisa berubah kapan saja admin cuma mengambil harga pas produk di tambahkan ke catalog mimin, selamat berbelanja"
+- Background kuning lembut (`#fef6e4`) dengan border bawah kuning
+- Tombol **X** di kanan untuk menutup — state tersimpan di `localStorage` (key `shopby_banner_dismissed`)
+- Jika sudah di-dismiss sebelumnya, banner tidak tampil sama sekali
+- `role="alert"` untuk aksesibilitas screen reader
+- `focus-visible` ring merah untuk keyboard navigation
+
+### 2.8 Feedback Section
+
+**File:** `src/components/sections/FeedbackSection.tsx`
+
+Form saran dan masukan di atas footer, dengan:
+
+- **Heading:** "Saran & Masukan" + deskripsi
+- **3 field:** Nama (text), Email (email), Pesan (textarea)
+- **Validasi client-side:** Semua field wajib diisi
+- **Submit:** `POST /api/feedback` dengan `Content-Type: application/json`
+- **Success state:** Centang hijau + "Terima kasih!" + tombol "Kirim lagi"
+- **Error state:** Ikon `AlertCircle` + pesan error merah
+- **Loading state:** Spinner + "Mengirim..." pada tombol
+- `role="alert"` pada status messages
+- Label menggunakan `htmlFor` untuk aksesibilitas
+
+### 2.9 Footer
 
 **File:** `src/components/layout/Footer.tsx`
 
@@ -292,7 +328,7 @@ Dua varian:
 - Link: Tentang Kami (`/about`), Kebijakan Privasi (`/privacy`), Syarat & Ketentuan (`/terms`), Hubungi Kami (`/contact`)
 - ✅ Semua link footer kini mengarah ke halaman statis yang nyata.
 
-### 2.8 Halaman Publik Lainnya
+### 2.10 Halaman Publik Lainnya
 
 Proyek kini memiliki halaman statis tambahan yang dapat diakses publik:
 
@@ -323,6 +359,7 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 | `/admin-shopby/products/new` | Tambah produk baru (POST `/api/products`) |
 | `/admin-shopby/products/[id]` | Edit produk (GET/PUT `/api/products/[id]`) |
 | `/admin-shopby/settings` | Pengaturan toko (simpan ke `/api/settings`) |
+| `/admin-shopby/feedback` | Kelola saran/masukan (tabel, pagination, hapus) |
 | `/admin-shopby/help` | Pusat Bantuan |
 
 > ✅ Semua halaman admin kini menggunakan data dari API nyata — tidak ada data hardcoded atau simulasi.
@@ -400,6 +437,7 @@ Layout bersama untuk semua halaman admin dengan:
 │                      │
 │ ─────────────────── │
 │ 🌐 View Storefront  │
+│ 📝 Feedback          │
 │ ❓ Help              │
 │ 🚪 Logout            │ ← merah
 └──────────────────────┘
@@ -1015,7 +1053,85 @@ Mengubah password admin (memerlukan CSRF header).
 { "error": "Current password is incorrect" }
 ```
 
-### 4.7 Contact Form
+### 4.7 Feedback
+
+#### POST /api/feedback
+
+Mengirim saran/masukan dari form feedback (public, rate-limited).
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "message": "Toko yang bagus!"
+}
+```
+
+**Rate Limit:** 2 request per menit per IP.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Saran/masukan berhasil dikirim. Terima kasih!"
+}
+```
+
+**Response (400):**
+```json
+{ "error": "Semua field harus diisi" }
+```
+
+**Response (429):**
+```json
+{ "error": "Terlalu banyak permintaan. Coba lagi nanti." }
+```
+
+#### GET /api/feedback
+
+Mengambil daftar feedback (admin auth required).
+
+**Query Parameters:**
+
+| Parameter | Tipe | Default | Keterangan |
+|---|---|---|---|
+| `page` | number | `1` | Halaman |
+| `limit` | number | `25` | Item per halaman (max 100) |
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "clx...",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "message": "Toko yang bagus!",
+      "createdAt": "2026-07-21T..."
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "totalPages": 1
+}
+```
+
+#### DELETE /api/feedback?id=
+
+Menghapus feedback (admin auth required).
+
+**Response (200):**
+```json
+{ "success": true, "message": "Feedback berhasil dihapus" }
+```
+
+**Response (400):**
+```json
+{ "error": "ID feedback diperlukan" }
+```
+
+### 4.8 Contact Form
 
 #### POST /api/contact
 
@@ -1121,6 +1237,16 @@ Mencatat klik produk dan mengembalikan URL Shopee.
 | `id` | String (CUID) | Primary key |
 | `key` | String (unique) | Nama pengaturan (`store_settings`) |
 | `value` | String | JSON string berisi semua nilai |
+
+#### Feedback
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | String (CUID) | Primary key |
+| `name` | String | Nama pengirim |
+| `email` | String | Email pengirim |
+| `message` | String | Isi saran/masukan |
+| `createdAt` | DateTime | Waktu dikirim |
 
 ### 5.2 Seed Data
 
@@ -1363,10 +1489,10 @@ shopby/
 ├── components.json                 # Shadcn/ui config
 ├── .env.example                    # Template environment
 ├── prisma/
-│   ├── schema.prisma               # Database schema
-│   ├── seed.ts                     # Seed data (4 kategori, 9 produk)
+│   ├── schema.prisma               # Database schema (Product, Category, ClickLog, AppSetting, Feedback)
+│   ├── seed.ts                     # Seed data (4 kategori)
 │   ├── dev.db                      # SQLite database (local)
-│   └── migrations/                 # Database migrations
+│   └── migrations/                 # Database migrations (incl. feedback migration)
 ├── public/                         # Static assets
 ├── design/                         # Referensi desain UI
 ├── docs/                           # Dokumentasi
@@ -1378,7 +1504,7 @@ shopby/
 └── src/
     ├── app/
     │   ├── layout.tsx              # Root layout + fonts
-    │   ├── page.tsx                # Storefront homepage
+    │   ├── page.tsx                # Storefront homepage (includes NotificationBanner + FeedbackSection)
     │   ├── providers.tsx           # TanStack Query provider
     │   ├── globals.css             # Tailwind v4 + tema + utilities
     │   ├── admin-shopby/
@@ -1387,13 +1513,14 @@ shopby/
     │   │   ├── loading.tsx         # Loading state
     │   │   ├── error.tsx           # Error boundary
     │   │   └── (dashboard)/
-    │   │       ├── layout.tsx      # Sidebar + navbar admin
+    │   │       ├── layout.tsx      # Sidebar + navbar admin (includes Feedback link)
     │   │       ├── page.tsx        # Dashboard utama
     │   │       ├── analytics/page.tsx
     │   │       ├── products/
     │   │       │   ├── page.tsx          # Daftar produk
     │   │       │   ├── new/page.tsx      # Tambah produk
     │   │       │   └── [id]/page.tsx     # Edit produk
+    │   │       ├── feedback/page.tsx     # Kelola feedback (admin only)
     │   │       └── settings/page.tsx
     │   └── api/
     │       ├── admin-shopby/
@@ -1403,6 +1530,7 @@ shopby/
     │       ├── products/[id]/route.ts # GET + PUT + DELETE
     │       ├── categories/route.ts # GET categories
     │       ├── click/route.ts      # POST click tracking
+    │       ├── feedback/route.ts   # POST (public), GET|DELETE (admin auth)
     │       ├── stats/route.ts      # GET dashboard stats
     │       ├── analytics/route.ts  # GET analytics data
     │       ├── settings/route.ts   # GET + PUT settings
@@ -1412,13 +1540,15 @@ shopby/
     │   │   ├── Navbar.tsx          # Navigasi utama
     │   │   └── Footer.tsx          # Footer
     │   ├── sections/
+    │   │   ├── NotificationBanner.tsx # Dismissible price disclaimer (client)
     │   │   ├── Hero.tsx            # Hero section
+    │   │   ├── FeedbackSection.tsx # Saran & masukan form (client, POST /api/feedback)
     │   │   ├── CategoryFilter.tsx  # Filter kategori (chips/sidebar)
     │   │   ├── ProductGrid.tsx     # Grid produk + sort + load more
     │   │   └── ProductCard.tsx     # Kartu produk (highlight/compact)
     │       └── ui/
-            ├── ProductCardSkeleton.tsx
-            └── EmptyState.tsx
+    │         ├── ProductCardSkeleton.tsx
+    │         └── EmptyState.tsx
     ├── hooks/
     │   ├── useProducts.ts          # TanStack Query untuk produk
     │   └── useCategories.ts        # TanStack Query untuk kategori
@@ -1435,7 +1565,7 @@ shopby/
     │       ├── categories.ts       # fetchCategories()
     │       └── click.ts            # logClick()
     └── types/
-        └── index.ts                # Product, Category, ClickLog
+        └── index.ts                # Product, Category, ClickLog, Feedback
 ```
 
 ### B. Alur Data Lengkap

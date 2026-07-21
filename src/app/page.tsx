@@ -9,6 +9,8 @@ import { useTopRatedProducts } from "@/hooks/useTopRatedProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { useSettings } from "@/hooks/useSettings"
 import { logClick } from "@/lib/services/click"
+import NotificationBanner from "@/components/sections/NotificationBanner"
+import FeedbackSection from "@/components/sections/FeedbackSection"
 import { buildNumberRanges } from "@/lib/utils"
 
 const CategoryFilter = dynamic(() => import("@/components/sections/CategoryFilter"), {
@@ -92,6 +94,7 @@ export default function Home() {
   return (
     <>
       <Navbar onSearch={handleSearch} searchQuery={searchQuery} />
+      <NotificationBanner />
       <Hero featuredProducts={topRatedProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isTopRatedLoading} storeName={settings?.storeName} tagline={settings?.bio} />
       <div className="w-full bg-white border-t border-dashed border-border-color">
       <main id="skip-target" className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
@@ -136,6 +139,7 @@ export default function Home() {
         </div>
       </main>
       </div>
+      <FeedbackSection />
       <Footer />
     </>
   )

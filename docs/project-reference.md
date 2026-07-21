@@ -11,7 +11,7 @@ middleware.ts             # Edge middleware — /admin → redirect /, /admin-sh
 src/
 ├── app/                  # Next.js App Router pages & API routes
 │   ├── layout.tsx        # Root layout (providers, fonts, globals, SEO)
-│   ├── page.tsx          # Homepage (Hero + ProductGrid + CategoryFilter)
+│   ├── page.tsx          # Homepage (NotificationBanner + Hero + ProductGrid + CategoryFilter + FeedbackSection + Footer)
 │   ├── globals.css       # Tailwind v4 + custom CSS
 │   ├── providers.tsx     # TanStack Query provider
 │   ├── loading.tsx       # Global loading state
@@ -34,6 +34,7 @@ src/
 │   │       │   ├── new/page.tsx
 │   │       │   └── [id]/page.tsx
 │   │       ├── analytics/page.tsx
+│   │       ├── feedback/page.tsx  # Admin feedback management (table, pagination, delete)
 │   │       └── settings/page.tsx
 │   ├── about/page.tsx
 │   ├── affiliate/page.tsx
@@ -55,6 +56,7 @@ src/
 │       ├── analytics/route.ts    # GET /api/analytics (auth)
 │       ├── settings/route.ts     # GET|PUT /api/settings (auth, via Prisma AppSetting)
 │       └── contact/route.ts      # POST /api/contact
+│       └── feedback/route.ts    # POST /api/feedback (public, rate-limited), GET|DELETE (admin auth)
 ├── components/           # Shared React components
 │   ├── ui/               # UI primitives + custom
 │   │   ├── ProductCardSkeleton.tsx
@@ -63,6 +65,8 @@ src/
 │   │   ├── Navbar.tsx
 │   │   └── Footer.tsx
 │   └── sections/
+│       ├── NotificationBanner.tsx # Dismissible price disclaimer (localStorage, role="alert")
+│       ├── FeedbackSection.tsx   # Saran & masukan form (POST /api/feedback)
 │       ├── Hero.tsx
 │       ├── ProductGrid.tsx
 │       ├── ProductCard.tsx
@@ -86,7 +90,7 @@ src/
 └── types/
     └── index.ts          # Product, Category, ClickLog types
 prisma/
-├── schema.prisma         # Product, Category, ClickLog, AppSetting
+├── schema.prisma         # Product, Category, ClickLog, AppSetting, Feedback
 ├── seed.ts               # 4 categories (0 products)
 └── migrations/
 ```
@@ -155,6 +159,15 @@ prisma/
 | `key`        | `String`     | Setting key (unique)         |
 | `value`      | `String`     | JSON-encoded value           |
 
+### Feedback
+| Field        | Type         | Notes                        |
+| ------------ | ------------ | ---------------------------- |
+| `id`         | `String`     | Auto-generated CUID          |
+| `name`       | `String`     | Sender name                  |
+| `email`      | `String`     | Sender email                 |
+| `message`    | `String`     | Feedback / saran content     |
+| `createdAt`  | `DateTime`   | Auto-set                     |
+
 ---
 
 ## API Routes
@@ -175,6 +188,9 @@ prisma/
 | PUT    | `/api/settings`       | Yes   | Update AppSetting via Prisma (+ Zod validation, CSRF guard) |
 | PUT    | `/api/settings/password` | Yes | Change admin password (scrypt, stored in DB AppSetting) |
 | POST   | `/api/click`          | —     | Track product click → returns `{ shopeeUrl }` |
+| POST   | `/api/feedback`       | —     | Submit feedback (rate-limited 2x/min/IP) |
+| GET    | `/api/feedback`       | Yes   | List feedback (pagination)             |
+| DELETE | `/api/feedback`       | Yes   | Delete feedback by `?id=`              |
 | POST   | `/api/contact`        | —     | Submit contact form                     |
 
 ### API Response — Product with `number`
@@ -266,6 +282,15 @@ Landing page memiliki filter nomor produk dengan chunk 100 produk per range (#1-
 ### 17. Image URL Input (No File Upload)
 Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Shopee langsung bisa ditempel sebagai URL, preview live dengan `<Image>` dari `next/image`.
 
+### 18. Notification Banner — Dismissible Price Disclaimer
+`NotificationBanner.tsx` — banner di atas landing page yang bisa ditutup dengan tombol X. State tersimpan di `localStorage` sebagai `shopby_banner_dismissed`, jadi tidak muncul lagi setelah di-dismiss. `role="alert"` untuk aksesibilitas screen reader. Muncul di `page.tsx` langsung di bawah `<Navbar />`.
+
+### 19. Feedback Form — Public + Rate-Limited
+`FeedbackSection.tsx` — form saran/masukan dengan 3 field (name, email, message). Submit ke `POST /api/feedback` yang di-rate-limit 2 request per menit per IP. Validasi server: semua field required, email valid (`@`), nama ≥ 2 chars, pesan ≥ 5 chars. Feedback tersimpan di Prisma model `Feedback`.
+
+### 20. Admin Feedback Panel
+`/admin-shopby/feedback` — halaman admin untuk melihat dan menghapus feedback. Tabel dengan kolom Nama, Email, Pesan (truncated line-clamp-3), Tanggal, Aksi. Pagination server-side (25 per page). Tombol hapus dengan konfirmasi langsung — `DELETE /api/feedback?id=`. Sidebar link `MessageSquare` ikon di antara Click Logs dan Settings.
+
 ---
 
 ## Component Library (src/components/)
@@ -277,6 +302,10 @@ Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Sh
 ### Layout (`src/components/layout/`)
 - **Navbar.tsx** — Fixed top nav with logo, nav links (Deals, Kategori, Affiliate)
 - **Footer.tsx** — Footer with copyright 2026, brand links (About, Affiliate, Privacy, Terms, Contact)
+
+### Section Components (`src/components/sections/`)
+- **NotificationBanner.tsx** — Dismissible price disclaimer banner at top of landing page, `role="alert"`, dismissed state in `localStorage`
+- **FeedbackSection.tsx** — Saran & masukan form: name, email, message fields; POST `/api/feedback`; success/error/loading states; accessible labels
 
 ### Block Components (`src/components/blocks/`)
 - **cta-section-with-gallery.tsx** — Gallery grid component with motion stagger animation: `GalleryGrid` (2-col, 5-row staggered grid), `GalleryGridCell` (animated cell with spring transition), `ContainerStagger` / `ContainerAnimated` (stagger container + blur reveal variants)
