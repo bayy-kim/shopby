@@ -221,24 +221,36 @@ export default function EditProduct() {
             </div>
 
             <div>
-              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-3">
+              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-3" htmlFor="rating">
                 Rating
               </label>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className={`size-8 flex items-center justify-center text-xl transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
-                      star <= rating ? "text-[#f59e0b]" : "text-[#e2e3e0]"
-                    }`}
-                    aria-label={`Rating ${star} bintang`}
-                  >
-                    ★
-                  </button>
-                ))}
-                <span className="font-mono text-[13px] text-[#76737b] ml-2">{rating > 0 ? `${rating}/5` : "Belum di rating"}</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star === Math.ceil(rating) ? (rating % 1 >= 0.25 ? Math.ceil(rating) : Math.ceil(rating) - 0.5) : star > rating ? star - 0.5 : star)}
+                      className={`size-8 flex items-center justify-center text-xl transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none ${
+                        star <= rating ? "text-[#f59e0b]" : star - 0.5 <= rating ? "text-[#f59e0b] opacity-60" : "text-[#e2e3e0]"
+                      }`}
+                      aria-label={`Rating ${star} bintang`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <input
+                  id="rating"
+                  type="number"
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  value={rating}
+                  onChange={(e) => setRating(Math.min(5, Math.max(0, parseFloat(e.target.value) || 0)))}
+                  className="w-20 border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-1 font-mono text-[16px] leading-[24px] text-[#1a1c1b] text-center focus:border-[#1a1c1b] focus:ring-0 focus:outline-none"
+                />
+                <span className="font-mono text-[13px] text-[#76737b]">/ 5</span>
               </div>
             </div>
 

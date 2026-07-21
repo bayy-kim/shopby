@@ -18,9 +18,7 @@ export default function ProductCardSkeleton({
     >
       <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-border-color z-20" />
       <div>
-        <div
-          className={`w-full border border-border-color mb-3 skeleton-shimmer ${isHighlight ? "h-48" : "h-32"}`}
-        />
+        <div className="w-full border border-border-color mb-3 skeleton-shimmer aspect-[4/3]" />
         {isHighlight && (
           <div className="h-3 skeleton-shimmer w-1/4 mb-2" />
         )}

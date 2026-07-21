@@ -11,9 +11,9 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - 🔍 **Search** — Multi-field search (nama produk, kategori, deskripsi gambar) dengan debounce
 - 🏷️ **Filter kategori** — Chip horizontal scroll (mobile) / sidebar (desktop)
 - #️⃣ **Filter nomor produk** — Range #1-100, #101-200, dst
-- 🔄 **Sorting** — Terbaru, termurah, termahal
-- 🖼️ **Grid produk** — Card dengan gambar, nomor produk, nama, rating bintang, harga, tombol "Beli di Shopee"
-- ⭐ **Rekomendasi Hari Ini** — Top-rated products, diurut rating tertinggi + harga termurah
+- 🔄 **Sorting** — Terbaru, termurah, termahal, rating
+- 🖼️ **Grid produk** — Card dengan gambar, nomor produk, nama (truncate + toggle "Lebih banyak"/"sedikit"), rating bintang desimal (4.5/5, 4.9/5), harga, tombol "Beli di Shopee"
+- ⭐ **Rekomendasi Hari Ini** — Top-rated products, diurut rating tertinggi + harga termurah, menampilkan rating desimal
 - 📊 **Klik tracking** — Setiap klik dicatat via API untuk analitik
 - ⚡ **Progressif load** — Tombol "Muat Lebih Banyak" tanpa reload
 - 🚫 **Stok Habis** — Admin bisa tandai produk sold out, overlay + disabled button
@@ -134,7 +134,7 @@ npm run dev
 |---|---|---|---|
 | `/api/admin-shopby/login` | POST | — | Login admin |
 | `/api/admin-shopby/logout` | POST | — | Logout |
-| `/api/products` | GET | — | Ambil produk (`?category=&sort=&q=`) |
+| `/api/products` | GET | — | Ambil produk (`?category=&sort=&q=&numberFrom=&numberTo=`) — sort: `newest`, `price_asc`, `price_desc`, `rating_desc` |
 | `/api/products` | POST | ✅ | Tambah produk |
 | `/api/products/[id]` | GET/PUT/DELETE | ✅ | Detail/update/hapus produk |
 | `/api/categories` | GET/POST/PUT/DELETE | ✅ | CRUD kategori |

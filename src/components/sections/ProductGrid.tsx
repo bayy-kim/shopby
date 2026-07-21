@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown, Star } from "lucide-react"
 import ProductCard from "./ProductCard"
 import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton"
 import EmptyState from "@/components/ui/EmptyState"
@@ -46,6 +46,7 @@ const sortOptions = [
   { value: "newest", label: "Terbaru" },
   { value: "price_asc", label: "Termurah" },
   { value: "price_desc", label: "Termahal" },
+  { value: "rating_desc", label: "Rating" },
 ]
 
 export default function ProductGrid({
@@ -123,7 +124,9 @@ export default function ProductGrid({
                     ? ArrowUp
                     : opt.value === "price_desc"
                       ? ArrowDown
-                      : ArrowUpDown
+                      : opt.value === "rating_desc"
+                        ? Star
+                        : ArrowUpDown
                 return (
                   <button
                     key={opt.value}

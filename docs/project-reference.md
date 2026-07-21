@@ -116,6 +116,7 @@ prisma/
 | `name`       | `String`     | Product name                 |
 | `price`      | `Int`        | Price in IDR (integer)       |
 | `commission` | `Int`        | Komisi per produk in IDR     |
+| `rating`     | `Float`      | Rating desimal 0-5 (4.5, 4.9) — half-star render di UI |
 | `discountPct`| `Int?`       | Discount percentage (nullable)|
 | `imageUrl`   | `String`     | Primary product image URL    |
 | `imageAlt`   | `String`     | Alt text for product image   |
@@ -162,7 +163,7 @@ prisma/
 | ------ | --------------------- | ----- | --------------------------------------- |
 | POST   | `/api/admin-shopby/login`    | —     | Authenticate admin, set HttpOnly JWT cookie (`SameSite=Strict`) |
 | POST   | `/api/admin-shopby/logout`   | —     | Clear session cookie                    |
-| GET    | `/api/products`       | —     | List products (`?category=&sort=&numberFrom=&numberTo=`) |
+| GET    | `/api/products`       | —     | List products (`?category=&sort=&numberFrom=&numberTo=`) — sort: `newest`, `price_asc`, `price_desc`, `rating_desc` |
 | POST   | `/api/products`       | Yes   | Create product                          |
 | GET    | `/api/products/[id]`  | —     | Get single product (includes computed `number`) |
 | PUT    | `/api/products/[id]`  | Yes   | Update product (accepts `isSoldOut`)    |
@@ -264,7 +265,7 @@ Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Sh
 
 ### Feature Components (`src/components/sections/`)
 - **Hero.tsx** — Landing page hero: headline + subtitle + CTA "Lihat Semua Deal" + floating product card
-- **ProductCard.tsx** — Card with image, name, price, badge `#number`, sold-out overlay/disabled button, "Beli di Shopee" button → POST `/api/click`
+- **ProductCard.tsx** — Card with image, name (truncate + "Lebih banyak"/"Lebih sedikit" toggle), price, badge `#number`, rating desimal (half-star via clip), sold-out overlay/disabled button, "Beli di Shopee" button → POST `/api/click`
 - **ProductGrid.tsx** — Responsive grid (1–2 mobile, 3 tablet, 4 desktop), progressive load with "Muat Lebih Banyak" button
 - **CategoryFilter.tsx** — Horizontal scroll chips on mobile, sidebar on desktop; includes category filter + number range filter sections
 
@@ -403,6 +404,11 @@ Run `pnpm prisma:seed` to populate the database.
 - **Product numbering (computed):** Helper `getProductNumberMap()` query semua produk `{ id, createdAt }` order ASC, return `Map<productId, number>`. Dipanggil paralel dengan query utama di API. Nomor tidak disimpan di database — renumbering otomatis saat delete
 - **Sold Out:** Field `isSoldOut` di Prisma, toggle di admin panel (toggle langsung di tabel list, checkbox di form new/edit). Di landing page: overlay "Stok Habis" + disabled button, `aria-disabled="true"`
 - **Number range filter:** Chunk 100 produk per range (`NUMBER_RANGE_CHUNK_SIZE = 100`). Filter di CategoryFilter (sidebar & mobile chips), query params `numberFrom`/`numberTo` ke API
+- **Decimal rating (July 2026):** `rating` diubah dari `Int` ke `Float` di Prisma. Star render menggunakan clip-path approach: full stars untuk integer part, partially-filled star untuk fractional part (threshold 0.25 untuk half-star). Ditampilkan sebagai `4.5/5`, `4.9/5` dll.
+- **Rating on all cards (July 2026):** Rating bintang desimal ditampilkan di semua varian ProductCard (highlight dan compact) — sebelumnya hanya di highlight.
+- **Name truncation (July 2026):** Produk dengan nama > 60 karakter di-truncate dengan ellipsis + tombol "Lebih banyak" / "Lebih sedikit" toggle per kartu. `aria-expanded` untuk aksesibilitas.
+- **Consistent card sizing (July 2026):** Gambar produk menggunakan `aspect-[4/3]` — rasio seragam antar varian. Kartu menggunakan `h-full` dalam grid flex-column.
+- **Sort by rating (July 2026):** Opsi sortir "Rating" ditambahkan ke ProductGrid, mengirim `sort=rating_desc` ke API.
 
 ---
 

@@ -205,10 +205,11 @@ Dua varian tergantung ukuran layar:
 #### Sorting
 
 | Tombol | Nilai | Ikon |
-|---|---|---|
+|---|---|---|---|
 | Terbaru | `newest` | `ArrowUpDown` |
 | Termurah | `price_asc` | `ArrowUp` |
 | Termahal | `price_desc` | `ArrowDown` |
+| Rating | `rating_desc` | `Star` |
 
 Sortir aktif mendapat gaya tebal + warna.
 
@@ -256,14 +257,20 @@ Dua varian:
 #### `highlight`
 - Background merah (`bg-primary`)
 - Menampilkan kategori
+- Rating bintang desimal (contoh: ⭐ 4.9/5) dengan setengah bintang untuk nilai pecahan
 - Tombol "Beli di Shopee" dengan ikon `ExternalLink`
 - Badge Harga lebih besar
 
 #### `compact`
 - Background abu-abu (`bg-muted`)
 - Tanpa kategori
+- Rating bintang desimal ditampilkan jika > 0
 - Tombol "Beli" lebih kecil
 - Harga dalam format standar
+
+**Nama Produk:** Nama > 60 karakter akan di-truncate dengan ellipsis + tombol "Lebih banyak" / "Lebih sedikit" toggle per kartu. Tombol memiliki `aria-expanded` untuk aksesibilitas keyboard.
+
+**Ukuran Kartu:** Konsisten antar varian — gambar menggunakan `aspect-[4/3]`, kartu menggunakan `h-full` dalam grid CSS. Skeleton juga menggunakan rasio yang sama.
 
 **Respon Klik:** Memanggil `logClick(productId)` → `POST /api/click` → buka URL Shopee di tab baru.
 
@@ -540,6 +547,7 @@ URL Gambar Produk
 | Price (IDR) | Text with "Rp" prefix | `1.250.000` |
 | Featured | Toggle switch | Yes / No |
 | Komisi per Produk (IDR) | Text with "Rp" prefix | — |
+| Rating | Number input (step 0.1, min 0, max 5) + star click | 4.5 / 5 |
 | Tandai Stok Habis | Toggle switch | Yes / No |
 
 #### Tombol Aksi
@@ -726,7 +734,7 @@ Mengambil daftar produk.
 | Parameter | Tipe | Default | Deskripsi |
 |---|---|---|---|---|---|
 | `category` | string | — | Slug kategori untuk filter |
-| `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc` |
+| `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc`, `rating_desc` |
 | `numberFrom` | number | — | Filter nomor produk awal (inklusif) |
 | `numberTo` | number | — | Filter nomor produk akhir (inklusif) |
 
@@ -785,7 +793,7 @@ Mengambil daftar produk (support filter, sort, pagination).
 | `category` | string | — | Filter slug kategori |
 | `search` | string | — | Pencarian nama produk |
 | `featured` | boolean | — | Filter produk unggulan |
-| `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc` |
+| `sort` | string | `"newest"` | Urutan: `newest`, `price_asc`, `price_desc`, `rating_desc` |
 | `page` | number | `1` | Halaman |
 | `limit` | number | `12` | Item per halaman |
 
