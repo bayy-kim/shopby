@@ -144,7 +144,7 @@ export default function ProductCard({
             )}
           </div>
           {product.number > 0 && (
-            <span className="font-mono text-[10px] text-ink/40 uppercase shrink-0 mt-1">
+            <span className="font-mono text-[13px] font-bold text-ink/70 uppercase shrink-0 mt-1">
               #{product.number}
             </span>
           )}
