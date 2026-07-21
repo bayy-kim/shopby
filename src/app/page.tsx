@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
 import { useProducts } from "@/hooks/useProducts"
-import { useTopRatedProducts } from "@/hooks/useTopRatedProducts"
+import { useMostClickedProducts } from "@/hooks/useMostClickedProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { useSettings } from "@/hooks/useSettings"
 import { logClick } from "@/lib/services/click"
@@ -37,7 +37,7 @@ export default function Home() {
   })
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories()
-  const { data: topRatedProducts, isLoading: isTopRatedLoading } = useTopRatedProducts()
+  const { data: topRatedProducts, isLoading: isTopRatedLoading } = useMostClickedProducts()
   const { data: settings } = useSettings()
 
   const total = data?.total ?? 0

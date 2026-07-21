@@ -17,6 +17,34 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data, total: products.length })
   }
 
+  const mostClicked = searchParams.get("mostClicked") === "true"
+  if (mostClicked) {
+    const limit = Math.min(20, Math.max(1, Number(searchParams.get("take")) || 6))
+    const clickCounts = await prisma.clickLog.groupBy({
+      by: ["productId"],
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+      take: limit,
+    })
+    if (clickCounts.length === 0) {
+      return NextResponse.json({ data: [], total: 0 })
+    }
+    const productIds = clickCounts.map((c) => c.productId)
+    const [products, numberMap] = await Promise.all([
+      prisma.product.findMany({
+        where: { id: { in: productIds } },
+        include: { category: true },
+      }),
+      getProductNumberMap(),
+    ])
+    const productMap = new Map(products.map((p) => [p.id, p]))
+    const data = productIds
+      .map((id) => productMap.get(id))
+      .filter(Boolean)
+      .map((p) => ({ ...p!, number: numberMap.get(p!.id) ?? 0 }))
+    return NextResponse.json({ data, total: data.length })
+  }
+
   const q = searchParams.get("q")
   const categorySlug = searchParams.get("category")
   const sort = searchParams.get("sort") ?? "newest"
