@@ -47,6 +47,7 @@ export default function ProductCard({
             fill
             loading="lazy"
             fetchPriority="low"
+            unoptimized
             className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
             sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
           />
