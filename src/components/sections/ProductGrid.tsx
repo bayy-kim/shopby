@@ -91,8 +91,7 @@ export default function ProductGrid({
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
           variants={prefersReducedMotion ? undefined : containerVariants}
           initial={prefersReducedMotion ? undefined : "hidden"}
-          whileInView={prefersReducedMotion ? undefined : "visible"}
-          viewport={prefersReducedMotion ? undefined : { once: true, amount: 0.2 }}
+          animate={prefersReducedMotion ? undefined : "visible"}
         >
           {isFeaturedLoading
             ? Array.from({ length: 3 }).map((_, i) => (
@@ -174,8 +173,7 @@ export default function ProductGrid({
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
         variants={prefersReducedMotion ? undefined : containerVariants}
         initial={prefersReducedMotion ? undefined : "hidden"}
-        whileInView={prefersReducedMotion ? undefined : "visible"}
-        viewport={prefersReducedMotion ? undefined : { once: true, amount: 0.1 }}
+        animate={prefersReducedMotion ? undefined : "visible"}
       >
         {isLoading
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (

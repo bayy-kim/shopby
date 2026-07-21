@@ -32,6 +32,7 @@ export function useProducts(options?: UseProductsOptions) {
       if (fetched >= lastPage.total) return undefined
       return { skip: fetched, take: PAGE_SIZE }
     },
+    placeholderData: (prev) => prev,
     staleTime: 30000,
   })
 
