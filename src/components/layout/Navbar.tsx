@@ -78,6 +78,8 @@ export default function Navbar({ onSearch, searchQuery = "" }: NavbarProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink/40 pointer-events-none" aria-hidden="true" />
           <input
             ref={inputRef}
+            id="navbar-search"
+            name="q"
             type="search"
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}

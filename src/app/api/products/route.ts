@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client"
 import { checkAuth } from "@/lib/auth"
 import { getProductNumberMap, resolveNumberRangeToIds } from "@/lib/products-numbering"
 import { rateLimit } from "@/lib/rate-limit"
+import Fuse from "fuse.js"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -55,22 +56,12 @@ export async function GET(request: NextRequest) {
   const numberFrom = searchParams.get("numberFrom") ? Number(searchParams.get("numberFrom")) : undefined
   const numberTo = searchParams.get("numberTo") ? Number(searchParams.get("numberTo")) : undefined
 
-  const searchWhere = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: "insensitive" as const } },
-          { imageAlt: { contains: q, mode: "insensitive" as const } },
-          { category: { name: { contains: q, mode: "insensitive" as const } } },
-        ],
-      }
-    : {}
+  const hasNumberFilter = numberFrom !== undefined && numberTo !== undefined
 
   const categoryWhere: Record<string, unknown> =
     categorySlug && categorySlug !== "semua"
       ? { category: { slug: categorySlug } }
       : {}
-
-  const hasNumberFilter = numberFrom !== undefined && numberTo !== undefined
 
   let orderBy: Prisma.ProductOrderByWithRelationInput[]
   if (sort === "number_asc") orderBy = [{ createdAt: "asc" }]
@@ -82,7 +73,47 @@ export async function GET(request: NextRequest) {
 
   const numberMapPromise = getProductNumberMap()
 
-  let where: Record<string, unknown> = { ...categoryWhere, ...searchWhere }
+  if (q && q.trim()) {
+    let baseWhere: Record<string, unknown> = { ...categoryWhere }
+    const numberMap = await numberMapPromise
+    if (hasNumberFilter) {
+      const idsInRange = resolveNumberRangeToIds(numberMap, numberFrom!, numberTo!)
+      baseWhere = { ...baseWhere, id: { in: idsInRange } }
+    }
+
+    const allCandidateProducts = await prisma.product.findMany({
+      where: baseWhere,
+      include: { category: true, _count: { select: { clicks: true } } },
+      orderBy,
+    })
+
+    const fuse = new Fuse(allCandidateProducts, {
+      keys: [
+        { name: "name", weight: 0.6 },
+        { name: "category.name", weight: 0.3 },
+        { name: "imageAlt", weight: 0.1 },
+      ],
+      threshold: 0.45,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+    })
+
+    const searchResults = fuse.search(q.trim())
+    const matchedProducts = searchResults.map((res) => res.item)
+    const total = matchedProducts.length
+    const offset = skip ?? 0
+    const limit = take !== undefined ? take : total
+    const paginated = matchedProducts.slice(offset, offset + limit)
+
+    const data = paginated.map((p) => ({
+      ...p,
+      number: numberMap.get(p.id) ?? 0,
+    }))
+
+    return NextResponse.json({ data, total })
+  }
+
+  let where: Record<string, unknown> = { ...categoryWhere }
   if (hasNumberFilter) {
     const numberMap = await numberMapPromise
     const idsInRange = resolveNumberRangeToIds(numberMap, numberFrom!, numberTo!)

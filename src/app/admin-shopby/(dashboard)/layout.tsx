@@ -212,6 +212,8 @@ export default function AdminDashboardLayout({
               <Search className="size-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#5c403a]" aria-hidden="true" />
               <input
                 ref={searchInputRef}
+                id="admin-search"
+                name="q"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

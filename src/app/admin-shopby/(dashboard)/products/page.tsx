@@ -143,6 +143,8 @@ export default function AdminProducts() {
         <div className="w-full sm:hidden relative flex items-center">
           <Search className="size-5 absolute left-3 text-[#5c403a]" aria-hidden="true" />
           <input
+            id="admin-products-search"
+            name="q"
             type="text"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
