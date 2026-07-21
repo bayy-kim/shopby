@@ -311,7 +311,7 @@ Area admin dilindungi oleh **middleware auth** — akses langsung ke route `/adm
 
 > ✅ Semua halaman admin kini menggunakan data dari API nyata — tidak ada data hardcoded atau simulasi.
 
-> ⚠️ **CSRF Protection:** Semua state-changing admin API (`POST`, `PUT`) memerlukan header `x-csrf-token: shopby-admin-1`. Frontend mengirim header ini otomatis di setiap request. Settings API juga memvalidasi input dengan whitelist 11 keys + tipe checking.
+> ⚠️ **CSRF Protection:** Semua state-changing admin API (`POST`, `PUT`) memerlukan header `x-csrf-token` dengan token unik per session (double-submit cookie pattern). Token di-generate saat login (`shopby_csrf` cookie), frontend membaca dari cookie dan mengirim sebagai header. Server validasi header === cookie.
 
 ### 3.1 Alur Autentikasi
 

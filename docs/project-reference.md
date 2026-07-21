@@ -409,8 +409,8 @@ Run `pnpm prisma:seed` to populate the database.
 ### 18. Commission per Product (July 2026)
 Revenue dihitung dari komisi per produk: setiap klik = `product.commission` IDR. Dashboard dan analytics menampilkan komisi per produk, total revenue berbasis komisi real (bukan estimasi `clicks * 50000`).
 
-### 19. CSRF Protection (July 2026)
-Semua state-changing admin API (`PUT`, `POST`) membutuhkan header `x-csrf-token: shopby-admin-1`. Session cookie menggunakan `SameSite=Strict`. Helper `csrfGuard()` di `src/lib/csrf.ts`.
+### 19. CSRF Protection (July 2026 — Per-Session Random Token)
+Semua state-changing admin API (`PUT`, `POST`) membutuhkan header `x-csrf-token`. Token random 32-byte (hex) di-generate saat login via `generateCsrfToken()` di `src/lib/csrf.ts`, disimpan di cookie `shopby_csrf` (non-HttpOnly, JS-readable). Client membaca cookie dan mengirim sebagai header. Server validasi header === cookie via `csrfGuard(request: NextRequest)`. Token berbeda per session, tidak bisa ditebak. Session cookie menggunakan `SameSite=Strict`.
 
 ### 20. Settings Input Validation (July 2026)
 `PUT /api/settings` memvalidasi semua field dengan whitelist 11 keys, tipe checking, dan batas panjang/ukuran via `validate-settings.ts`.
@@ -454,7 +454,7 @@ Staggered cleanup tiap 60 detik (sebelumnya: nuke 10K entries). Mencegah memory 
 |---|------|-------|-----|
 | 1 | `settings/page.tsx` | Change password was client-only (no API) | Wired to `PUT /api/settings/password` — verifies current + stores new hash |
 | 2 | `settings/page.tsx` | Logo upload never persisted (base64 in state only) | Logo included in settings PUT body, stored in DB JSON |
-| 3 | `settings/route.ts`, `login/route.ts`, `logout/route.ts` | No CSRF protection | Added `x-csrf-token` header check + `SameSite=Strict` on session cookie |
+| 3 | `settings/route.ts`, `login/route.ts`, `logout/route.ts` | No CSRF protection | Added per-session random token (double-submit cookie) + `SameSite=Strict` |
 | 4 | `settings/route.ts` | PUT accepted arbitrary keys | Added Zod-style validation whitelist (11 keys) + type/size checks |
 | 5 | `rate-limit.ts` | In-memory Map with 10K-entry nuke | Staggered cleanup every 60s |
 | 6 | `auth.ts` | No secret length check | Added min 32 chars requirement for `SESSION_SECRET` |
@@ -464,6 +464,20 @@ Staggered cleanup tiap 60 detik (sebelumnya: nuke 10K entries). Mencegah memory 
 | 10 | `layout.tsx` | Help drawer had no focus trap | Added `FocusTrap` component |
 | 11 | `login/page.tsx` | Missing `autoComplete` attributes | Added `autoComplete="email"` and `autoComplete="current-password"` |
 | 12 | `dashboard/page.tsx` | Fetch errors silently ignored | Added visible error banner |
+
+### Security Hardening v2 (July 2026)
+
+| # | Issue | Severity | Fix |
+|---|-------|----------|-----|
+| 1 | CSRF token hardcoded (`shopby-admin-1`) visible in client JS | CRITICAL | Per-session random 32-byte hex token, double-submit cookie pattern |
+| 2 | `/api/click` public endpoint without rate limit | HIGH | Rate limit 30/min/IP + referer/origin validation |
+| 3 | `/api/products` POST without rate limit | HIGH | Rate limit 20/min/IP |
+| 4 | No HSTS/security headers | MEDIUM | Added HSTS (1yr), X-Content-Type-Options, Referrer-Policy, X-Frame-Options |
+| 5 | CSP `frame-src 'none'` blocked settings preview iframe | MEDIUM | Changed to `frame-src 'self'` |
+| 6 | No root error boundary | HIGH | Created `src/app/error.tsx` with brutalist UI + retry button |
+| 7 | Hero.tsx hydration mismatch (new Date() in module) | HIGH | Replaced with static date string |
+| 8 | Render-phase setState in page.tsx | MEDIUM | Moved to useEffect |
+| 9 | fetchCategories returned `{ data: [...] }` instead of `[...]` | CRITICAL | Changed to extract `.data` before return |
 
 ### Commission Feature (July 2026)
 

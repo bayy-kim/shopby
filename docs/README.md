@@ -22,7 +22,7 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 ### Admin Panel (Auth Guard)
 - 🔐 `/admin-shopby/login` — Login page receipt card brutalist style
 - 🛡️ **Middleware auth** — Semua route admin diproteksi, redirect ke login jika invalid
-- 🛡️ **CSRF protection** — State-changing API memerlukan `x-csrf-token` header
+- 🛡️ **CSRF protection** — Per-session random token (double-submit cookie pattern)
 - 🛡️ **Input validation** — Settings API validasi whitelist keys
 - 🔑 **Single admin** — Credential dari `.env` + JWT session cookie HttpOnly
 - 📈 `/admin-shopby` — Dashboard dengan statistik real, grafik revenue, top products
