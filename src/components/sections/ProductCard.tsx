@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { ExternalLink, Star } from "lucide-react"
+import { ExternalLink, Star, ImageOff } from "lucide-react"
 import type { Product } from "@/types"
 import { formatPrice } from "@/lib/utils"
 
@@ -69,6 +69,7 @@ export default function ProductCard({
   const isHighlight = variant === "highlight"
   const isSoldOut = product.isSoldOut
   const [nameExpanded, setNameExpanded] = useState(false)
+  const [imgError, setImgError] = useState(false)
   const nameNeedsTruncation = product.name.length > MAX_NAME_LENGTH
 
   const handleBuy = () => {
@@ -91,16 +92,26 @@ export default function ProductCard({
       )}
       <div>
         <div className="relative w-full border border-border-color mb-3 overflow-hidden aspect-[4/3]">
-          <Image
-            src={product.imageUrl}
-            alt={product.imageAlt}
-            fill
-            loading="lazy"
-            fetchPriority="low"
-            unoptimized
-            className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
-            sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
-          />
+          {imgError ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#e2e3e0]">
+              <div className="text-center">
+                <ImageOff className="size-8 mx-auto text-[#5c403a]/40" aria-hidden="true" />
+                <p className="font-mono text-[10px] text-[#5c403a]/50 mt-1">No Image</p>
+              </div>
+            </div>
+          ) : (
+            <Image
+              src={product.imageUrl}
+              alt={product.imageAlt}
+              fill
+              loading="lazy"
+              fetchPriority="low"
+              unoptimized
+              className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
+              sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
+              onError={() => setImgError(true)}
+            />
+          )}
           {isSoldOut && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <span className="font-mono text-sm text-white font-bold uppercase tracking-wider bg-ink/60 px-3 py-1 border border-white/30">
