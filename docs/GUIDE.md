@@ -93,8 +93,7 @@ Halaman utama di **`/`** — landing page untuk menampilkan produk affiliate Sho
 ├─────────────────────────────────────────────────┤
 │ HERO SECTION                                    │
 │ "Belanja Cerdas, Struk Berkualitas"             │
-│ [Lihat Semua Deal]    [Card #2] [Card #1]       │
-│                      (#1 di kiri, #2 di kanan)  │
+│ [Lihat Semua Deal]    [Card Produk Unggulan]    │
 ├─────────────────────────────────────────────────┤
 │  ← BACKGROUND PUTIH FULL WIDTH →                │
 │ ┌─────────────────────────────────────────────┐ │
@@ -104,7 +103,8 @@ Halaman utama di **`/`** — landing page untuk menampilkan produk affiliate Sho
 │ │           │ Rp450rb  │ │ Rp120rb │ │Rp899rb││ │
 │ │           └─────────┘ └─────────┘ └───────┘│ │
 │ │           SEMUA PRODUK                      │ │
-│ │           [Terbaru▼] [Termurah] 12 produk   │ │
+│ │           [Nomor] [Terbaru] [Termurah] ...  │ │
+│ │           12 produk (default #1, #2, #3…)   │ │
 │ │           [Semua] [Elektronik] [Fashion] →  │ │
 │ │             (chips mobile di bawah heading) │ │
 │ │           ┌────┐ ┌────┐ ┌────┐ ┌────┐      │ │
@@ -146,7 +146,7 @@ Bagian hero dengan:
 - **Headline:** "Belanja Cerdas, Struk Berkualitas"
 - **Subtitle:** "Koleksi produk Shopee Affiliate pilihan..."
 - **Tombol "Lihat Semua Deal"** — scroll halus ke bagian produk
-- **2 Kartu Produk Unggulan** — bergaya struk/nota dengan efek scan-line, diputar (rotate). Produk #1 di posisi kiri, produk #2 di kanan untuk bacaan left-to-right. Menampilkan:
+- **2 Kartu Produk Unggulan** — bergaya struk/nota dengan efek scan-line, diputar (rotate), menampilkan:
   - Gambar produk
   - Nama kategori
   - Nama produk
@@ -209,13 +209,14 @@ Dua varian tergantung ukuran layar:
 #### Sorting
 
 | Tombol | Nilai | Ikon |
-|---|---|---|---|
+|---|---|---|---|---|
+| Nomor (default) | `number_asc` | `ArrowUpDown` |
 | Terbaru | `newest` | `ArrowUpDown` |
 | Termurah | `price_asc` | `ArrowUp` |
 | Termahal | `price_desc` | `ArrowDown` |
 | Rating | `rating_desc` | `Star` |
 
-Sortir aktif mendapat gaya tebal + warna.
+Default sort adalah **Nomor** (#1, #2, #3…) — produk baru otomatis di ujung kanan. Sortir aktif mendapat gaya tebal + warna.
 
 #### Rekomendasi Hari Ini (Featured)
 

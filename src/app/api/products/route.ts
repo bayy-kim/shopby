@@ -45,7 +45,8 @@ export async function GET(request: NextRequest) {
   const hasNumberFilter = numberFrom !== undefined && numberTo !== undefined
 
   let orderBy: Prisma.ProductOrderByWithRelationInput[]
-  if (sort === "price_asc") orderBy = [{ price: "asc" }]
+  if (sort === "number_asc") orderBy = [{ createdAt: "asc" }]
+  else if (sort === "price_asc") orderBy = [{ price: "asc" }]
   else if (sort === "price_desc") orderBy = [{ price: "desc" }]
   else if (sort === "rating_desc") orderBy = [{ rating: "desc" }]
   else if (sort === "rating_desc,price_asc") orderBy = [{ rating: "desc" }, { price: "asc" }]

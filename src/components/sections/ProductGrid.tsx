@@ -50,6 +50,7 @@ const itemVariants = {
 const SKELETON_COUNT = 8
 
 const sortOptions = [
+  { value: "number_asc", label: "Nomor" },
   { value: "newest", label: "Terbaru" },
   { value: "price_asc", label: "Termurah" },
   { value: "price_desc", label: "Termahal" },
