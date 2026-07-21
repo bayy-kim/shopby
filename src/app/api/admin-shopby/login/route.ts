@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createSessionToken } from "@/lib/auth"
 import { validateCredentials } from "@/lib/auth-password"
 import { rateLimit } from "@/lib/rate-limit"
+import { generateCsrfToken } from "@/lib/csrf"
 
 export async function POST(request: Request) {
   try {
@@ -30,11 +31,20 @@ export async function POST(request: Request) {
     }
 
     const token = await createSessionToken()
+    const csrfToken = generateCsrfToken()
 
     const response = NextResponse.json({ success: true })
 
     response.cookies.set("shopby_admin_session", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    })
+
+    response.cookies.set("shopby_csrf", csrfToken, {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",

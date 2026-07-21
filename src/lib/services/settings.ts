@@ -28,8 +28,9 @@ const defaults: StoreSettings = {
 
 export async function fetchSettings(): Promise<StoreSettings> {
   try {
+    const token = typeof document !== "undefined" ? document.cookie.match(/(?:^|;\s*)shopby_csrf=([^;]*)/)?.[1] || "" : ""
     const res = await fetch("/api/settings", {
-      headers: { "x-csrf-token": "shopby-admin-1" },
+      headers: { "x-csrf-token": token },
     })
     if (!res.ok) throw new Error("Failed to fetch settings")
     const data = await res.json()

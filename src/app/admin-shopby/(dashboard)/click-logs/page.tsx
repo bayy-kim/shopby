@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { MousePointerClick, Loader2, ChevronLeft, ChevronRight, Calendar, Filter } from "lucide-react"
 import Image from "next/image"
+import { getCsrfToken } from "@/lib/utils"
 
 interface ClickLogEntry {
   id: string
@@ -45,7 +46,7 @@ export default function AdminClickLogs() {
       if (dateTo) params.set("dateTo", dateTo)
 
       const res = await fetch(`/api/click-logs?${params.toString()}`, {
-        headers: { "x-csrf-token": "shopby-admin-1" },
+        headers: { "x-csrf-token": getCsrfToken() },
       })
       if (!res.ok) throw new Error("Failed to fetch")
       const json: ClickLogResponse = await res.json()

@@ -7,7 +7,7 @@ const csp = [
   `img-src 'self' data: https://lh3.googleusercontent.com https://*.img.susercontent.com https://picsum.photos`,
   "font-src 'self' https://fonts.gstatic.com",
   "connect-src 'self'",
-  "frame-src 'none'",
+  "frame-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
       },
     ]

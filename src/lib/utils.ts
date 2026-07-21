@@ -5,6 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function getCsrfToken(): string {
+  if (typeof document === "undefined") return ""
+  const match = document.cookie.match(/(?:^|;\s*)shopby_csrf=([^;]*)/)
+  return match ? match[1] : ""
+}
+
 export function formatPrice(price: number): string {
   return `Rp${price.toLocaleString("id-ID")}`
 }

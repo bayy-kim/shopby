@@ -2,6 +2,7 @@
 
 import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw, TriangleAlert, Monitor, Smartphone, RefreshCw } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
+import { getCsrfToken } from "@/lib/utils"
 
 const tabs = ["Storefront", "Payouts", "Account", "Preview"]
 
@@ -39,7 +40,7 @@ export default function AdminSettings() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    fetch("/api/settings", { headers: { "x-csrf-token": "shopby-admin-1" } })
+    fetch("/api/settings", { headers: { "x-csrf-token": getCsrfToken() } })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch")
         return res.json()
@@ -69,7 +70,7 @@ export default function AdminSettings() {
       }
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
         body: JSON.stringify(payload),
       })
       if (!res.ok) {
@@ -98,7 +99,7 @@ export default function AdminSettings() {
     try {
       const res = await fetch("/api/settings/password", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
         body: JSON.stringify({ currentPassword, newPassword }),
       })
       if (!res.ok) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import dynamic from "next/dynamic"
 import Navbar from "@/components/layout/Navbar"
 import Hero from "@/components/sections/Hero"
@@ -40,9 +40,11 @@ export default function Home() {
 
   const total = data?.total ?? 0
   const [globalTotal, setGlobalTotal] = useState(0)
-  if (!numberRange && total > 0 && globalTotal !== total) {
-    setGlobalTotal(total)
-  }
+  useEffect(() => {
+    if (!numberRange && total > 0 && globalTotal !== total) {
+      setGlobalTotal(total)
+    }
+  }, [numberRange, total, globalTotal])
   const displayTotal = numberRange ? globalTotal || total : total
   const allProducts = useMemo(() => data?.data ?? [], [data])
 

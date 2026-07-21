@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react"
+import { getCsrfToken } from "@/lib/utils"
 
 interface Category {
   id: string
@@ -59,7 +60,7 @@ export default function AdminCategories() {
       if (editingId) {
         const res = await fetch("/api/categories", {
           method: "PUT",
-          headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+          headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
           body: JSON.stringify({ id: editingId, name: formName.trim() }),
         })
         if (!res.ok) {
@@ -70,7 +71,7 @@ export default function AdminCategories() {
         const slug = formSlug.trim() || formName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
         const res = await fetch("/api/categories", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-csrf-token": "shopby-admin-1" },
+          headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
           body: JSON.stringify({ name: formName.trim(), slug }),
         })
         if (!res.ok) {
@@ -97,7 +98,7 @@ export default function AdminCategories() {
     try {
       const res = await fetch(`/api/categories?id=${id}`, {
         method: "DELETE",
-        headers: { "x-csrf-token": "shopby-admin-1" },
+        headers: { "x-csrf-token": getCsrfToken() },
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))

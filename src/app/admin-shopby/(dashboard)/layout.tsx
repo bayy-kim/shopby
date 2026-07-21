@@ -22,6 +22,7 @@ import {
   MousePointerClick,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
+import { getCsrfToken } from "@/lib/utils"
 
 const navItems = [
   { href: "/admin-shopby", label: "Dashboard", icon: LayoutDashboard },
@@ -109,7 +110,7 @@ export default function AdminDashboardLayout({
   const handleLogout = async () => {
     await fetch("/api/admin-shopby/logout", {
       method: "POST",
-      headers: { "x-csrf-token": "shopby-admin-1" },
+      headers: { "x-csrf-token": getCsrfToken() },
     })
     router.push("/admin-shopby/login")
   }

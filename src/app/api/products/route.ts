@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import type { Prisma } from "@prisma/client"
 import { checkAuth } from "@/lib/auth"
 import { getProductNumberMap, resolveNumberRangeToIds } from "@/lib/products-numbering"
+import { rateLimit } from "@/lib/rate-limit"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -97,6 +98,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+  const { allowed } = rateLimit(`product_create:${ip}`, { max: 20, windowMs: 60_000 })
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 })
   }
   const body = await request.json()
   const { name, price, commission, rating, discountPct, imageUrl, imageAlt, shopeeUrl, categoryId, isFeatured, isSoldOut } = body
