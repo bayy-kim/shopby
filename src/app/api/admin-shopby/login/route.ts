@@ -1,8 +1,22 @@
 import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { createSessionToken } from "@/lib/auth"
 import { validateCredentials } from "@/lib/auth-password"
 import { rateLimit } from "@/lib/rate-limit"
 import { generateCsrfToken } from "@/lib/csrf"
+import { createOtp } from "@/lib/otp-store"
+import { sendOtpEmail } from "@/lib/email"
+
+async function readTwoFA(): Promise<boolean> {
+  try {
+    const row = await prisma.appSetting.findUnique({ where: { key: "store_settings" } })
+    if (!row) return false
+    const parsed = JSON.parse(row.value) as Record<string, unknown>
+    return !!parsed.twoFA
+  } catch {
+    return false
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -28,6 +42,14 @@ export async function POST(request: Request) {
         { error: "Email atau password salah" },
         { status: 401 }
       )
+    }
+
+    const twoFA = await readTwoFA()
+
+    if (twoFA) {
+      const code = createOtp(email)
+      await sendOtpEmail(email, code)
+      return NextResponse.json({ requiresOtp: true })
     }
 
     const token = await createSessionToken()

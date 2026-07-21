@@ -13,6 +13,12 @@ export default function NotificationBanner() {
     if (!dismissed) setVisible(true)
   }, [])
 
+  useEffect(() => {
+    if (!visible) return
+    const timer = setTimeout(() => setVisible(false), 5000)
+    return () => clearTimeout(timer)
+  }, [visible])
+
   if (!visible) return null
 
   const handleDismiss = () => {
