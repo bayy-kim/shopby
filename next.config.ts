@@ -4,7 +4,7 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: https://lh3.googleusercontent.com https://down-bs-id.img.susercontent.com https://down-id.img.susercontent.com https://picsum.photos`,
+  `img-src 'self' data: https://lh3.googleusercontent.com https://*.img.susercontent.com https://picsum.photos`,
   "font-src 'self' https://fonts.gstatic.com",
   "connect-src 'self'",
   "frame-src 'none'",
@@ -22,11 +22,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "down-bs-id.img.susercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "down-id.img.susercontent.com",
+        hostname: "*.img.susercontent.com",
       },
       {
         protocol: "https",
