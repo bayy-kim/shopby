@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     response.cookies.set("shopby_admin_session", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
     })
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     response.cookies.set("shopby_csrf", csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
     })

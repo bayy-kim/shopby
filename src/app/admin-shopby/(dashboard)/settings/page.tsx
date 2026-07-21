@@ -2,7 +2,7 @@
 
 import { Store, Shield, Save, ArrowRight, Loader2, RotateCcw, TriangleAlert, Monitor, Smartphone, RefreshCw } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
-import { getCsrfToken } from "@/lib/utils"
+import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
 
 const tabs = ["Storefront", "Payouts", "Account", "Preview"]
 
@@ -40,19 +40,21 @@ export default function AdminSettings() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    fetch("/api/settings", { headers: { "x-csrf-token": getCsrfToken() } })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch")
-        return res.json()
-      })
-      .then((data) => {
-        const normalized = { ...defaultSettings, ...data }
-        setSettings(normalized)
-        originalRef.current = { ...normalized }
-        if (data.logo) setLogoPreview(data.logo)
-      })
-      .catch(() => setMessage({ type: "error", text: "Failed to load settings" }))
-      .finally(() => setLoading(false))
+    ensureCsrfToken().then((csrfToken) => {
+      fetch("/api/settings", { headers: { "x-csrf-token": csrfToken } })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch")
+          return res.json()
+        })
+        .then((data) => {
+          const normalized = { ...defaultSettings, ...data }
+          setSettings(normalized)
+          originalRef.current = { ...normalized }
+          if (data.logo) setLogoPreview(data.logo)
+        })
+        .catch(() => setMessage({ type: "error", text: "Failed to load settings" }))
+        .finally(() => setLoading(false))
+    })
   }, [])
 
   function handleDiscard() {
@@ -68,9 +70,10 @@ export default function AdminSettings() {
       if (logoPreview && logoPreview.startsWith("data:")) {
         payload.logo = logoPreview
       }
+      const csrfToken = await ensureCsrfToken()
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
         body: JSON.stringify(payload),
       })
       if (!res.ok) {
@@ -97,9 +100,10 @@ export default function AdminSettings() {
     setChangingPassword(true)
     setMessage(null)
     try {
+      const csrfToken = await ensureCsrfToken()
       const res = await fetch("/api/settings/password", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
         body: JSON.stringify({ currentPassword, newPassword }),
       })
       if (!res.ok) {

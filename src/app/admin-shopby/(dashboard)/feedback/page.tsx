@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { MessageSquare, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
-import { getCsrfToken } from "@/lib/utils"
+import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
 
 interface FeedbackEntry {
   id: string
@@ -35,8 +35,9 @@ export default function AdminFeedback() {
       params.set("page", String(page))
       params.set("limit", String(limit))
 
+      const csrfToken = await ensureCsrfToken()
       const res = await fetch(`/api/feedback?${params.toString()}`, {
-        headers: { "x-csrf-token": getCsrfToken() },
+        headers: { "x-csrf-token": csrfToken },
       })
       if (!res.ok) throw new Error("Failed to fetch")
       const json: FeedbackResponse = await res.json()
@@ -57,9 +58,10 @@ export default function AdminFeedback() {
   const handleDelete = async (id: string) => {
     setDeleting(id)
     try {
+      const csrfToken = await ensureCsrfToken()
       const res = await fetch(`/api/feedback?id=${id}`, {
         method: "DELETE",
-        headers: { "x-csrf-token": getCsrfToken() },
+        headers: { "x-csrf-token": csrfToken },
       })
       if (!res.ok) throw new Error("Failed to delete")
       setFeedbacks((prev) => prev.filter((f) => f.id !== id))

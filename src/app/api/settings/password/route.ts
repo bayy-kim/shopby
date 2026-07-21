@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const csrf = csrfGuard(request)
+  const csrf = await csrfGuard(request)
   if (csrf) return csrf
 
   try {

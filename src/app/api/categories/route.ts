@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const csrf = csrfGuard(request)
+  const csrf = await csrfGuard(request)
   if (csrf) return csrf
 
   const body = await request.json()
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest) {
   if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const csrf = csrfGuard(request)
+  const csrf = await csrfGuard(request)
   if (csrf) return csrf
 
   const body = await request.json()
@@ -51,7 +51,7 @@ export async function DELETE(request: NextRequest) {
   if (!(await checkAuth(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const csrf = csrfGuard(request)
+  const csrf = await csrfGuard(request)
   if (csrf) return csrf
 
   const { searchParams } = new URL(request.url)

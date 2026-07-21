@@ -8,7 +8,22 @@ export function cn(...inputs: ClassValue[]) {
 export function getCsrfToken(): string {
   if (typeof document === "undefined") return ""
   const match = document.cookie.match(/(?:^|;\s*)shopby_csrf=([^;]*)/)
-  return match ? match[1] : ""
+  return match ? decodeURIComponent(match[1]) : ""
+}
+
+export async function ensureCsrfToken(): Promise<string> {
+  const existing = getCsrfToken()
+  if (existing) return existing
+  try {
+    const res = await fetch("/api/admin-shopby/csrf")
+    if (res.ok) {
+      const data = await res.json()
+      return data.token || getCsrfToken()
+    }
+  } catch {
+    // Ignore fetch error
+  }
+  return ""
 }
 
 export function formatPrice(price: number): string {

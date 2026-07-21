@@ -101,6 +101,13 @@ export default function AdminDashboardLayout({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
+  useEffect(() => {
+    const csrf = getCsrfToken()
+    if (!csrf) {
+      fetch("/api/admin-shopby/csrf").catch(() => {})
+    }
+  }, [])
+
   const helpRef = useRef<HTMLDivElement>(null!)
   const notifRef = useRef<HTMLDivElement>(null!)
   const profileRef = useRef<HTMLDivElement>(null!)
