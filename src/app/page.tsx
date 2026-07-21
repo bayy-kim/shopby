@@ -82,7 +82,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero featuredProducts={featuredProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isFeaturedLoading} />
-      <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
+      <main id="skip-target" className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
         <div id="categories">
           <CategoryFilter
             categories={categories}

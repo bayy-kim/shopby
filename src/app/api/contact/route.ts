@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { rateLimit } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+    const { allowed } = rateLimit(`contact:${ip}`, { max: 3, windowMs: 60_000 })
+    if (!allowed) {
+      return NextResponse.json({ error: "Terlalu banyak permintaan. Coba lagi nanti." }, { status: 429 })
+    }
+
     const { name, email, message } = await request.json()
 
     if (!name || !email || !message) {
