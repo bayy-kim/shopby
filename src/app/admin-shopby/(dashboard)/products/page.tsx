@@ -1,7 +1,6 @@
 "use client"
 
-import Image from "next/image"
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -229,13 +228,7 @@ export default function AdminProducts() {
                       className="relative size-12 bg-[#e2e3e0] shrink-0 flex items-center justify-center font-mono text-xs text-[#5c403a] overflow-hidden"
                       style={{ clipPath: "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" }}
                     >
-                      {product.imageUrl ? (
-                        <ImagePreview src={product.imageUrl} alt={product.imageAlt}>
-                          <Image src={product.imageUrl} alt={product.imageAlt} fill className="object-cover" unoptimized />
-                        </ImagePreview>
-                      ) : (
-                        product.name.charAt(0)
-                      )}
+                      {product.name.charAt(0)}
                     </div>
                     <div>
                       <p className="font-sans text-[16px] leading-[24px] font-bold text-[#1a1c1b]">{product.name}</p>
@@ -335,50 +328,4 @@ export default function AdminProducts() {
   )
 }
 
-function ImagePreview({ src, alt, children }: { src: string; alt: string; children: React.ReactNode }) {
-  const [show, setShow] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
 
-  const handleMouseEnter = () => {
-    timerRef.current = setTimeout(() => setShow(true), 400)
-  }
-
-  const handleMouseLeave = () => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setShow(false)
-  }
-
-  return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {children}
-      {show && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{
-            left: "calc(50% + 120px)",
-            top: "50%",
-            transform: "translateY(-50%)",
-          }}
-        >
-          <div className="border-2 border-[#1a1c1b] shadow-[4px_4px_0px_0px_rgba(26,28,27,1)] overflow-hidden bg-white">
-            {/* receipt-card notch */}
-            <span className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-[#FAFAF7] border border-[#e5e1d8] z-10" aria-hidden="true" />
-            <Image
-              src={src}
-              alt={alt}
-              width={240}
-              height={240}
-              className="object-cover"
-              unoptimized
-              style={{ maxWidth: "240px", maxHeight: "240px" }}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}

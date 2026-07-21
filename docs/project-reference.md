@@ -239,7 +239,19 @@ Beberapa teknik performance diterapkan secara konsisten: (a) **preconnect** untu
 ### 13. Error Boundaries
 Admin section memiliki error boundary di `src/app/admin-shopby/error.tsx` yang menangkap runtime errors dengan fallback UI dan tombol retry. `src/app/admin-shopby/loading.tsx` menyediakan loading state global untuk semua admin pages, memberikan UX yang mulus saat data fetching.
 
-### 14. Product Numbering (Computed, Not Stored)
+### 14. Landing Page Layout — Full-Width White Background (July 2026)
+Area konten antara Hero dan Footer dibungkus dalam `div.w-full.bg-white` — sidebar tidak lagi terlihat "ngangkang" (floating), latar putih solid membentang penuh. Efek visual: sidebar melebur ke latar belakang konten.
+
+### 15. Hero Card Positions — Left-to-Right (July 2026)
+Card #1 (produk pertama) diposisikan `bottom-10 left-10` (kiri), card #2 `top-10 right-10` (kanan) — urutan left-to-right, nomor satu di kiri. Loading skeleton juga ikut bertukar posisi.
+
+### 16. Mobile Chips Relocated (July 2026)
+Filter kategori dan number range chips (mobile-only) dipindah dari `#categories` div di atas "Rekomendasi Hari Ini" ke dalam `ProductGrid`, tepat di bawah heading "Semua Produk". Props filter diteruskan ke ProductGrid via `categories`, `activeSlug`, `onCategoryChange`, `numberRanges`, `activeRange`, `onRangeSelect`, `isCategoriesLoading`.
+
+### 17. Admin Products — ImagePreview Removed (July 2026)
+Komponen `ImagePreview` (hover popup gambar besar) dan import `next/image` dihapus dari halaman admin products. Sel gambar kini hanya menampilkan inisial huruf pertama nama produk — menghilangkan broken photo URLs yang tidak tampil.
+
+### 18. Product Numbering (Computed, Not Stored)
 Nomor produk dihitung dari posisi dalam urutan `createdAt ASC` — produk pertama = #1, berikutnya = #2, dst. Tidak disimpan sebagai kolom database. Renumbering otomatis saat produk dihapus. Helper di `src/lib/products-numbering.ts`.
 
 ### 15. Sold Out Status

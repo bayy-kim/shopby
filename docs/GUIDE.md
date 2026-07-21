@@ -93,27 +93,31 @@ Halaman utama di **`/`** — landing page untuk menampilkan produk affiliate Sho
 ├─────────────────────────────────────────────────┤
 │ HERO SECTION                                    │
 │ "Belanja Cerdas, Struk Berkualitas"             │
-│ [Lihat Semua Deal]    [Card Produk Unggulan]    │
+│ [Lihat Semua Deal]    [Card #2] [Card #1]       │
+│                      (#1 di kiri, #2 di kanan)  │
 ├─────────────────────────────────────────────────┤
-│ KATEGORI (chip horizontal di mobile,            │
-│ sidebar di desktop)                             │
-│ [Semua] [Elektronik] [Fashion] [Rumah] [Cantik]│
-├─────────────────────────────────────────────────┤
-│ REKOMENDASI HARI INI (featured products)        │
+│  ← BACKGROUND PUTIH FULL WIDTH →                │
+│ ┌─────────────────────────────────────────────┐ │
+│ │ sidebar   REKOMENDASI HARI INI (featured)   │ │
+│ │ (desktop  ┌─────────┐ ┌─────────┐ ┌───────┐│ │
+│ │  only)    │ Keyboard│ │ Tumbler │ │ Watch ││ │
+│ │           │ Rp450rb  │ │ Rp120rb │ │Rp899rb││ │
+│ │           └─────────┘ └─────────┘ └───────┘│ │
+│ │           SEMUA PRODUK                      │ │
+│ │           [Terbaru▼] [Termurah] 12 produk   │ │
+│ │           [Semua] [Elektronik] [Fashion] →  │ │
+│ │             (chips mobile di bawah heading) │ │
+│ │           ┌────┐ ┌────┐ ┌────┐ ┌────┐      │ │
 │ ┌─────────┐ ┌─────────┐ ┌─────────┐            │
 │ │ Keyboard│ │ Tumbler │ │ Watch   │            │
 │ │ Rp450rb │ │ Rp120rb │ │ Rp899rb │            │
 │ └─────────┘ └─────────┘ └─────────┘            │
 ├─────────────────────────────────────────────────┤
-│ SEMUA PRODUK                                    │
-│ [Terbaru▼] [Termurah] [Termahal]   12 produk    │
-│ ┌────┐ ┌────┐ ┌────┐ ┌────┐                    │
-│ │ P1 │ │ P2 │ │ P3 │ │ P4 │                    │
-│ └────┘ └────┘ └────┘ └────┘                    │
-│ ┌────┐ ┌────┐ ┌────┐ ┌────┐                    │
-│ │ P5 │ │ P6 │ │ P7 │ │ P8 │                    │
-│ └────┘ └────┘ └────┘ └────┘                    │
-│ [Muat Lebih Banyak ▼]                          │
+│           │ ┌────┐ ┌────┐ ┌────┐ ┌────┐       │ │
+│           │ │ P5 │ │ P6 │ │ P7 │ │ P8 │       │ │
+│           │ └────┘ └────┘ └────┘ └────┘       │ │
+│           │ [Muat Lebih Banyak ▼]              │ │
+│ └─────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────┤
 │ FOOTER                                          │
 │ Shopby — Shopee Affiliate Partner               │
@@ -142,7 +146,7 @@ Bagian hero dengan:
 - **Headline:** "Belanja Cerdas, Struk Berkualitas"
 - **Subtitle:** "Koleksi produk Shopee Affiliate pilihan..."
 - **Tombol "Lihat Semua Deal"** — scroll halus ke bagian produk
-- **2 Kartu Produk Unggulan** — bergaya struk/nota dengan efek scan-line, diputar (rotate), menampilkan:
+- **2 Kartu Produk Unggulan** — bergaya struk/nota dengan efek scan-line, diputar (rotate). Produk #1 di posisi kiri, produk #2 di kanan untuk bacaan left-to-right. Menampilkan:
   - Gambar produk
   - Nama kategori
   - Nama produk
@@ -580,7 +584,7 @@ URL Gambar Produk
 | Kolom | Isi |
 |---|---|
 | # | Nomor produk urut (computed dari createdAt ASC) |
-| Product | Gambar thumbnail + nama + ID produk |
+| Product | Inisial huruf pertama + nama + ID produk (ImagePreview dihapus karena broken photos) |
 | Category | Badge kategori |
 | Price | Format Rp (contoh: Rp450.000) |
 | Komisi | Komisi per produk (IDR) |

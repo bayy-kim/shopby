@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
-import { ArrowUpDown, ArrowUp, ArrowDown, Star } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown, Star, LayoutGrid, Laptop, Shirt, Home, Sparkles } from "lucide-react"
 import ProductCard from "./ProductCard"
 import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton"
 import EmptyState from "@/components/ui/EmptyState"
@@ -22,6 +22,13 @@ interface ProductGridProps {
   hasMore?: boolean
   onLoadMore?: () => void
   isLoadMoreLoading?: boolean
+  categories?: Category[]
+  activeSlug?: string
+  onCategoryChange?: (slug: string) => void
+  numberRanges?: { label: string; from: number; to: number }[]
+  activeRange?: { from: number; to: number } | null
+  onRangeSelect?: (range: { from: number; to: number } | null) => void
+  isCategoriesLoading?: boolean
 }
 
 const containerVariants = {
@@ -49,6 +56,14 @@ const sortOptions = [
   { value: "rating_desc", label: "Rating" },
 ]
 
+const iconMap: Record<string, React.ReactNode> = {
+  semua: <LayoutGrid className="size-3.5" aria-hidden="true" />,
+  elektronik: <Laptop className="size-3.5" aria-hidden="true" />,
+  fashion: <Shirt className="size-3.5" aria-hidden="true" />,
+  "rumah-tangga": <Home className="size-3.5" aria-hidden="true" />,
+  kecantikan: <Sparkles className="size-3.5" aria-hidden="true" />,
+}
+
 export default function ProductGrid({
   featuredProducts = [],
   allProducts = [],
@@ -64,6 +79,13 @@ export default function ProductGrid({
   hasMore,
   onLoadMore,
   isLoadMoreLoading,
+  categories,
+  activeSlug = "semua",
+  onCategoryChange,
+  numberRanges,
+  activeRange,
+  onRangeSelect,
+  isCategoriesLoading,
 }: ProductGridProps) {
   const prefersReducedMotion = useReducedMotion()
   if (error) {
@@ -171,6 +193,71 @@ export default function ProductGrid({
           })}
         </div>
       )}
+
+      {/* Mobile category + number range chips */}
+      <div className="md:hidden space-y-2 mb-4">
+        {isCategoriesLoading ? (
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={`sk-cat-${i}`} className="h-8 skeleton-shimmer rounded-full shrink-0" style={{ width: `${70 + i * 20}px` }} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {categories && categories.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="tablist" aria-label="Kategori produk">
+                {categories.map((cat) => {
+                  const isActive = cat.slug === activeSlug
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => onCategoryChange?.(cat.slug)}
+                      className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-mono uppercase border transition-all shrink-0 focus-visible:ring-2 focus-visible:ring-primary ${
+                        isActive
+                          ? "bg-tag-yellow text-ink font-bold border-ink"
+                          : "bg-white text-ink/60 border-border-color hover:border-ink/30"
+                      }`}
+                    >
+                      {iconMap[cat.slug]}
+                      <span>{cat.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            {numberRanges !== undefined && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <button
+                  onClick={() => onRangeSelect?.(null)}
+                  className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-mono uppercase border transition-all shrink-0 focus-visible:ring-2 focus-visible:ring-primary ${
+                    !activeRange
+                      ? "bg-tag-yellow text-ink font-bold border-ink"
+                      : "bg-white text-ink/60 border-border-color hover:border-ink/30"
+                  }`}
+                >
+                  Semua
+                </button>
+                {numberRanges.map((range) => {
+                  const isActive = activeRange?.from === range.from && activeRange?.to === range.to
+                  return (
+                    <button
+                      key={range.label}
+                      onClick={() => onRangeSelect?.(isActive ? null : range)}
+                      className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-mono uppercase border transition-all shrink-0 focus-visible:ring-2 focus-visible:ring-primary ${
+                        isActive
+                          ? "bg-tag-yellow text-ink font-bold border-ink"
+                          : "bg-white text-ink/60 border-border-color hover:border-ink/30"
+                      }`}
+                    >
+                      {range.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       <motion.div
         className="grid grid-cols-2 md:grid-cols-4 gap-4"

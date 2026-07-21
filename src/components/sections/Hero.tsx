@@ -89,7 +89,7 @@ export default function Hero({
         <div className="relative h-[400px] hidden md:block">
           {isFeaturedLoading ? (
             <>
-              <div className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
+              <div className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
                 <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
                 <div className="mt-8 brutalist-dashed pb-4">
                   <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
@@ -101,7 +101,7 @@ export default function Hero({
                   <div className="size-5 skeleton-shimmer" />
                 </div>
               </div>
-              <div className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
+              <div className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
                 <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
                 <div className="mt-8 brutalist-dashed pb-4">
                   <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
@@ -116,46 +116,6 @@ export default function Hero({
             </>
           ) : (
             <>
-              {card1 && (
-                <button
-                  onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
-                  className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer text-left"
-                  style={{
-                    background: "white",
-                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
-                  }}
-                  aria-label={`Lihat ${card1.name}`}
-                >
-                  <span className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" aria-hidden="true" />
-                  <div className="mt-8 brutalist-dashed pb-4">
-                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
-                      <Image
-                        src={card1.imageUrl}
-                        alt={card1.imageAlt}
-                        fill
-                        loading="eager"
-                        className="object-cover"
-                        sizes="256px"
-                      />
-                    </div>
-                    <span className="font-mono text-xs text-ink/60 uppercase">
-                      {card1.category.name}
-                    </span>
-                    <span className="font-bold text-ink mt-1 block">{card1.name}</span>
-                  </div>
-                  <div className="pt-4 flex justify-between items-end">
-                    <span
-                      className="font-mono text-price-xl text-ink"
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      Rp{(card1.price / 1000).toFixed(0)}k
-                    </span>
-                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
-                  </div>
-                  <span className="scan-line" aria-hidden="true" />
-                </button>
-              )}
-
               {card2 && (
                 <button
                   onClick={() => handleCardClick(card2.id, card2.shopeeUrl)}
@@ -189,6 +149,46 @@ export default function Hero({
                       style={{ fontVariantNumeric: "tabular-nums" }}
                     >
                       Rp{(card2.price / 1000).toFixed(0)}k
+                    </span>
+                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
+                  </div>
+                  <span className="scan-line" aria-hidden="true" />
+                </button>
+              )}
+
+              {card1 && (
+                <button
+                  onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
+                  className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer text-left"
+                  style={{
+                    background: "white",
+                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
+                  }}
+                  aria-label={`Lihat ${card1.name}`}
+                >
+                  <span className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" aria-hidden="true" />
+                  <div className="mt-8 brutalist-dashed pb-4">
+                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
+                      <Image
+                        src={card1.imageUrl}
+                        alt={card1.imageAlt}
+                        fill
+                        loading="eager"
+                        className="object-cover"
+                        sizes="256px"
+                      />
+                    </div>
+                    <span className="font-mono text-xs text-ink/60 uppercase">
+                      {card1.category.name}
+                    </span>
+                    <span className="font-bold text-ink mt-1 block">{card1.name}</span>
+                  </div>
+                  <div className="pt-4 flex justify-between items-end">
+                    <span
+                      className="font-mono text-price-xl text-ink"
+                      style={{ fontVariantNumeric: "tabular-nums" }}
+                    >
+                      Rp{(card1.price / 1000).toFixed(0)}k
                     </span>
                     <ArrowRight className="text-primary size-5" aria-hidden="true" />
                   </div>

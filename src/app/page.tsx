@@ -93,19 +93,8 @@ export default function Home() {
     <>
       <Navbar onSearch={handleSearch} searchQuery={searchQuery} />
       <Hero featuredProducts={topRatedProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isTopRatedLoading} storeName={settings?.storeName} tagline={settings?.bio} />
+      <div className="w-full bg-white border-t border-dashed border-border-color">
       <main id="skip-target" className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
-        <div id="categories">
-          <CategoryFilter
-            categories={categories}
-            activeSlug={selectedCategory}
-            onSelect={handleCategoryChange}
-            variant="chips"
-            numberRanges={numberRanges}
-            activeRange={numberRange}
-            onRangeSelect={handleRangeSelect}
-            isLoading={isCategoriesLoading}
-          />
-        </div>
         <div id="products">
         <div className="flex flex-col md:flex-row gap-8 mt-3 md:mt-0">
           <CategoryFilter
@@ -135,10 +124,18 @@ export default function Home() {
             hasMore={hasNextPage}
             onLoadMore={handleLoadMore}
             isLoadMoreLoading={isFetchingNextPage}
+            categories={categories}
+            activeSlug={selectedCategory}
+            onCategoryChange={handleCategoryChange}
+            numberRanges={numberRanges}
+            activeRange={numberRange}
+            onRangeSelect={handleRangeSelect}
+            isCategoriesLoading={isCategoriesLoading}
           />
         </div>
         </div>
       </main>
+      </div>
       <Footer />
     </>
   )

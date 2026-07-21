@@ -28,7 +28,7 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 - 🔑 **Single admin** — Credential dari `.env` + JWT session cookie HttpOnly
 - 📈 `/admin-shopby` — Dashboard dengan statistik real, grafik revenue, top products
 - 📦 `/admin-shopby/products` — Manajemen produk (CRUD, filter, search, pagination, toggle Sold Out)
-- 🖼️ **Image preview** — Hover thumbnail untuk lihat gambar besar
+- 🖼️ **Image preview** — Hover thumbnail untuk lihat gambar besar (removed — broken photos)
 - 🏷️ `/admin-shopby/categories` — Manajemen kategori (tambah, edit, hapus, validasi relasi)
 - 🖱️ `/admin-shopby/click-logs` — Riwayat klik dengan filter tanggal, pagination
 - 📊 `/admin-shopby/analytics` — Metrik, traffic sources, geographic data
