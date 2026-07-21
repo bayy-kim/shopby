@@ -268,6 +268,8 @@ Dua varian:
 - Tombol "Beli" lebih kecil
 - Harga dalam format standar
 
+**Star Rating Glossy Shine Animation:** Bintang pada kartu dengan rating > 4.5 mendapat efek `star-shine-high` — animate brightness (1.6x), saturate, dan drop-shadow dengan cycle 2s. Rating 4–4.5 mendapat efek `star-shine-mid` — brightness 1.3x, cycle 3s. Rating ≤ 4 tidak ada animasi. CSS-only via keyframes `star-glossy-high` / `star-glossy-mid` di `globals.css`. Hormati `prefers-reduced-motion: reduce` — animasi nonaktif otomatis.
+
 **Nama Produk:** Nama > 60 karakter akan di-truncate dengan ellipsis + tombol "Lebih banyak" / "Lebih sedikit" toggle per kartu. Tombol memiliki `aria-expanded` untuk aksesibilitas keyboard.
 
 **Ukuran Kartu:** Konsisten antar varian — gambar menggunakan `aspect-[4/3]`, kartu menggunakan `h-full` dalam grid CSS. Skeleton juga menggunakan rasio yang sama.

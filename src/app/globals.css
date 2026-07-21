@@ -318,6 +318,34 @@
     transform: var(--press-down);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .star-shine-high {
+      animation: star-glossy-high 2s ease-in-out infinite;
+    }
+
+    .star-shine-mid {
+      animation: star-glossy-mid 3s ease-in-out infinite;
+    }
+  }
+
+  @keyframes star-glossy-high {
+    0%, 100% {
+      filter: brightness(1.2) saturate(1.1) drop-shadow(0 0 2px rgba(251,191,36,0.4));
+    }
+    50% {
+      filter: brightness(1.6) saturate(1.4) drop-shadow(0 0 8px rgba(251,191,36,0.9));
+    }
+  }
+
+  @keyframes star-glossy-mid {
+    0%, 100% {
+      filter: brightness(1.1) saturate(1.05) drop-shadow(0 0 1px rgba(251,191,36,0.2));
+    }
+    50% {
+      filter: brightness(1.3) saturate(1.2) drop-shadow(0 0 4px rgba(251,191,36,0.5));
+    }
+  }
+
   .tag-pulse {
     animation: pulse-glow 2s ease-in-out infinite;
   }

@@ -19,6 +19,7 @@ function StarRating({ rating }: { rating: number }) {
   const fullStars = Math.floor(rating)
   const hasHalfStar = rating - fullStars >= 0.25
   const halfFill = rating - fullStars
+  const shineClass = rating > 4.5 ? "star-shine-high" : rating > 4 ? "star-shine-mid" : ""
 
   return (
     <div className="flex items-center gap-0.5 mt-1" aria-label={`Rating ${rating.toFixed(1)} dari 5`}>
@@ -27,7 +28,7 @@ function StarRating({ rating }: { rating: number }) {
           return (
             <Star
               key={s}
-              className="size-3 text-[#f59e0b] fill-[#f59e0b]"
+              className={`size-3 text-[#f59e0b] fill-[#f59e0b] ${shineClass}`}
               aria-hidden="true"
             />
           )
@@ -40,7 +41,7 @@ function StarRating({ rating }: { rating: number }) {
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${halfFill * 100}%` }}
               >
-                <Star className="size-3 text-[#f59e0b] fill-[#f59e0b]" />
+                <Star className={`size-3 text-[#f59e0b] fill-[#f59e0b] ${shineClass}`} />
               </span>
             </span>
           )
