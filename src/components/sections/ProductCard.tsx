@@ -45,6 +45,8 @@ export default function ProductCard({
             src={product.imageUrl}
             alt={product.imageAlt}
             fill
+            loading="lazy"
+            fetchPriority="low"
             className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
             sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
           />
