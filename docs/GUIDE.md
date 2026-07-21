@@ -146,12 +146,14 @@ Bagian hero dengan:
 - **Headline:** "Belanja Cerdas, Struk Berkualitas"
 - **Subtitle:** "Koleksi produk Shopee Affiliate pilihan..."
 - **Tombol "Lihat Semua Deal"** — scroll halus ke bagian produk
-- **2 Kartu Produk Unggulan** — bergaya struk/nota dengan efek scan-line, diputar (rotate), menampilkan:
-  - Gambar produk
+- **Gallery Grid 4 Produk Unggulan** — grid 2 kolom dengan staggered layout via `GalleryGrid` + `GalleryGridCell` dari `@/components/blocks/cta-section-with-gallery`. Setiap cell menampilkan:
+  - Gambar produk (cover, hover scale-110)
+  - Gradient overlay (hitam transparan)
   - Nama kategori
   - Nama produk
   - Harga (format "Rp450k")
-  - Ikon panah sebagai CTA
+  - Ikon panah muncul saat hover
+- Animasi: motion spring stagger (delay 0.2s per cell) + blur reveal
 
 Produk yang tampil berasal dari props `featuredProducts` (produk dengan `isFeatured = true`). Jika kosong, fallback ke data hardcoded (Mechanical Keyboard Pro & Steel Tumbler).
 

@@ -245,7 +245,10 @@ Area konten antara Hero dan Footer dibungkus dalam `div.w-full.bg-white` — sid
 ### 15. Default Sort — Number Ascending (July 2026)
 Default sort diubah dari `"newest"` (createdAt DESC — produk terbaru di kiri) menjadi `"number_asc"` (createdAt ASC — #1 di kiri, #2, #3… ke kanan). Produk baru otomatis muncul di ujung kanan grid. Tombol sort "Nomor" ditambahkan sebagai opsi pertama di `sortOptions` dan default state di page.tsx.
 
-### 16. Mobile Chips Relocated (July 2026)
+### 16. Gallery Grid Hero — 4 Products (July 2026)
+Hero section menggunakan `GalleryGrid` dari `@/components/blocks/cta-section-with-gallery` — grid 2 kolom, 5 baris, 4 cell staggered. Setiap cell menampilkan produk dengan image cover, gradient overlay, kategori, nama, harga, dan ikon panah hover. Animasi motion spring + blur reveal. Dependencies: `motion` + `@radix-ui/react-slot` + `class-variance-authority`. Button component standalone di `/components/ui/button.tsx` (shadcn style, multiple variants).
+
+### 17. Mobile Chips Relocated (July 2026)
 Filter kategori dan number range chips (mobile-only) dipindah dari `#categories` div di atas "Rekomendasi Hari Ini" ke dalam `ProductGrid`, tepat di bawah heading "Semua Produk". Props filter diteruskan ke ProductGrid via `categories`, `activeSlug`, `onCategoryChange`, `numberRanges`, `activeRange`, `onRangeSelect`, `isCategoriesLoading`.
 
 ### 17. Admin Products — ImagePreview Removed (July 2026)
@@ -275,8 +278,11 @@ Input gambar produk menggunakan URL (bukan drag-and-drop base64). Gambar dari Sh
 - **Navbar.tsx** — Fixed top nav with logo, nav links (Deals, Kategori, Affiliate)
 - **Footer.tsx** — Footer with copyright 2026, brand links (About, Affiliate, Privacy, Terms, Contact)
 
+### Block Components (`src/components/blocks/`)
+- **cta-section-with-gallery.tsx** — Gallery grid component with motion stagger animation: `GalleryGrid` (2-col, 5-row staggered grid), `GalleryGridCell` (animated cell with spring transition), `ContainerStagger` / `ContainerAnimated` (stagger container + blur reveal variants)
+
 ### Feature Components (`src/components/sections/`)
-- **Hero.tsx** — Landing page hero: headline + subtitle + CTA "Lihat Semua Deal" + floating product card
+- **Hero.tsx** — Landing page hero: headline + subtitle + CTA "Lihat Semua Deal" + GalleryGrid 4 produk unggulan (staggered motion animation)
 - **ProductCard.tsx** — Card with image, name (truncate + "Lebih banyak"/"Lebih sedikit" toggle), price, badge `#number`, rating desimal (half-star via clip), sold-out overlay/disabled button, "Beli di Shopee" button → POST `/api/click`
 - **ProductGrid.tsx** — Responsive grid (1–2 mobile, 3 tablet, 4 desktop), progressive load with "Muat Lebih Banyak" button
 - **CategoryFilter.tsx** — Horizontal scroll chips on mobile, sidebar on desktop; includes category filter + number range filter sections

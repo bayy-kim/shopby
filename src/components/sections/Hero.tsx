@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import type { Product } from "@/types"
+import { GalleryGrid, GalleryGridCell } from "@/components/blocks/cta-section-with-gallery"
 
 interface HeroProps {
   featuredProducts?: Product[]
@@ -51,6 +52,42 @@ const defaultFeatured: Product[] = [
     number: 0,
     createdAt: "2026-01-01T00:00:00.000Z",
   },
+  {
+    id: "4",
+    name: "Smartwatch Pro Max",
+    price: 899000,
+    commission: 0,
+    rating: 4.7,
+    discountPct: null,
+    imageUrl:
+      "https://images.unsplash.com/photo-1546868871-af0de0ae72b5?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageAlt: "A modern smartwatch on a desk, sleek minimalist aesthetic.",
+    shopeeUrl: "#",
+    categoryId: "cat1",
+    category: { id: "cat1", name: "Elektronik", slug: "elektronik" },
+    isFeatured: true,
+    isSoldOut: false,
+    number: 0,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "5",
+    name: "Minimalist Desk Lamp",
+    price: 180000,
+    commission: 0,
+    rating: 4.3,
+    discountPct: null,
+    imageUrl:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    imageAlt: "A sleek desk lamp illuminating a workspace, warm lighting.",
+    shopeeUrl: "#",
+    categoryId: "cat3",
+    category: { id: "cat3", name: "Rumah Tangga", slug: "rumah-tangga" },
+    isFeatured: true,
+    isSoldOut: false,
+    number: 0,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
 ]
 
 export default function Hero({
@@ -61,7 +98,7 @@ export default function Hero({
   tagline,
 }: HeroProps) {
   const displayProducts = featuredProducts?.length ? featuredProducts : defaultFeatured
-  const [card1, card2] = displayProducts.slice(0, 2)
+  const gridProducts = displayProducts.slice(0, 4)
 
   const handleCardClick = (productId: string, shopeeUrl: string) => {
     if (!onBuyProduct || shopeeUrl === "#") return
@@ -86,116 +123,47 @@ export default function Hero({
           </a>
         </div>
 
-        <div className="relative h-[400px] hidden md:block">
+        <div className="hidden md:block">
           {isFeaturedLoading ? (
-            <>
-              <div className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
-                <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-                <div className="mt-8 brutalist-dashed pb-4">
-                  <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
-                  <div className="h-3 skeleton-shimmer w-16 mb-2" />
-                  <div className="h-4 skeleton-shimmer w-36" />
-                </div>
-                <div className="pt-4 flex justify-between items-end">
-                  <div className="h-5 skeleton-shimmer w-20" />
-                  <div className="size-5 skeleton-shimmer" />
-                </div>
-              </div>
-              <div className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0" style={{ background: "white", clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)" }}>
-                <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" />
-                <div className="mt-8 brutalist-dashed pb-4">
-                  <div className="w-full h-40 skeleton-shimmer mb-4 border border-border-color" />
-                  <div className="h-3 skeleton-shimmer w-16 mb-2" />
-                  <div className="h-4 skeleton-shimmer w-36" />
-                </div>
-                <div className="pt-4 flex justify-between items-end">
-                  <div className="h-5 skeleton-shimmer w-20" />
-                  <div className="size-5 skeleton-shimmer" />
-                </div>
-              </div>
-            </>
+            <GalleryGrid className="animate-pulse">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className={`relative overflow-hidden rounded-xl bg-[#e8e8e5] shadow-xl ${["col-start-2 col-end-3 row-start-1 row-end-3","col-start-1 col-end-2 row-start-2 row-end-4","col-start-1 col-end-2 row-start-4 row-end-6","col-start-2 col-end-3 row-start-3 row-end-5"][i]}`} />
+              ))}
+            </GalleryGrid>
           ) : (
-            <>
-              {card1 && (
-                <button
-                  onClick={() => handleCardClick(card1.id, card1.shopeeUrl)}
-                  className="absolute top-10 right-10 w-64 receipt-card p-4 -rotate-[3deg] z-10 cursor-pointer text-left"
-                  style={{
-                    background: "white",
-                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
-                  }}
-                  aria-label={`Lihat ${card1.name}`}
-                >
-                  <span className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" aria-hidden="true" />
-                  <div className="mt-8 brutalist-dashed pb-4">
-                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
-                      <Image
-                        src={card1.imageUrl}
-                        alt={card1.imageAlt}
-                        fill
-                        loading="eager"
-                        className="object-cover"
-                        sizes="256px"
-                      />
+            <GalleryGrid>
+              {gridProducts.map((product, index) => (
+                <GalleryGridCell key={product.id} index={index}>
+                  <button
+                    onClick={() => handleCardClick(product.id, product.shopeeUrl)}
+                    className="group relative size-full cursor-pointer text-left overflow-hidden rounded-xl"
+                    aria-label={`Lihat ${product.name}`}
+                  >
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.imageAlt}
+                      fill
+                      loading={index < 2 ? "eager" : "lazy"}
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, 300px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <span className="font-mono text-[10px] uppercase text-white/70 tracking-wider">
+                        {product.category.name}
+                      </span>
+                      <p className="font-sans text-sm font-bold text-white leading-tight mt-0.5 line-clamp-1">
+                        {product.name}
+                      </p>
+                      <span className="font-mono text-xs text-white/90 mt-1 block">
+                        Rp{(product.price / 1000).toFixed(0)}k
+                      </span>
                     </div>
-                    <span className="font-mono text-xs text-ink/60 uppercase">
-                      {card1.category.name}
-                    </span>
-                    <span className="font-bold text-ink mt-1 block">{card1.name}</span>
-                  </div>
-                  <div className="pt-4 flex justify-between items-end">
-                    <span
-                      className="font-mono text-price-xl text-ink"
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      Rp{(card1.price / 1000).toFixed(0)}k
-                    </span>
-                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
-                  </div>
-                  <span className="scan-line" aria-hidden="true" />
-                </button>
-              )}
-
-              {card2 && (
-                <button
-                  onClick={() => handleCardClick(card2.id, card2.shopeeUrl)}
-                  className="absolute bottom-10 left-10 w-64 receipt-card p-4 rotate-[2deg] z-0 cursor-pointer text-left"
-                  style={{
-                    background: "white",
-                    clipPath: "polygon(10px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 10px)",
-                  }}
-                  aria-label={`Lihat ${card2.name}`}
-                >
-                  <span className="absolute top-3 left-3 w-3 h-3 rounded-full bg-bg border border-border-color z-20" aria-hidden="true" />
-                  <div className="mt-8 brutalist-dashed pb-4">
-                    <div className="relative w-full h-40 border border-border-color mb-4 overflow-hidden">
-                      <Image
-                        src={card2.imageUrl}
-                        alt={card2.imageAlt}
-                        fill
-                        loading="eager"
-                        className="object-cover"
-                        sizes="256px"
-                      />
-                    </div>
-                    <span className="font-mono text-xs text-ink/60 uppercase">
-                      {card2.category.name}
-                    </span>
-                    <span className="font-bold text-ink mt-1 block">{card2.name}</span>
-                  </div>
-                  <div className="pt-4 flex justify-between items-end">
-                    <span
-                      className="font-mono text-price-xl text-ink"
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      Rp{(card2.price / 1000).toFixed(0)}k
-                    </span>
-                    <ArrowRight className="text-primary size-5" aria-hidden="true" />
-                  </div>
-                  <span className="scan-line" aria-hidden="true" />
-                </button>
-              )}
-            </>
+                    <ArrowRight className="absolute top-3 right-3 size-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                  </button>
+                </GalleryGridCell>
+              ))}
+            </GalleryGrid>
           )}
         </div>
       </div>

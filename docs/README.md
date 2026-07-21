@@ -45,7 +45,8 @@ Landing page pribadi untuk memajang produk-produk Shopee Affiliate + admin panel
 | **Auth** | JWT (jose) + scrypt password hash |
 | **State** | TanStack Query (React Query) |
 | **Ikon** | lucide-react |
-| **Animation** | Framer Motion |
+| **Animation** | Framer Motion + motion |
+| **UI Primitives** | shadcn/ui (Button) + @radix-ui/react-slot + class-variance-authority |
 
 ## Struktur Folder
 
@@ -97,6 +98,7 @@ shopby/
 │   ├── components/
 │   │   ├── ui/ (ProductCardSkeleton, EmptyState)
 │   │   ├── layout/ (Navbar, Footer)
+│   │   ├── blocks/ (cta-section-with-gallery)
 │   │   └── sections/ (Hero, ProductGrid, ProductCard, CategoryFilter)
 │   ├── hooks/
 │   ├── lib/
