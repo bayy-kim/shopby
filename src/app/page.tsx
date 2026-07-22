@@ -93,8 +93,8 @@ export default function Home() {
 
   return (
     <>
-      <Navbar onSearch={handleSearch} searchQuery={searchQuery} />
       <NotificationBanner />
+      <Navbar onSearch={handleSearch} searchQuery={searchQuery} />
       <Hero featuredProducts={topRatedProducts} onBuyProduct={handleBuyProduct} isFeaturedLoading={isTopRatedLoading} storeName={settings?.storeName} tagline={settings?.bio} />
       <div className="w-full bg-white border-t border-dashed border-border-color">
       <main id="skip-target" className="flex-grow w-full max-w-[1200px] mx-auto px-4 md:px-8 py-12">
