@@ -91,7 +91,14 @@ export default function ProductCard({
         </span>
       )}
       <div>
-        <div className="relative w-full border border-border-color mb-3 overflow-hidden aspect-[4/3]">
+        <div
+          className="relative w-full border border-border-color mb-3 overflow-hidden aspect-[4/3] cursor-pointer"
+          onClick={!isSoldOut ? handleBuy : undefined}
+          onKeyDown={(e) => { if (!isSoldOut && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleBuy(); } }}
+          role="link"
+          tabIndex={0}
+          aria-label={`Lihat ${product.name} di Shopee`}
+        >
           {imgError ? (
             <div className="absolute inset-0 flex items-center justify-center bg-[#e2e3e0]">
               <div className="text-center">
@@ -107,7 +114,7 @@ export default function ProductCard({
               loading="lazy"
               fetchPriority="low"
               unoptimized
-              className={`object-cover ${isSoldOut ? "opacity-50" : ""}`}
+              className={`object-cover pointer-events-none ${isSoldOut ? "opacity-50" : ""}`}
               sizes={isHighlight ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 50vw, 25vw"}
               onError={() => setImgError(true)}
             />
@@ -128,7 +135,14 @@ export default function ProductCard({
               </span>
             )}
             <StarRating rating={product.rating} />
-            <h3 className={`font-bold text-ink leading-tight ${isHighlight ? "" : "text-sm"} ${product.rating > 0 ? "mt-0" : "mt-1"}`}>
+            <h3
+              className={`font-bold text-ink leading-tight ${isHighlight ? "" : "text-sm"} ${product.rating > 0 ? "mt-0" : "mt-1"} cursor-pointer hover:underline`}
+              onClick={!isSoldOut ? handleBuy : undefined}
+              onKeyDown={(e) => { if (!isSoldOut && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleBuy(); } }}
+              role="link"
+              tabIndex={0}
+              aria-label={`Lihat ${product.name} di Shopee`}
+            >
               {nameNeedsTruncation && !nameExpanded
                 ? `${product.name.slice(0, MAX_NAME_LENGTH)}...`
                 : product.name}

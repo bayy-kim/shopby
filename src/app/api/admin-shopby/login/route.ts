@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const valid = validateCredentials(email, password)
+    const valid = await validateCredentials(email, password)
 
     if (!valid) {
       return NextResponse.json(

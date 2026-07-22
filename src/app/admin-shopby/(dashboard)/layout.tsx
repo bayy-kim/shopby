@@ -16,8 +16,6 @@ import {
   ExternalLink,
   X,
   LifeBuoy,
-  FileText,
-  ChevronRight,
   Tags,
   MousePointerClick,
   MessageSquare,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { MessageSquare, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
-import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
+import { ensureCsrfToken } from "@/lib/utils"
 
 interface FeedbackEntry {
   id: string

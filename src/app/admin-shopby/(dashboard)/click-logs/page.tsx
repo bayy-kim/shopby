@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { MousePointerClick, Loader2, ChevronLeft, ChevronRight, Calendar, Filter, Download } from "lucide-react"
 import Image from "next/image"
-import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
+import { ensureCsrfToken } from "@/lib/utils"
 
 interface ClickLogEntry {
   id: string

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Loader2, X, Check, ChevronDown } from "lucide-react"
 import CategoryIcon, { CATEGORY_ICONS } from "@/components/ui/CategoryIcon"
-import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
+import { ensureCsrfToken } from "@/lib/utils"
 
 interface Category {
   id: string
