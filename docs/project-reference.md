@@ -182,6 +182,8 @@ prisma/
 | PUT    | `/api/products/[id]`  | Yes   | Update product (accepts `isSoldOut`)    |
 | DELETE | `/api/products/[id]`  | Yes   | Delete product                          |
 | GET    | `/api/categories`     | —     | List categories (no query params)       |
+| GET    | `/api/click-logs`     | Yes   | List click logs (paginated, date filter) |
+| GET    | `/api/click-logs/export` | Yes | Export click logs as CSV download      |
 | GET    | `/api/stats`          | Yes   | Dashboard stats — totalSales, totalProducts, totalClicks, recentClicks, topProducts |
 | GET    | `/api/analytics`      | Yes   | Analytics data — revenue, clicks, traffic sources, geography |
 | GET    | `/api/settings`       | Yes   | Read AppSetting via Prisma              |
@@ -460,7 +462,20 @@ Run `pnpm prisma:seed` to populate the database.
 
 ---
 
-### 18. Commission per Product (July 2026)
+### 18. Discount Percentage Display (July 2026)
+`discountPct` field (nullable Int, 0-100) already existed in Prisma Product model and API routes but was never displayed on the card. Now ProductCard shows:
+- Red "-X%" badge next to the price section
+- Original price with line-through in muted color
+- Discounted price (`price * (1 - discountPct / 100)`) as the main price
+Both new product and edit product forms now include a "Diskon (%)" numeric input field. Discount is stored as `null` when empty/0, passthrough as-is otherwise.
+
+### 19. Click Logs CSV Export (July 2026)
+`GET /api/click-logs/export` — authenticated endpoint that returns CSV with `Content-Disposition: attachment` header. Columns: Product Name, Category, Price, Commission, Clicked At, Product ID. Respects the same `?dateFrom=` and `?dateTo=` filter params as the paginated click logs endpoint. "Export CSV" button in click logs admin page opens the URL in a new tab.
+
+### 20. Lazy Resend Initialization (July 2026)
+`src/lib/email.ts` changed from eager `new Resend(process.env.RESEND_API_KEY)` (which crashes build when env var is missing) to lazy `getResend()` that returns `null` if `RESEND_API_KEY` is not set. `sendOtpEmail()` silently skips sending with a `console.warn` instead of throwing. This allows the app to build and run without Resend configured.
+
+### 21. Commission per Product (July 2026)
 Revenue dihitung dari komisi per produk: setiap klik = `product.commission` IDR. Dashboard dan analytics menampilkan komisi per produk, total revenue berbasis komisi real (bukan estimasi `clicks * 50000`).
 
 ### 19. CSRF Protection (July 2026 — Per-Session Random Token)

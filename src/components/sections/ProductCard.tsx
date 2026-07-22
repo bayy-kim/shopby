@@ -151,12 +151,31 @@ export default function ProductCard({
         </div>
       </div>
       <div className="mt-3 pt-3 border-t border-dashed border-border-color">
-        <p
-          className={`font-mono text-ink mb-2 ${isHighlight ? "text-2xl" : "text-lg"}`}
-          style={{ fontVariantNumeric: "tabular-nums" }}
-        >
-          {formatPrice(product.price)}
-        </p>
+        {product.discountPct && product.discountPct > 0 ? (
+          <div className="flex items-start gap-2 mb-2">
+            <div>
+              <p className="font-mono text-xs text-ink/40 line-through" style={{ fontVariantNumeric: "tabular-nums" }}>
+                {formatPrice(product.price)}
+              </p>
+              <p
+                className={`font-mono text-ink ${isHighlight ? "text-2xl" : "text-lg"}`}
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {formatPrice(Math.round(product.price * (1 - product.discountPct / 100)))}
+              </p>
+            </div>
+            <span className="font-mono text-[10px] font-bold text-white bg-[#ba1a1a] px-1.5 py-0.5 shrink-0">
+              -{product.discountPct}%
+            </span>
+          </div>
+        ) : (
+          <p
+            className={`font-mono text-ink mb-2 ${isHighlight ? "text-2xl" : "text-lg"}`}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {formatPrice(product.price)}
+          </p>
+        )}
         <button
           onClick={handleBuy}
           disabled={isSoldOut}

@@ -155,6 +155,7 @@ Admin layout includes: fixed sidebar (desktop) + collapsible mobile nav, top sea
 | `/api/products/[id]` | PUT | ✅ | Body: `{ name, price, ... }` | Update produk |
 | `/api/products/[id]` | DELETE | ✅ | — | Hapus produk |
 | `/api/categories` | GET | — | — | Ambil semua kategori → `[{ id, name, slug }]` (plain array) |
+| `/api/click-logs/export` | GET | ✅ | `?dateFrom=&dateTo=` | Export click logs as CSV download |
 | `/api/click` | POST | — | Body: `{ productId }` | Simpan log klik → `{ shopeeUrl }` |
 | `/api/stats` | GET | ✅ | — | `{ data: { totalSales, totalProducts, activeProducts, totalClicks, avgCommission, recentClicks, topProducts } }` |
 | `/api/analytics` | GET | ✅ | `?period=all|week|month|year` | Data analitik — totalRevenue, clicks, traffic sources, geography |

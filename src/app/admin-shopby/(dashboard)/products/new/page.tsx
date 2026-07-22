@@ -19,6 +19,7 @@ export default function NewProduct() {
 
   const [commission, setCommission] = useState("")
   const [rating, setRating] = useState(0)
+  const [discountPct, setDiscountPct] = useState("")
   const nameRef = useRef<HTMLInputElement>(null)
   const categoryRef = useRef<HTMLSelectElement>(null)
   const linkRef = useRef<HTMLInputElement>(null)
@@ -50,11 +51,13 @@ export default function NewProduct() {
     setSaving(true)
     try {
       const commissionVal = parseInt(commission.replace(/\./g, ""), 10) || 0
+      const discountVal = parseInt(discountPct, 10) || 0
       await createProduct({
         name,
         price,
         commission: commissionVal,
         rating,
+        discountPct: discountVal > 0 ? discountVal : null,
         imageUrl: trimmedUrl || "https://picsum.photos/seed/" + Date.now() + "/400/400",
         imageAlt: name,
         shopeeUrl,
@@ -186,6 +189,14 @@ export default function NewProduct() {
                 <input id="commission" type="text" value={commission} onChange={(e) => setCommission(e.target.value)} placeholder="50.000"
                   className="flex-1 border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[32px] leading-[32px] tracking-[-0.04em] font-bold text-[#1a1c1b] placeholder:text-[#5c403a]/20 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
               </div>
+            </div>
+
+            <div>
+              <label className="block font-mono text-[12px] leading-[16px] font-medium text-[#76737b] uppercase mb-1" htmlFor="discount">
+                Diskon (%)
+              </label>
+              <input id="discount" type="number" min={0} max={100} value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} placeholder="0"
+                className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[20px] leading-[28px] font-bold text-[#1a1c1b] placeholder:text-[#5c403a]/20 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none" />
             </div>
 
             <div>

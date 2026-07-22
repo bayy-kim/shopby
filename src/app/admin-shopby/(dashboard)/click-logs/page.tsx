@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { MousePointerClick, Loader2, ChevronLeft, ChevronRight, Calendar, Filter } from "lucide-react"
+import { MousePointerClick, Loader2, ChevronLeft, ChevronRight, Calendar, Filter, Download } from "lucide-react"
 import Image from "next/image"
 import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
 
@@ -98,6 +98,18 @@ export default function AdminClickLogs() {
           >
             <Filter className="size-4" aria-hidden="true" />
             Filters
+          </button>
+          <button
+            onClick={() => {
+              const params = new URLSearchParams()
+              if (dateFrom) params.set("dateFrom", dateFrom)
+              if (dateTo) params.set("dateTo", dateTo)
+              window.open(`/api/click-logs/export?${params.toString()}`, "_blank")
+            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-full font-mono text-[13px] bg-[#1a1c1b] text-white hover:bg-ink transition-colors focus-visible:ring-2 focus-visible:ring-[#b51c00] focus-visible:outline-none"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            Export CSV
           </button>
         </div>
         <span className="font-mono text-[13px] text-[#5c403a]">
