@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, X, Check, ChevronDown } from "lucide-react"
+import CategoryIcon, { CATEGORY_ICONS } from "@/components/ui/CategoryIcon"
 import { getCsrfToken, ensureCsrfToken } from "@/lib/utils"
 
 interface Category {
   id: string
   name: string
   slug: string
+  icon?: string
 }
 
 export default function AdminCategories() {
@@ -18,6 +20,7 @@ export default function AdminCategories() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formName, setFormName] = useState("")
   const [formSlug, setFormSlug] = useState("")
+  const [formIcon, setFormIcon] = useState("LayoutGrid")
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
@@ -42,6 +45,7 @@ export default function AdminCategories() {
     setEditingId(cat.id)
     setFormName(cat.name)
     setFormSlug(cat.slug)
+    setFormIcon(cat.icon || "LayoutGrid")
     setShowForm(true)
   }
 
@@ -49,6 +53,7 @@ export default function AdminCategories() {
     setEditingId(null)
     setFormName("")
     setFormSlug("")
+    setFormIcon("LayoutGrid")
     setShowForm(true)
   }
 
@@ -62,7 +67,7 @@ export default function AdminCategories() {
         const res = await fetch("/api/categories", {
           method: "PUT",
           headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
-          body: JSON.stringify({ id: editingId, name: formName.trim() }),
+          body: JSON.stringify({ id: editingId, name: formName.trim(), icon: formIcon }),
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
@@ -73,7 +78,7 @@ export default function AdminCategories() {
         const res = await fetch("/api/categories", {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
-          body: JSON.stringify({ name: formName.trim(), slug }),
+          body: JSON.stringify({ name: formName.trim(), slug, icon: formIcon }),
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
@@ -170,6 +175,26 @@ export default function AdminCategories() {
                 />
               </div>
             )}
+            <div>
+              <label htmlFor="catIcon" className="block font-mono text-[13px] leading-[16px] tracking-[0.05em] text-[#5c403a] mb-1">Icon</label>
+              <div className="relative">
+                <select
+                  id="catIcon"
+                  value={formIcon}
+                  onChange={(e) => setFormIcon(e.target.value)}
+                  className="w-full border-0 border-b-2 border-[#e5e1d8] bg-transparent pb-2 font-mono text-[13px] text-[#1a1c1b] appearance-none pr-8 focus:border-[#1a1c1b] focus:ring-0 focus:outline-none"
+                >
+                  {CATEGORY_ICONS.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="size-4 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[#5c403a]" aria-hidden="true" />
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <CategoryIcon icon={formIcon} className="size-5 text-[#1a1c1b]" />
+                <span className="font-mono text-[11px] text-[#906f69]">{formIcon}</span>
+              </div>
+            </div>
           </div>
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-dashed border-[#e5e1d8]">
             <button
@@ -201,7 +226,7 @@ export default function AdminCategories() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-dashed border-[#e5e1d8] bg-[#f4f4f1]">
-                {["Name", "Slug", "Actions"].map((h) => (
+                {["Icon", "Name", "Slug", "Actions"].map((h) => (
                   <th key={h} className="py-3 px-6 text-left font-mono text-[12px] leading-[16px] tracking-[0.05em] text-[#5c403a] uppercase">{h}</th>
                 ))}
               </tr>
@@ -209,6 +234,9 @@ export default function AdminCategories() {
             <tbody>
               {categories.map((cat) => (
                 <tr key={cat.id} className="border-b border-dashed border-[#e5e1d8] hover:bg-[#f4f4f1]/50 transition-colors">
+                  <td className="py-4 px-6">
+                    <CategoryIcon icon={cat.icon} className="size-5 text-[#1a1c1b]" />
+                  </td>
                   <td className="py-4 px-6 font-sans text-[16px] font-bold text-[#1a1c1b]">{cat.name}</td>
                   <td className="py-4 px-6 font-mono text-[13px] text-[#906f69]">/category/{cat.slug}</td>
                   <td className="py-4 px-6">

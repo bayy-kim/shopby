@@ -13,25 +13,15 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
-  Laptop,
-  Shirt,
-  Home,
-  Sparkles,
 } from "lucide-react"
+import { Star } from "lucide-react"
+import CategoryIcon from "@/components/ui/CategoryIcon"
 import { fetchProducts, deleteProduct, updateProduct } from "@/lib/services/products"
 import { useCategories } from "@/hooks/useCategories"
 import { formatPrice } from "@/lib/utils"
-import { Star } from "lucide-react"
 import type { Product, Category } from "@/types"
 
 type ProductWithClicks = Product & { _count?: { clicks: number } }
-
-const defaultIcons: Record<string, React.ReactNode> = {
-  elektronik: <Laptop className="size-3" aria-hidden="true" />,
-  fashion: <Shirt className="size-3" aria-hidden="true" />,
-  "rumah-tangga": <Home className="size-3" aria-hidden="true" />,
-  kecantikan: <Sparkles className="size-3" aria-hidden="true" />,
-}
 
 export default function AdminProducts() {
   const searchParams = useSearchParams()
@@ -54,7 +44,7 @@ export default function AdminProducts() {
     ]
     if (dbCategories) {
       for (const cat of dbCategories) {
-        all.push({ slug: cat.slug, name: cat.name, icon: defaultIcons[cat.slug] ?? <LayoutGrid className="size-3" aria-hidden="true" /> })
+        all.push({ slug: cat.slug, name: cat.name, icon: <CategoryIcon icon={cat.icon} className="size-3" /> })
       }
     }
     return all

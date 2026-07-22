@@ -3,10 +3,10 @@ import { PrismaClient } from "@prisma/client"
 const prisma = new PrismaClient()
 
 const categories = [
-  { id: "cat-elektronik", name: "Elektronik", slug: "elektronik" },
-  { id: "cat-fashion", name: "Fashion", slug: "fashion" },
-  { id: "cat-rumah-tangga", name: "Rumah Tangga", slug: "rumah-tangga" },
-  { id: "cat-kecantikan", name: "Kecantikan", slug: "kecantikan" },
+  { id: "cat-elektronik", name: "Elektronik", slug: "elektronik", icon: "Laptop" },
+  { id: "cat-fashion", name: "Fashion", slug: "fashion", icon: "Shirt" },
+  { id: "cat-rumah-tangga", name: "Rumah Tangga", slug: "rumah-tangga", icon: "Home" },
+  { id: "cat-kecantikan", name: "Kecantikan", slug: "kecantikan", icon: "Sparkles" },
 ] as const
 
 async function main() {
@@ -18,8 +18,8 @@ async function main() {
   for (const cat of categories) {
     await prisma.category.upsert({
       where: { id: cat.id },
-      update: { name: cat.name, slug: cat.slug },
-      create: { id: cat.id, name: cat.name, slug: cat.slug },
+      update: { name: cat.name, slug: cat.slug, icon: cat.icon },
+      create: { id: cat.id, name: cat.name, slug: cat.slug, icon: cat.icon },
     })
   }
 

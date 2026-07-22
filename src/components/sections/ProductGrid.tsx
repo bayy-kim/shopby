@@ -1,7 +1,8 @@
 "use client"
 
 import { motion, useReducedMotion } from "framer-motion"
-import { ArrowUpDown, ArrowUp, ArrowDown, Star, LayoutGrid, Laptop, Shirt, Home, Sparkles } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown, Star } from "lucide-react"
+import CategoryIcon from "@/components/ui/CategoryIcon"
 import ProductCard from "./ProductCard"
 import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton"
 import EmptyState from "@/components/ui/EmptyState"
@@ -56,14 +57,6 @@ const sortOptions = [
   { value: "price_desc", label: "Termahal" },
   { value: "rating_desc", label: "Rating" },
 ]
-
-const iconMap: Record<string, React.ReactNode> = {
-  semua: <LayoutGrid className="size-3.5" aria-hidden="true" />,
-  elektronik: <Laptop className="size-3.5" aria-hidden="true" />,
-  fashion: <Shirt className="size-3.5" aria-hidden="true" />,
-  "rumah-tangga": <Home className="size-3.5" aria-hidden="true" />,
-  kecantikan: <Sparkles className="size-3.5" aria-hidden="true" />,
-}
 
 export default function ProductGrid({
   featuredProducts = [],
@@ -219,7 +212,7 @@ export default function ProductGrid({
                           : "bg-white text-ink/60 border-border-color hover:border-ink/30"
                       }`}
                     >
-                      {iconMap[cat.slug]}
+                      <CategoryIcon icon={cat.icon} className="size-3.5" />
                       <span>{cat.name}</span>
                     </button>
                   )

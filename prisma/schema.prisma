@@ -29,6 +29,7 @@ model Category {
   id       String    @id @default(cuid())
   name     String
   slug     String    @unique
+  icon     String    @default("LayoutGrid")
   products Product[]
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
-import { LayoutGrid, Laptop, Shirt, Home, Sparkles } from "lucide-react"
+import { LayoutGrid } from "lucide-react"
+import CategoryIcon from "@/components/ui/CategoryIcon"
 import type { Category } from "@/types"
 
 interface CategoryFilterProps {
@@ -15,20 +16,12 @@ interface CategoryFilterProps {
 }
 
 const defaultCategories: Category[] = [
-  { id: "all", name: "Semua", slug: "semua" },
-  { id: "cat1", name: "Elektronik", slug: "elektronik" },
-  { id: "cat2", name: "Fashion", slug: "fashion" },
-  { id: "cat3", name: "Rumah Tangga", slug: "rumah-tangga" },
-  { id: "cat4", name: "Kecantikan", slug: "kecantikan" },
+  { id: "all", name: "Semua", slug: "semua", icon: "LayoutGrid" },
+  { id: "cat1", name: "Elektronik", slug: "elektronik", icon: "Laptop" },
+  { id: "cat2", name: "Fashion", slug: "fashion", icon: "Shirt" },
+  { id: "cat3", name: "Rumah Tangga", slug: "rumah-tangga", icon: "Home" },
+  { id: "cat4", name: "Kecantikan", slug: "kecantikan", icon: "Sparkles" },
 ]
-
-const iconMap: Record<string, React.ReactNode> = {
-  semua: <LayoutGrid className="size-3.5" aria-hidden="true" />,
-  elektronik: <Laptop className="size-3.5" aria-hidden="true" />,
-  fashion: <Shirt className="size-3.5" aria-hidden="true" />,
-  "rumah-tangga": <Home className="size-3.5" aria-hidden="true" />,
-  kecantikan: <Sparkles className="size-3.5" aria-hidden="true" />,
-}
 
 export default function CategoryFilter({
   categories = defaultCategories,
@@ -102,7 +95,7 @@ export default function CategoryFilter({
                         : "bg-white text-ink/60 border-border-color hover:border-ink/30"
                     }`}
               >
-                {iconMap[cat.slug]}
+                <CategoryIcon icon={cat.icon} className="size-3.5" />
                 <span>{cat.name}</span>
               </button>
             )
@@ -162,7 +155,7 @@ export default function CategoryFilter({
                       : "text-ink/60 hover:bg-[#e8e8e5] border border-transparent hover:border-border-color"
                   }`}
                 >
-                  <span className="text-ink/60" aria-hidden="true">{iconMap[cat.slug]}</span>
+                  <span className="text-ink/60"><CategoryIcon icon={cat.icon} className="size-3.5" /></span>
                   <span>{cat.name}</span>
                 </button>
               </li>
